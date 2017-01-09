@@ -72,7 +72,7 @@ namespace Structurizr.InfrastructureAsCode.Azure.InfrastructureRendering
             var deployments = await client.Deployments.ListAsync(resourceGroupName, new DeploymentListParameters());
             await client.EnsureResourceGroupExists(resourceGroupName, location);
             var template = ToTemplate(resourceGroupName, environment, location, containers, deployments.Deployments.Count);
-            await client.Deploy(resourceGroupName, location, template, deploymentName);
+            await client.Deploy(resourceGroupName, location, template, $"{deploymentName}.{deployments.Deployments.Count}");
         }
 
         private JObject ToTemplate(string resourceGroupName, IInfrastructureEnvironment environment, string location, IEnumerable<Container> containers, int deploymentsCount)
