@@ -8,7 +8,7 @@ namespace Structurizr.InfrastructureAsCode.Azure.Sample.Model
         {
             Name = "Key Vault";
             Description = "Stores infrastructure secrets and allows applications access to those secrets at runtime";
-            Infrastructure = new KeyVault();
+            Infrastructure = new KeyVault(e => $"shop-keyvault-{e.Name}");
         }
     }
 }

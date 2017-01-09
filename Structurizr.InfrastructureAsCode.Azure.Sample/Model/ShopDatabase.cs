@@ -9,7 +9,7 @@ namespace Structurizr.InfrastructureAsCode.Azure.Sample.Model
             Name = "Shop database";
             Description = "Stores product, customer and order data";
             Technology = "DocumentDB";
-            Infrastructure = new NoSqlDocumentDatabase();
+            Infrastructure = new NoSqlDocumentDatabase(e => $"shop-db-{e.Name}");
         }
     }
 }

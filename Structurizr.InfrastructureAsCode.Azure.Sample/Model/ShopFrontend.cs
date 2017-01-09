@@ -15,7 +15,7 @@ namespace Structurizr.InfrastructureAsCode.Azure.Sample.Model
             Description = "Allows the user to browse and order products";
             Technology = "ASP.NET Core MVC Web Application";
 
-            Infrastructure = new AppService();
+            Infrastructure = new AppService(e => $"shop-{e.Name}");
         }
 
         public override void InitializeUsings()

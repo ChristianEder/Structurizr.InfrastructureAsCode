@@ -35,6 +35,13 @@ namespace Structurizr.InfrastructureAsCode.Azure.InfrastructureRendering
             _clientSecret = clientSecret;
             _tenantId = tenantId;
             _subscriptionId = subscriptionId;
+
+            Renderers = GetType().Assembly.GetTypes()
+                .Where(t => typeof(AzureResourceRenderer).IsAssignableFrom(t))
+                .Where(t => !t.IsAbstract)
+                .Select(Activator.CreateInstance)
+                .Cast<AzureResourceRenderer>()
+                .ToList();
         }
 
         public async Task Render(Structurizr.Model model, IInfrastructureEnvironment environment)
@@ -46,30 +53,49 @@ namespace Structurizr.InfrastructureAsCode.Azure.InfrastructureRendering
             {
                 var azureInfrastructureElements = softwareSystem.Containers
                      .OfType<Container>()
-                     .Select(c => c.Infrastructure)
                      .Distinct();
 
                 foreach (var elementsInLocation in azureInfrastructureElements.GroupBy(e => _resourceLocationTargetingStrategy.TargetLocation(environment, e)))
                 {
                     foreach (var elementsInResourceGroup in elementsInLocation.GroupBy(e => _resourceGroupTargetingStrategy.TargetResourceGroup(environment, e)))
                     {
-                        await DeployInfrastructure(client, elementsInResourceGroup.Key, elementsInLocation.Key, elementsInResourceGroup, softwareSystem.Name);
+                        await DeployInfrastructure(client, environment, elementsInResourceGroup.Key, elementsInLocation.Key, elementsInResourceGroup, softwareSystem.Name);
                     }
                 }
             }
         }
 
+        public List<AzureResourceRenderer> Renderers { get; }
 
-        private async Task DeployInfrastructure(ResourceManagementClient client, string resourceGroupName, string location, IEnumerable<ContainerInfrastructure> infrastructureElements, string deploymentName)
+        private async Task DeployInfrastructure(ResourceManagementClient client, IInfrastructureEnvironment environment, string resourceGroupName, string location, IEnumerable<Container> containers, string deploymentName)
         {
+            var deployments = await client.Deployments.ListAsync(resourceGroupName, new DeploymentListParameters());
             await client.EnsureResourceGroupExists(resourceGroupName, location);
-            var template = ToTemplate(resourceGroupName, location, infrastructureElements);
+            var template = ToTemplate(resourceGroupName, environment, location, containers, deployments.Deployments.Count);
             await client.Deploy(resourceGroupName, location, template, deploymentName);
         }
 
-        private JObject ToTemplate(string resourceGroupName, string location, IEnumerable<ContainerInfrastructure> infrastructureElements)
+        private JObject ToTemplate(string resourceGroupName, IInfrastructureEnvironment environment, string location, IEnumerable<Container> containers, int deploymentsCount)
         {
-            return null;
+            var template = new JObject
+            {
+                ["$schema"] = "http://schema.management.azure.com/schemas/2014-04-01-preview/deploymentTemplate.json#",
+                ["contentVersion"] = $"1.0.0.{deploymentsCount}",
+                ["parameters"] = new JObject(),
+                ["resources"] = new JArray(
+                    containers.Select(e => ToResource(e, environment, resourceGroupName, location))
+                    .Where(r => r != null)
+                    .Cast<object>()
+                    .ToArray())
+            };
+
+            return template;
+        }
+
+        private JObject ToResource(Container container, IInfrastructureEnvironment environment, string resourceGroupName, string location)
+        {
+            var renderer = Renderers.FirstOrDefault(r => r.CanRender(container));
+            return renderer?.Render(container, environment, resourceGroupName, location);
         }
 
         private async Task<ResourceManagementClient> LoginClient()

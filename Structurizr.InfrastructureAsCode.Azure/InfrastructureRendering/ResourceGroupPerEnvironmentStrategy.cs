@@ -12,7 +12,7 @@ namespace Structurizr.InfrastructureAsCode.Azure.InfrastructureRendering
             _namingConvention = namingConvention;
         }
 
-        public string TargetResourceGroup(IInfrastructureEnvironment environment, ContainerInfrastructure infrastructureElement)
+        public string TargetResourceGroup(IInfrastructureEnvironment environment, Container container)
         {
             return _namingConvention(environment);
         }

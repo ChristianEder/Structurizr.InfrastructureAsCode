@@ -4,6 +4,6 @@ namespace Structurizr.InfrastructureAsCode.Azure.InfrastructureRendering
 {
     public interface IResourceGroupTargetingStrategy
     {
-        string TargetResourceGroup(IInfrastructureEnvironment environment, ContainerInfrastructure infrastructureElement);
+        string TargetResourceGroup(IInfrastructureEnvironment environment, Container container);
     }
 }

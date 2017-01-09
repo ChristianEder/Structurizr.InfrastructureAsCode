@@ -1,7 +1,15 @@
-﻿namespace Structurizr.InfrastructureAsCode
+﻿using System;
+using Structurizr.InfrastructureAsCode.InfrastructureRendering;
+
+namespace Structurizr.InfrastructureAsCode
 {
     public class ContainerInfrastructure
     {
-        public string Name { get; set; }
+        public ContainerInfrastructure(Func<IInfrastructureEnvironment, string> name)
+        {
+            Name = name;
+        }
+
+        public Func<IInfrastructureEnvironment, string> Name { get; }
     }
 }

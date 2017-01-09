@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Collections.Generic;
 using Microsoft.Extensions.Configuration;
 using Structurizr.Client;
 using Structurizr.InfrastructureAsCode.Azure.InfrastructureRendering;
@@ -12,14 +13,20 @@ namespace Structurizr.InfrastructureAsCode.Azure.Sample
         public static void Main(string[] args)
         {
             var workspace = ArchitectureModel();
-            RenderInfrastructure(workspace, "dev");
             if (args.Length == 2 && args[0] == "infrastructure")
             {
                 RenderInfrastructure(workspace, args[1]);
             }
-            else
+            else if (args.Length == 1 && args[0] == "structurizr")
             {
                 UploadToStructurizr(workspace);
+            }
+            else
+            {
+                Console.WriteLine("You should run this with one of the following parameters:");
+                Console.WriteLine("1) infrastructure <environment>");
+                Console.WriteLine("2) structurizr");
+                Console.ReadLine();
             }
         }
 
@@ -32,13 +39,14 @@ namespace Structurizr.InfrastructureAsCode.Azure.Sample
 
         private static void RenderInfrastructure(Workspace workspace, string environment)
         {
-            var renderer = Renderer();
-            renderer.Render(workspace.Model, new InfrastructureEnvironment(environment)).Wait();
+            var configuration = Configuration();
+            var renderer = Renderer(configuration);
+
+            renderer.Render(workspace.Model, new InfrastructureEnvironment(environment, configuration["Azure:TenantId"], configuration["Azure:Administrators"].Split(",".ToCharArray()))).Wait();
         }
 
-        private static InfrastructureRenderer Renderer()
+        private static InfrastructureRenderer Renderer(IConfiguration configuration)
         {
-            var configuration = Configuration();
 
             // In order for this to run, you need to create an Azure AD application for this tool first, then configure the AD Apps credentials in the configuration file
             // How to: https://msdn.microsoft.com/en-us/library/mt603580.aspx
@@ -72,7 +80,7 @@ namespace Structurizr.InfrastructureAsCode.Azure.Sample
         {
             return new ConfigurationBuilder().AddJsonFile(
                 "appsettings.json.user",
-                optional: false, 
+                optional: false,
                 reloadOnChange: false)
                 .Build();
         }
