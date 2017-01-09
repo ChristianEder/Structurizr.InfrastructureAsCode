@@ -20,3 +20,4 @@ bld/
 *.user
 /.vs/config/applicationhost.config
 /packages
+/Structurizr.InfrastructureAsCode.Azure.Sample/structurizr-18991-*.json
