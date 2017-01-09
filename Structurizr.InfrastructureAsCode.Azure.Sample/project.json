@@ -1,0 +1,18 @@
+﻿{
+  "version": "1.0.0-*",
+  "buildOptions": {
+    "emitEntryPoint": true
+  },
+
+  "dependencies": {
+    "Structurizr.InfrastructureAsCode.Azure": "1.0.0-*"
+  },
+
+  "frameworks": {
+    "net461": {
+      "frameworkAssemblies": {
+        "System.Xml": ""
+      }
+    }
+  }
+}

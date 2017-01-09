@@ -1,0 +1,14 @@
+﻿{
+  "version": "1.0.0-*",
+
+  "dependencies": {
+    "Structurizr.InfrastructureAsCode": "1.0.0-*"
+  },
+  "frameworks": {
+    "net461": {
+      "frameworkAssemblies": {
+        "System.Xml": ""
+      }
+    }
+  }
+}
