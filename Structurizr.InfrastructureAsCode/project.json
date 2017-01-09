@@ -1,4 +1,4 @@
-﻿{
+{
   "version": "1.0.0-*",
 
   "dependencies": {
@@ -8,6 +8,11 @@
     "net461": {
       "frameworkAssemblies": {
         "System.Xml": ""
+      },
+      "dependencies": {
+        "Structurizr.Core": {
+          "target": "project"
+        }
       }
     }
   }
