@@ -2,13 +2,12 @@
   "version": "1.0.0-*",
 
   "dependencies": {
-    "Structurizr.InfrastructureAsCode": "1.0.0-*"
+    "Structurizr.InfrastructureAsCode": "1.0.0-*",
+    "Microsoft.IdentityModel.Clients.ActiveDirectory": "3.12.0",
+    "Microsoft.Azure.Management.Resources": "2.20.1-preview"
   },
   "frameworks": {
     "net461": {
-      "frameworkAssemblies": {
-        "System.Xml": ""
-      }
     }
   }
 }

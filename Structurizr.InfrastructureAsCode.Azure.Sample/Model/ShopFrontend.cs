@@ -16,7 +16,6 @@ namespace Structurizr.InfrastructureAsCode.Azure.Sample.Model
             Technology = "ASP.NET Core MVC Web Application";
 
             Infrastructure = new AppService();
-          
         }
 
         public override void InitializeUsings()

@@ -2,18 +2,14 @@
   "version": "1.0.0-*",
 
   "dependencies": {
+    
+    "Structurizr.Core": {
+      "target": "project"
+    }
   },
 
   "frameworks": {
     "net461": {
-      "frameworkAssemblies": {
-        "System.Xml": ""
-      },
-      "dependencies": {
-        "Structurizr.Core": {
-          "target": "project"
-        }
-      }
     }
   }
 }

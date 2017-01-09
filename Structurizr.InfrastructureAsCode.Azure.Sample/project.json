@@ -1,18 +1,22 @@
 ﻿{
   "version": "1.0.0-*",
   "buildOptions": {
-    "emitEntryPoint": true
+    "emitEntryPoint": true,
+    "copyToOutput": {
+      "includeFiles": [
+        "appsettings.json.user"
+      ]
+    }
   },
 
   "dependencies": {
-    "Structurizr.InfrastructureAsCode.Azure": "1.0.0-*"
+    "Structurizr.InfrastructureAsCode.Azure": "1.0.0-*",
+    "Microsoft.Extensions.Configuration.Json": "1.1.0"
   },
 
   "frameworks": {
     "net461": {
-      "frameworkAssemblies": {
-        "System.Xml": ""
-      }
     }
   }
+
 }
