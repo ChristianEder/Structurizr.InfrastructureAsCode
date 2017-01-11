@@ -8,7 +8,9 @@ using Microsoft.Azure.Management.Resources.Models;
 using Microsoft.IdentityModel.Clients.ActiveDirectory;
 using Newtonsoft.Json.Linq;
 using Structurizr.InfrastructureAsCode.Azure.ARM;
+using Structurizr.InfrastructureAsCode.Azure.ARM.Configuration;
 using Structurizr.InfrastructureAsCode.InfrastructureRendering;
+using Structurizr.InfrastructureAsCode.InfrastructureRendering.Configuration;
 
 namespace Structurizr.InfrastructureAsCode.Azure.InfrastructureRendering
 {
@@ -36,17 +38,27 @@ namespace Structurizr.InfrastructureAsCode.Azure.InfrastructureRendering
             _tenantId = tenantId;
             _subscriptionId = subscriptionId;
 
-            Renderers = GetType().Assembly.GetTypes()
-                .Where(t => typeof(AzureResourceRenderer).IsAssignableFrom(t))
-                .Where(t => !t.IsAbstract)
+            Renderers = Find<AzureResourceRenderer>();
+            ConfigurationValueResolvers = Find<ContainerInfrastructureConfigurationElementValueResolver>();
+            ConfigurationValueResolvers.Add(new FixedContainerInfrastructureConfigurationElementValueResolver<string>());
+            ConfigurationValueResolvers.Add(new FixedContainerInfrastructureConfigurationElementValueResolver<int>());
+        }
+
+        private List<T> Find<T>()
+        {
+            return GetType().Assembly.GetTypes()
+                .Where(t => typeof(T).IsAssignableFrom(t))
+                .Where(t => !t.IsAbstract && !t.IsGenericTypeDefinition)
                 .Select(Activator.CreateInstance)
-                .Cast<AzureResourceRenderer>()
+                .Cast<T>()
                 .ToList();
         }
 
         public async Task Render(Structurizr.Model model, IAzureInfrastructureEnvironment environment)
         {
             var client = await LoginClient();
+
+            var configContext = SetContextToConfigurationResolvers(client);
 
             foreach (var softwareSystem in model.SoftwareSystems)
             {
@@ -58,20 +70,77 @@ namespace Structurizr.InfrastructureAsCode.Azure.InfrastructureRendering
                 {
                     foreach (var elementsInResourceGroup in elementsInLocation.GroupBy(e => _resourceGroupTargetingStrategy.TargetResourceGroup(environment, e)))
                     {
-                        await DeployInfrastructure(client, environment, elementsInResourceGroup.Key, elementsInLocation.Key, elementsInResourceGroup, softwareSystem.Name);
+                        await DeployInfrastructure(client, environment, elementsInResourceGroup.Key, elementsInLocation.Key, elementsInResourceGroup.ToArray(), softwareSystem.Name, configContext);
                     }
                 }
             }
         }
-
+        
         public List<AzureResourceRenderer> Renderers { get; }
+        public List<ContainerInfrastructureConfigurationElementValueResolver> ConfigurationValueResolvers { get; }
 
-        private async Task DeployInfrastructure(ResourceManagementClient client, IAzureInfrastructureEnvironment environment, string resourceGroupName, string location, IEnumerable<Container> containers, string deploymentName)
+        private async Task DeployInfrastructure(ResourceManagementClient client, IAzureInfrastructureEnvironment environment, string resourceGroupName, string location, Container[] containers, string deploymentName, AzureContainerInfrastructureConfigurationElementValueResolverContext configContext)
         {
             var deployments = await client.Deployments.ListAsync(resourceGroupName, new DeploymentListParameters());
             await client.EnsureResourceGroupExists(resourceGroupName, location);
             var template = ToTemplate(resourceGroupName, environment, location, containers, deployments.Deployments.Count);
             await client.Deploy(resourceGroupName, location, template, $"{deploymentName}.{deployments.Deployments.Count}");
+
+            await Configure(environment, containers, configContext);
+        }
+
+        private async Task Configure(IAzureInfrastructureEnvironment environment, Container[] containers, AzureContainerInfrastructureConfigurationElementValueResolverContext configContext)
+        {
+            await ResolveConfigurationValuesToContext(containers, configContext);
+            foreach (var container in containers)
+            {
+                var renderer = Renderers.FirstOrDefault(r => r.CanConfigure(container));
+                if (renderer != null)
+                {
+                    await renderer.Configure(container, configContext);
+                }
+            }
+        }
+
+        private async Task ResolveConfigurationValuesToContext(IEnumerable<Container> containers,
+            AzureContainerInfrastructureConfigurationElementValueResolverContext configContext)
+        {
+            var values = containers.SelectMany(c =>
+            {
+                var renderer = Renderers.FirstOrDefault(r => r.CanConfigure(c));
+                return renderer != null
+                    ? renderer.GetConfigurationValues(c)
+                    : Enumerable.Empty<ContainerInfrastructureConfigurationElementValue>();
+            }).ToList();
+
+            var valueAndResolver = FindFirstValueToBeResolved(values);
+            while (valueAndResolver != null)
+            {
+                values.Remove(valueAndResolver.Item1);
+
+                var value = await valueAndResolver.Item2.Resolve(valueAndResolver.Item1);
+                configContext.Values.Add(valueAndResolver.Item1, value);
+
+                valueAndResolver = FindFirstValueToBeResolved(values);
+            }
+        }
+
+        private Tuple<ContainerInfrastructureConfigurationElementValue, ContainerInfrastructureConfigurationElementValueResolver> FindFirstValueToBeResolved(List<ContainerInfrastructureConfigurationElementValue> values)
+        {
+            if (!values.Any())
+            {
+                return null;
+            }
+
+            foreach (var value in values)
+            {
+                var resolver = ConfigurationValueResolvers.FirstOrDefault(r => r.CanResolve(value));
+                if (resolver != null)
+                {
+                    return new Tuple<ContainerInfrastructureConfigurationElementValue, ContainerInfrastructureConfigurationElementValueResolver>(value, resolver);
+                }
+            }
+            return null;
         }
 
         private JObject ToTemplate(string resourceGroupName, IAzureInfrastructureEnvironment environment, string location, IEnumerable<Container> containers, int deploymentsCount)
@@ -115,6 +184,17 @@ namespace Structurizr.InfrastructureAsCode.Azure.InfrastructureRendering
             }
 
             return new TokenCloudCredentials(_subscriptionId, result.AccessToken);
+        }
+
+        private AzureContainerInfrastructureConfigurationElementValueResolverContext SetContextToConfigurationResolvers(ResourceManagementClient client)
+        {
+            var configContext = new AzureContainerInfrastructureConfigurationElementValueResolverContext(client);
+            foreach (var resolver in ConfigurationValueResolvers
+                .OfType<IAzureContainerInfrastructureConfigurationElementValueResolver>())
+            {
+                resolver.SetContext(configContext);
+            }
+            return configContext;
         }
     }
 }

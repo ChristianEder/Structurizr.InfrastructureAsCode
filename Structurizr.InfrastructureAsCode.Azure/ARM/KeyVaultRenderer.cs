@@ -1,8 +1,10 @@
-﻿using System.Linq;
+﻿using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 using Newtonsoft.Json.Linq;
+using Structurizr.InfrastructureAsCode.Azure.ARM.Configuration;
 using Structurizr.InfrastructureAsCode.Azure.InfrastructureRendering;
 using Structurizr.InfrastructureAsCode.Azure.Model;
-using Structurizr.InfrastructureAsCode.InfrastructureRendering;
 
 namespace Structurizr.InfrastructureAsCode.Azure.ARM
 {
@@ -42,6 +44,23 @@ namespace Structurizr.InfrastructureAsCode.Azure.ARM
                     }
                 }
             };
+        }
+
+        protected override IEnumerable<ContainerInfrastructureConfigurationElementValue> GetConfigurationValues(Container<KeyVault> container)
+        {
+            return base.GetConfigurationValues(container).Concat(container.Infrastructure.Secrets.Values);
+        }
+
+        protected override async Task Configure(Container<KeyVault> container, AzureContainerInfrastructureConfigurationElementValueResolverContext context)
+        {
+            foreach (var secret in container.Infrastructure.Secrets)
+            {
+                object value;
+                if (context.Values.TryGetValue(secret.Value, out value))
+                {
+                    // TODO: add secret to key vault using the context.Client
+                }
+            }
         }
     }
 }
