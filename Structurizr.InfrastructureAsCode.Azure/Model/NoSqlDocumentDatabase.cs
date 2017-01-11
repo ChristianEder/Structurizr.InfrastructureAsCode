@@ -1,12 +1,12 @@
-﻿using System;
-using Structurizr.InfrastructureAsCode.InfrastructureRendering;
-
-namespace Structurizr.InfrastructureAsCode.Azure.Model
+﻿namespace Structurizr.InfrastructureAsCode.Azure.Model
 {
     public class NoSqlDocumentDatabase : ContainerInfrastructure
     {
-        public NoSqlDocumentDatabase(Func<IInfrastructureEnvironment, string> name) : base(name)
-        {
-        }
+        public NoSqlDocumentDatabaseAccessKey PrimaryMasterKey => new NoSqlDocumentDatabaseAccessKey { Type = "PrimaryMaster" };
+    }
+
+    public class NoSqlDocumentDatabaseAccessKey : ContainerInfrastructureConfigurationElementValue
+    {
+        public string Type { get; set; }
     }
 }

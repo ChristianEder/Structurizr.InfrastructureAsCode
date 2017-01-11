@@ -1,13 +1,19 @@
-﻿namespace Structurizr.InfrastructureAsCode.Azure.Sample.Model
+﻿using Structurizr.InfrastructureAsCode.InfrastructureRendering;
+
+namespace Structurizr.InfrastructureAsCode.Azure.Sample.Model
 {
     public class Shop : SoftwareSystem
     {
-        public Shop()
+        public Shop() : this(null)
+        {
+        }
+
+        public Shop(IInfrastructureEnvironment environment)
         {
             Name = "Shop";
-            KeyVault = new ShopKeyVault();
-            Database = new ShopDatabase();
-            Frontend = new ShopFrontend(Database, KeyVault);
+            KeyVault = new ShopKeyVault(environment);
+            Database = new ShopDatabase(environment);
+            Frontend = new ShopFrontend(environment, Database, KeyVault);
         }
 
         public ShopKeyVault KeyVault { get; set; }

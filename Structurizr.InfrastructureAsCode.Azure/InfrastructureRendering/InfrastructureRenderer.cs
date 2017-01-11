@@ -12,7 +12,7 @@ using Structurizr.InfrastructureAsCode.InfrastructureRendering;
 
 namespace Structurizr.InfrastructureAsCode.Azure.InfrastructureRendering
 {
-    public class InfrastructureRenderer : IInfrastructureRenderer
+    public class InfrastructureRenderer : IInfrastructureRenderer<IAzureInfrastructureEnvironment>
     {
         private readonly IResourceGroupTargetingStrategy _resourceGroupTargetingStrategy;
         private readonly IResourceLocationTargetingStrategy _resourceLocationTargetingStrategy;
@@ -44,10 +44,9 @@ namespace Structurizr.InfrastructureAsCode.Azure.InfrastructureRendering
                 .ToList();
         }
 
-        public async Task Render(Structurizr.Model model, IInfrastructureEnvironment environment)
+        public async Task Render(Structurizr.Model model, IAzureInfrastructureEnvironment environment)
         {
             var client = await LoginClient();
-
 
             foreach (var softwareSystem in model.SoftwareSystems)
             {
@@ -67,7 +66,7 @@ namespace Structurizr.InfrastructureAsCode.Azure.InfrastructureRendering
 
         public List<AzureResourceRenderer> Renderers { get; }
 
-        private async Task DeployInfrastructure(ResourceManagementClient client, IInfrastructureEnvironment environment, string resourceGroupName, string location, IEnumerable<Container> containers, string deploymentName)
+        private async Task DeployInfrastructure(ResourceManagementClient client, IAzureInfrastructureEnvironment environment, string resourceGroupName, string location, IEnumerable<Container> containers, string deploymentName)
         {
             var deployments = await client.Deployments.ListAsync(resourceGroupName, new DeploymentListParameters());
             await client.EnsureResourceGroupExists(resourceGroupName, location);
@@ -75,7 +74,7 @@ namespace Structurizr.InfrastructureAsCode.Azure.InfrastructureRendering
             await client.Deploy(resourceGroupName, location, template, $"{deploymentName}.{deployments.Deployments.Count}");
         }
 
-        private JObject ToTemplate(string resourceGroupName, IInfrastructureEnvironment environment, string location, IEnumerable<Container> containers, int deploymentsCount)
+        private JObject ToTemplate(string resourceGroupName, IAzureInfrastructureEnvironment environment, string location, IEnumerable<Container> containers, int deploymentsCount)
         {
             var template = new JObject
             {
@@ -92,7 +91,7 @@ namespace Structurizr.InfrastructureAsCode.Azure.InfrastructureRendering
             return template;
         }
 
-        private JObject ToResource(Container container, IInfrastructureEnvironment environment, string resourceGroupName, string location)
+        private JObject ToResource(Container container, IAzureInfrastructureEnvironment environment, string resourceGroupName, string location)
         {
             var renderer = Renderers.FirstOrDefault(r => r.CanRender(container));
             return renderer?.Render(container, environment, resourceGroupName, location);

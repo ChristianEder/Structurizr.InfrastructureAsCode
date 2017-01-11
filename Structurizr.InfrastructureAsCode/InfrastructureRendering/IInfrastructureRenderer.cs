@@ -2,8 +2,8 @@
 
 namespace Structurizr.InfrastructureAsCode.InfrastructureRendering
 {
-    public interface IInfrastructureRenderer
+    public interface IInfrastructureRenderer<TEnvironment> where TEnvironment : IInfrastructureEnvironment
     {
-        Task Render(Model model, IInfrastructureEnvironment environment);
+        Task Render(Model model, TEnvironment environment);
     }
 }

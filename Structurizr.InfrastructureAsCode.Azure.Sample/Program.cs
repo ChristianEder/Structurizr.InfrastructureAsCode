@@ -12,13 +12,16 @@ namespace Structurizr.InfrastructureAsCode.Azure.Sample
     {
         public static void Main(string[] args)
         {
-            var workspace = ArchitectureModel();
             if (args.Length == 2 && args[0] == "infrastructure")
             {
-                RenderInfrastructure(workspace, args[1]);
+                var configuration = Configuration();
+                var environment = Environment(args[1], configuration);
+                var workspace = ArchitectureModel(environment);
+                RenderInfrastructure(workspace, environment, Configuration());
             }
             else if (args.Length == 1 && args[0] == "structurizr")
             {
+                var workspace = ArchitectureModel(null);
                 UploadToStructurizr(workspace);
             }
             else
@@ -37,12 +40,15 @@ namespace Structurizr.InfrastructureAsCode.Azure.Sample
             client.PutWorkspace(int.Parse(configuration["Structurizr:WorkspaceId"]), workspace);
         }
 
-        private static void RenderInfrastructure(Workspace workspace, string environment)
+        private static void RenderInfrastructure(Workspace workspace, IAzureInfrastructureEnvironment environment, IConfigurationRoot configuration)
         {
-            var configuration = Configuration();
             var renderer = Renderer(configuration);
+            renderer.Render(workspace.Model, environment).Wait();
+        }
 
-            renderer.Render(workspace.Model, new InfrastructureEnvironment(environment, configuration["Azure:TenantId"], configuration["Azure:Administrators"].Split(",".ToCharArray()))).Wait();
+        private static IAzureInfrastructureEnvironment Environment(string environment, IConfigurationRoot configuration)
+        {
+            return new AzureInfrastructureEnvironment(environment, configuration["Azure:TenantId"], configuration["Azure:Administrators"].Split(",".ToCharArray()));
         }
 
         private static InfrastructureRenderer Renderer(IConfiguration configuration)
@@ -64,11 +70,11 @@ namespace Structurizr.InfrastructureAsCode.Azure.Sample
                 );
         }
 
-        private static Workspace ArchitectureModel()
+        private static Workspace ArchitectureModel(IAzureInfrastructureEnvironment environment)
         {
             var workspace = new Workspace("Shop architecture", "Some generic web implemented with Azure cloud infrastructure");
 
-            var shop = new Shop();
+            var shop = new Shop(environment);
             workspace.Model.Add(shop);
             shop.Initialize();
 

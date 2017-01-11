@@ -1,11 +1,14 @@
 ﻿namespace Structurizr.InfrastructureAsCode
 {
-    public class Container : Structurizr.Container
+    public abstract class Container : Structurizr.Container
     {
-        public ContainerInfrastructure Infrastructure { get; set; }
-
         public virtual void InitializeUsings()
         {
         }
+    }
+
+    public class Container<TInfrastructure> : Container where TInfrastructure : ContainerInfrastructure
+    {
+        public TInfrastructure Infrastructure { get; set; }
     }
 }

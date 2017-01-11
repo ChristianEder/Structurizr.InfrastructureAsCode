@@ -1,5 +1,6 @@
 ﻿using System.Linq;
 using Newtonsoft.Json.Linq;
+using Structurizr.InfrastructureAsCode.Azure.InfrastructureRendering;
 using Structurizr.InfrastructureAsCode.Azure.Model;
 using Structurizr.InfrastructureAsCode.InfrastructureRendering;
 
@@ -7,14 +8,12 @@ namespace Structurizr.InfrastructureAsCode.Azure.ARM
 {
     public class KeyVaultRenderer : AzureResourceRenderer<KeyVault>
     {
-        public override JObject Render(Container container, IInfrastructureEnvironment environment, string resourceGroup, string location)
+        protected override JObject Render(Container<KeyVault> container, IAzureInfrastructureEnvironment environment, string resourceGroup, string location)
         {
-            var keyVault = (KeyVault)container.Infrastructure;
-
             return new JObject
             {
                 ["type"] = "Microsoft.KeyVault/vaults",
-                ["name"] = keyVault.Name(environment),
+                ["name"] = container.Infrastructure.Name,
                 ["apiVersion"] = "2015-06-01",
                 ["location"] = location,
                 ["properties"] = new JObject
