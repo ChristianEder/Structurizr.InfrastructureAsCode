@@ -81,8 +81,9 @@ namespace Structurizr.InfrastructureAsCode.Azure.InfrastructureRendering
 
         private async Task DeployInfrastructure(ResourceManagementClient client, IAzureInfrastructureEnvironment environment, string resourceGroupName, string location, Container[] containers, string deploymentName, AzureContainerInfrastructureConfigurationElementValueResolverContext configContext)
         {
-            var deployments = await client.Deployments.ListAsync(resourceGroupName, new DeploymentListParameters());
             await client.EnsureResourceGroupExists(resourceGroupName, location);
+
+            var deployments = await client.Deployments.ListAsync(resourceGroupName, new DeploymentListParameters());
             var template = ToTemplate(resourceGroupName, environment, location, containers, deployments.Deployments.Count);
             await client.Deploy(resourceGroupName, location, template, $"{deploymentName}.{deployments.Deployments.Count}");
 

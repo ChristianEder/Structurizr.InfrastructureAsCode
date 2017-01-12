@@ -43,7 +43,28 @@ namespace Structurizr.InfrastructureAsCode.Azure.ARM
             };
 
             var deploymentResult = await client.Deployments.CreateOrUpdateAsync(resourceGroupName, deploymentName, deployment);
-            Console.WriteLine($"Deployment status: {deploymentResult.Deployment.Properties.ProvisioningState}");
+            var deploymentState = deploymentResult.Deployment;
+
+            Console.WriteLine($"Deployment status: {deploymentState.Properties.ProvisioningState}");
+
+            while (!IsCompleted(deploymentState))
+            {
+                Console.Write(".");
+                await Task.Delay(500);
+                var current = await client.Deployments.GetAsync(resourceGroupName, deploymentName);
+                deploymentState = current.Deployment;
+            }
+            Console.WriteLine();
+            Console.WriteLine($"Deployment status: {deploymentState.Properties.ProvisioningState}");
+        }
+
+        private static bool IsCompleted(DeploymentExtended deployment)
+        {
+            return deployment.Properties.ProvisioningState == ProvisioningState.Succeeded ||
+                deployment.Properties.ProvisioningState == ProvisioningState.Failed ||
+                deployment.Properties.ProvisioningState == ProvisioningState.Canceled ||
+                deployment.Properties.ProvisioningState == ProvisioningState.Deleted;
+            
         }
     }
 }
