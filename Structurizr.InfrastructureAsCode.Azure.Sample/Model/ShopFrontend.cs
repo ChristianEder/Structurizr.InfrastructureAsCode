@@ -22,7 +22,7 @@ namespace Structurizr.InfrastructureAsCode.Azure.Sample.Model
 
             if (environment != null)
             {
-                Infrastructure = new AppService { Name = $"shop-{environment.Name}" };
+                Infrastructure = new AppService { Name = $"aac-sample-shop-{environment.Name}" };
                 AddKeyVaultAccessConfiguration(keyVault);
 
                 keyVault.Infrastructure.Secrets.Add(new KeyVaultSecret

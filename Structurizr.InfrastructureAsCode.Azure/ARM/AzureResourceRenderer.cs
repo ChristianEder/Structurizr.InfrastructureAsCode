@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Newtonsoft.Json.Linq;
@@ -11,7 +12,7 @@ namespace Structurizr.InfrastructureAsCode.Azure.ARM
     public abstract class AzureResourceRenderer
     {
         public abstract bool CanRender(Container container);
-        public abstract JObject Render(Container container, IAzureInfrastructureEnvironment environment, string resourceGroup, string location);
+        public abstract IEnumerable<JObject> Render(Container container, IAzureInfrastructureEnvironment environment, string resourceGroup, string location);
         public abstract bool CanConfigure(Container container);
         public abstract IEnumerable<ContainerInfrastructureConfigurationElementValue> GetConfigurationValues(Container container);
         public abstract Task Configure(Container container, AzureContainerInfrastructureConfigurationElementValueResolverContext context);
@@ -25,7 +26,7 @@ namespace Structurizr.InfrastructureAsCode.Azure.ARM
             return container is Container<TInfrastructure>;
         }
 
-        public override JObject Render(Container container, IAzureInfrastructureEnvironment environment, string resourceGroup, string location)
+        public override IEnumerable<JObject> Render(Container container, IAzureInfrastructureEnvironment environment, string resourceGroup, string location)
         {
             return Render((Container<TInfrastructure>) container, environment, resourceGroup, location);
         }
@@ -56,7 +57,17 @@ namespace Structurizr.InfrastructureAsCode.Azure.ARM
             return Task.FromResult(0);
         }
 
-        protected abstract JObject Render(Container<TInfrastructure> container, IAzureInfrastructureEnvironment environment, string resourceGroup, string location);
-        
+        protected abstract IEnumerable<JObject> Render(Container<TInfrastructure> container, IAzureInfrastructureEnvironment environment, string resourceGroup, string location);
+
+        protected string ToLocationName(string location)
+        {
+            switch (location)
+            {
+                case "westeurope":
+                    return "West Europe";
+                default:
+                    throw new InvalidOperationException();
+            }
+        }
     }
 }

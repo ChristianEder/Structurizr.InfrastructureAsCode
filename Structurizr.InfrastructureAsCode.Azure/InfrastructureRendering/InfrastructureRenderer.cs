@@ -86,7 +86,7 @@ namespace Structurizr.InfrastructureAsCode.Azure.InfrastructureRendering
             var template = ToTemplate(resourceGroupName, environment, location, containers, deployments.Deployments.Count);
             await client.Deploy(resourceGroupName, location, template, $"{deploymentName}.{deployments.Deployments.Count}");
 
-            await Configure(environment, containers, configContext);
+            //await Configure(environment, containers, configContext);
         }
 
         private async Task Configure(IAzureInfrastructureEnvironment environment, Container[] containers, AzureContainerInfrastructureConfigurationElementValueResolverContext configContext)
@@ -151,7 +151,7 @@ namespace Structurizr.InfrastructureAsCode.Azure.InfrastructureRendering
                 ["contentVersion"] = $"1.0.0.{deploymentsCount}",
                 ["parameters"] = new JObject(),
                 ["resources"] = new JArray(
-                    containers.Select(e => ToResource(e, environment, resourceGroupName, location))
+                    containers.SelectMany(e => ToResource(e, environment, resourceGroupName, location))
                     .Where(r => r != null)
                     .Cast<object>()
                     .ToArray())
@@ -160,7 +160,7 @@ namespace Structurizr.InfrastructureAsCode.Azure.InfrastructureRendering
             return template;
         }
 
-        private JObject ToResource(Container container, IAzureInfrastructureEnvironment environment, string resourceGroupName, string location)
+        private IEnumerable<JObject> ToResource(Container container, IAzureInfrastructureEnvironment environment, string resourceGroupName, string location)
         {
             var renderer = Renderers.FirstOrDefault(r => r.CanRender(container));
             return renderer?.Render(container, environment, resourceGroupName, location);

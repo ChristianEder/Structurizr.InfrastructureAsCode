@@ -18,7 +18,7 @@ namespace Structurizr.InfrastructureAsCode.Azure.Sample.Model
 
             if (environment != null)
             {
-                Infrastructure = new NoSqlDocumentDatabase { Name = $"shop-db-{environment.Name}" };
+                Infrastructure = new NoSqlDocumentDatabase { Name = $"aac-sample-shop-db-{environment.Name}" };
             }
         }
     }

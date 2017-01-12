@@ -2,6 +2,11 @@
 {
     public class AppService : ContainerInfrastructure
     {
+        public AppService()
+        {
+            Settings = new ContainerInfrastructureConfiguration<AppServiceSetting>();
+            ConnectionStrings = new ContainerInfrastructureConfiguration<AppServiceConnectionString>();
+        }
         public ContainerInfrastructureConfiguration<AppServiceSetting> Settings { get; set; }
         public ContainerInfrastructureConfiguration<AppServiceConnectionString> ConnectionStrings { get; set; }
     }

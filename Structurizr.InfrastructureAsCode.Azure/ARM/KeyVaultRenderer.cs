@@ -10,9 +10,9 @@ namespace Structurizr.InfrastructureAsCode.Azure.ARM
 {
     public class KeyVaultRenderer : AzureResourceRenderer<KeyVault>
     {
-        protected override JObject Render(Container<KeyVault> container, IAzureInfrastructureEnvironment environment, string resourceGroup, string location)
+        protected override IEnumerable<JObject> Render(Container<KeyVault> container, IAzureInfrastructureEnvironment environment, string resourceGroup, string location)
         {
-            return new JObject
+            yield return new JObject
             {
                 ["type"] = "Microsoft.KeyVault/vaults",
                 ["name"] = container.Infrastructure.Name,
