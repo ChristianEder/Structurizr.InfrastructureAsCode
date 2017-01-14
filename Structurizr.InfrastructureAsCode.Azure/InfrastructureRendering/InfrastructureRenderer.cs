@@ -2,9 +2,11 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.Azure;
-using Microsoft.Azure.Management.Resources;
-using Microsoft.Azure.Management.Resources.Models;
+using Microsoft.Azure.Management.AppService.Fluent;
+using Microsoft.Azure.Management.Resource.Fluent;
+using Microsoft.Azure.Management.Resource.Fluent.Authentication;
+using Microsoft.Azure.Management.Resource.Fluent.Core;
+using Microsoft.Azure.Management.Resource.Fluent.Models;
 using Microsoft.IdentityModel.Clients.ActiveDirectory;
 using Newtonsoft.Json.Linq;
 using Structurizr.InfrastructureAsCode.Azure.ARM;
@@ -39,10 +41,8 @@ namespace Structurizr.InfrastructureAsCode.Azure.InfrastructureRendering
 
         public async Task Render(Structurizr.Model model)
         {
-            var client = await LoginClient();
-
-            var configContext = SetContextToConfigurationResolvers(client);
-
+            var client = LoginClient();
+            
             foreach (var softwareSystem in model.SoftwareSystems)
             {
                 var azureInfrastructureElements = softwareSystem.Containers
@@ -53,24 +53,30 @@ namespace Structurizr.InfrastructureAsCode.Azure.InfrastructureRendering
                 {
                     foreach (var elementsInResourceGroup in elementsInLocation.GroupBy(e => _resourceGroupTargetingStrategy.TargetResourceGroup(_environment, e)))
                     {
-                        await DeployInfrastructure(client, elementsInResourceGroup.Key, elementsInLocation.Key, elementsInResourceGroup.ToArray(), softwareSystem.Name, configContext);
+                        await DeployInfrastructure(client, elementsInResourceGroup.Key, elementsInLocation.Key, elementsInResourceGroup.ToArray(), softwareSystem.Name);
                     }
                 }
             }
         }
-        
-        private async Task DeployInfrastructure(ResourceManagementClient client, string resourceGroupName, string location, Container[] containers, string deploymentName, AzureConfigurationValueResolverContext configContext)
+
+        private async Task DeployInfrastructure(IAppServiceManager appServiceManager, string resourceGroupName, string location, Container[] containers, string deploymentName)
         {
-            await client.EnsureResourceGroupExists(resourceGroupName, location);
+            var configContext = SetContextToConfigurationResolvers(appServiceManager, resourceGroupName);
 
-            var deployments = await client.Deployments.ListAsync(resourceGroupName, new DeploymentListParameters());
-            var template = ToTemplate(resourceGroupName, location, containers, deployments.Deployments.Count);
-            await client.Deploy(resourceGroupName, location, template, $"{deploymentName}.{deployments.Deployments.Count}");
+            await appServiceManager.EnsureResourceGroupExists(resourceGroupName, location);
 
-            //await Configure(environment, containers, configContext);
+            var deployments = appServiceManager.ResourceManager.Deployments.List()
+                .Where(d => d.ResourceGroupName == resourceGroupName)
+                .Distinct()
+                .Count();
+
+            var template = ToTemplate(resourceGroupName, location, containers, deployments);
+            await appServiceManager.Deploy(resourceGroupName, location, template, $"{deploymentName}.{deployments}");
+
+            await Configure(containers, configContext);
         }
 
-        private async Task Configure(IAzureInfrastructureEnvironment environment, Container[] containers, AzureConfigurationValueResolverContext configContext)
+        private async Task Configure(Container[] containers, AzureConfigurationValueResolverContext configContext)
         {
             await ResolveConfigurationValuesToContext(containers, configContext);
             foreach (var container in containers)
@@ -78,7 +84,11 @@ namespace Structurizr.InfrastructureAsCode.Azure.InfrastructureRendering
                 var renderer = _ioc.GetRendererFor(container);
                 if (renderer != null)
                 {
+                    Console.Write($"Configuring {container.Infrastructure.Name} ...");
+
                     await renderer.Configure(container, configContext);
+
+                    Console.WriteLine(" done");
                 }
             }
         }
@@ -148,29 +158,22 @@ namespace Structurizr.InfrastructureAsCode.Azure.InfrastructureRendering
             return renderer?.Render(container, _environment, resourceGroupName, location);
         }
 
-        private async Task<ResourceManagementClient> LoginClient()
+        private IAppServiceManager LoginClient()
         {
-            var credentials = await GetAccessTokenCredentials();
-            return new ResourceManagementClient(credentials);
+            var client = AppServiceManager.Authenticate(
+                  AzureCredentials.FromServicePrincipal(
+                      _subscriptionCredentials.ClientId, 
+                      _subscriptionCredentials.ClientSecret,
+                      _subscriptionCredentials.TenantId, 
+                      AzureEnvironment.AzureGlobalCloud),
+                  _subscriptionCredentials.SubscriptionId);
+
+            return client;
         }
 
-        private async Task<SubscriptionCloudCredentials> GetAccessTokenCredentials()
+        private AzureConfigurationValueResolverContext SetContextToConfigurationResolvers(IAppServiceManager appServiceManager, string resourceGroupName)
         {
-            var clientCredential = new ClientCredential(_subscriptionCredentials.ClientId, _subscriptionCredentials.ClientSecret);
-            var context = new AuthenticationContext($"https://login.microsoftonline.com/{_subscriptionCredentials.TenantId}");
-            var result = await context.AcquireTokenAsync("https://management.azure.com/", clientCredential);
-
-            if (result == null)
-            {
-                throw new InvalidOperationException("Failed to obtain authorization token");
-            }
-
-            return new TokenCloudCredentials(_subscriptionCredentials.SubscriptionId, result.AccessToken);
-        }
-
-        private AzureConfigurationValueResolverContext SetContextToConfigurationResolvers(ResourceManagementClient client)
-        {
-            var configContext = new AzureConfigurationValueResolverContext(client);
+            var configContext = new AzureConfigurationValueResolverContext(appServiceManager, resourceGroupName);
             _ioc.Register(configContext);
             return configContext;
         }

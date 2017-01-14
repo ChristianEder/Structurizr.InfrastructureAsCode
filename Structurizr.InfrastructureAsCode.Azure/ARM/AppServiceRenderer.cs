@@ -1,5 +1,14 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Concurrent;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
+using Microsoft.Azure;
+using Microsoft.Azure.Management.AppService.Fluent;
+using Microsoft.Azure.Management.AppService.Fluent.Models;
 using Newtonsoft.Json.Linq;
+using Structurizr.InfrastructureAsCode.Azure.ARM.Configuration;
 using Structurizr.InfrastructureAsCode.Azure.InfrastructureRendering;
 using Structurizr.InfrastructureAsCode.Azure.Model;
 
@@ -54,6 +63,43 @@ namespace Structurizr.InfrastructureAsCode.Azure.ARM
                     $"[concat(\'Microsoft.Web/serverfarms/\', \'{container.Infrastructure.Name}\')]"
                 }
             };
+        }
+
+        protected override IEnumerable<ConfigurationValue> GetConfigurationValues(Container<AppService> container)
+        {
+            return container.Infrastructure.Settings.Values.Concat(container.Infrastructure.ConnectionStrings.Values);
+        }
+
+        protected override async Task Configure(Container<AppService> container, AzureConfigurationValueResolverContext context)
+        {
+            var webapp = await context.AppServiceManager.WebApps.GetByGroupAsync(context.ResourceGroupName, container.Infrastructure.Name);
+
+            var appSettings = new Dictionary<string, string>();
+
+            foreach (var setting in container.Infrastructure.Settings)
+            {
+                object value;
+                if (context.Values.TryGetValue(setting.Value, out value))
+                {
+                    appSettings.Add(setting.Name, value.ToString());
+                }
+            }
+
+            var update = webapp.Update().WithAppSettings(appSettings);
+
+            foreach (var connectionString in container.Infrastructure.ConnectionStrings)
+            {
+                object value;
+                if (context.Values.TryGetValue(connectionString.Value, out value))
+                {
+                    update = update.WithConnectionString(
+                        connectionString.Name, 
+                        value.ToString(), 
+                        (ConnectionStringType) Enum.Parse(typeof(ConnectionStringType), connectionString.Type));
+                }
+            }
+
+            await update.ApplyAsync();
         }
     }
 }

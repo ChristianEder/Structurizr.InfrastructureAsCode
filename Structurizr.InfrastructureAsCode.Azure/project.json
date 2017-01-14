@@ -3,8 +3,9 @@
 
   "dependencies": {
     "Structurizr.InfrastructureAsCode": "1.0.0-*",
-    "Microsoft.IdentityModel.Clients.ActiveDirectory": "3.12.0",
-    "Microsoft.Azure.Management.Resources": "2.20.1-preview"
+    //"Microsoft.IdentityModel.Clients.ActiveDirectory": "3.12.0",
+    //"Microsoft.Azure.Management.Resources": "2.20.1-preview",
+    "Microsoft.Azure.Management.AppService.Fluent": "1.0.0-beta4-1"
   },
   "frameworks": {
     "net461": {

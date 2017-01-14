@@ -25,11 +25,11 @@ namespace Structurizr.InfrastructureAsCode.Azure.Sample.Model
                 Infrastructure = new AppService { Name = $"aac-sample-shop-{environment.Name}" };
                 AddKeyVaultAccessConfiguration(keyVault);
 
-                keyVault.Infrastructure.Secrets.Add(new KeyVaultSecret
-                {
-                    Name = "shop-frontend-db-key",
-                    Value = database.Infrastructure.PrimaryMasterKey
-                });
+                //keyVault.Infrastructure.Secrets.Add(new KeyVaultSecret
+                //{
+                //    Name = "shop-frontend-db-key",
+                //    Value = database.Infrastructure.PrimaryMasterKey
+                //});
             }
         }
 
@@ -48,19 +48,19 @@ namespace Structurizr.InfrastructureAsCode.Azure.Sample.Model
                 Value = keyVault.Infrastructure.Url
             });
 
-            Infrastructure.ConnectionStrings.Add(new AppServiceConnectionString
-            {
-                Name = "KeyVaultAppId",
-                Type = "Custom",
-                Value = keyVault.Infrastructure.ActiveDirectoryApplicationIdFor(Infrastructure.Name)
-            });
+            //Infrastructure.ConnectionStrings.Add(new AppServiceConnectionString
+            //{
+            //    Name = "KeyVaultAppId",
+            //    Type = "Custom",
+            //    Value = keyVault.Infrastructure.ActiveDirectoryApplicationIdFor(Infrastructure.Name)
+            //});
 
-            Infrastructure.ConnectionStrings.Add(new AppServiceConnectionString
-            {
-                Name = "KeyVaultAppId",
-                Type = "Custom",
-                Value = keyVault.Infrastructure.ActiveDirectoryApplicationSecretFor(Infrastructure.Name)
-            });
+            //Infrastructure.ConnectionStrings.Add(new AppServiceConnectionString
+            //{
+            //    Name = "KeyVaultAppId",
+            //    Type = "Custom",
+            //    Value = keyVault.Infrastructure.ActiveDirectoryApplicationSecretFor(Infrastructure.Name)
+            //});
         }
     }
 }
