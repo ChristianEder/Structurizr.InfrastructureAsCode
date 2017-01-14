@@ -36,7 +36,10 @@ namespace Structurizr.InfrastructureAsCode.Azure.Sample
         private static void UploadToStructurizr(Workspace workspace)
         {
             var configuration = Configuration();
-            var client = new StructurizrClient(configuration["Structurizr:Key"], configuration["Structurizr:Secret"]);
+            var client = new StructurizrClient(configuration["Structurizr:Key"], configuration["Structurizr:Secret"])
+            {
+                WorkspaceArchiveLocation = null
+            };
             client.PutWorkspace(int.Parse(configuration["Structurizr:WorkspaceId"]), workspace);
         }
 
@@ -78,8 +81,14 @@ namespace Structurizr.InfrastructureAsCode.Azure.Sample
             workspace.Model.Add(shop);
             shop.Initialize();
 
-            var containerView = workspace.Views.CreateContainerView(shop, "Shop Container View", "Overview over the shop system");
+            var contextView = workspace.Views.CreateSystemContextView(shop, "Shop context view", "Overview over the shop system");
+            contextView.AddAllSoftwareSystems();
+            contextView.AddAllPeople();
+
+            var containerView = workspace.Views.CreateContainerView(shop, "Shop Container View", "Overview over the shop system architecture");
             containerView.AddAllContainers();
+            containerView.AddAllPeople();
+
             return workspace;
         }
         private static IConfigurationRoot Configuration()
