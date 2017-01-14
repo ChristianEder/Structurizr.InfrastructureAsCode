@@ -19,5 +19,14 @@ namespace Structurizr.InfrastructureAsCode.Azure.Sample.Model
         public ShopKeyVault KeyVault { get; set; }
         public ShopFrontend Frontend { get; set; }
         public ShopDatabase Database { get; set; }
+        public Person Customer { get; set; }
+
+        public override void Initialize()
+        {
+            base.Initialize();
+            Customer = Model.AddPerson(Location.External, "Customer", "Buys stuff in our shop");
+            Customer.Uses(Frontend, "buys stuff");
+            Customer.Uses(this, "buys stuff");
+        }
     }
 }
