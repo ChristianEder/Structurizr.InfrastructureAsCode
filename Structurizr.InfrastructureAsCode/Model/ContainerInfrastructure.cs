@@ -2,7 +2,7 @@
 
 namespace Structurizr.InfrastructureAsCode
 {
-    public class ContainerInfrastructure
+    public abstract class ContainerInfrastructure
     {
         private string _name;
 

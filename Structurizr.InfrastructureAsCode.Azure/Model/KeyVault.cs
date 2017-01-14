@@ -1,18 +1,15 @@
-﻿using System;
-using Structurizr.InfrastructureAsCode.InfrastructureRendering;
-
-namespace Structurizr.InfrastructureAsCode.Azure.Model
+﻿namespace Structurizr.InfrastructureAsCode.Azure.Model
 {
     public class KeyVault : ContainerInfrastructure
     {
         public KeyVault()
         {
-            Secrets = new ContainerInfrastructureConfiguration<KeyVaultSecret>();
+            Secrets = new Configuration<KeyVaultSecret>();
         }
 
-        public ContainerInfrastructureConfiguration<KeyVaultSecret> Secrets { get; set; }
+        public Configuration<KeyVaultSecret> Secrets { get; set; }
 
-        public ContainerInfrastructureConfigurationElementValue<string> Url => new ContainerInfrastructureConfigurationElementValue<string>("TODO");
+        public ConfigurationValue<string> Url => new ConfigurationValue<string>("TODO");
 
         public KeyVaultActiveDirectoryApplicationId ActiveDirectoryApplicationIdFor(string clientName)
         {
@@ -30,17 +27,17 @@ namespace Structurizr.InfrastructureAsCode.Azure.Model
         }
     }
 
-    public class KeyVaultActiveDirectoryApplicationId : ContainerInfrastructureConfigurationElementValue
+    public class KeyVaultActiveDirectoryApplicationId : ConfigurationValue
     {
         public string ClientName { get; set; }
     }
 
-    public class KeyVaultActiveDirectoryApplicationSecret : ContainerInfrastructureConfigurationElementValue
+    public class KeyVaultActiveDirectoryApplicationSecret : ConfigurationValue
     {
         public string ClientName { get; set; }
     }
 
-    public class KeyVaultSecret : ContainerInfrastructureConfigurationElement
+    public class KeyVaultSecret : ConfigurationElement
     {
         public string Name { get; set; }
     }

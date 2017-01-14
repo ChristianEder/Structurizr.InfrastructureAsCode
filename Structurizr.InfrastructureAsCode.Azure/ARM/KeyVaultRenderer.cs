@@ -46,12 +46,12 @@ namespace Structurizr.InfrastructureAsCode.Azure.ARM
             };
         }
 
-        protected override IEnumerable<ContainerInfrastructureConfigurationElementValue> GetConfigurationValues(Container<KeyVault> container)
+        protected override IEnumerable<ConfigurationValue> GetConfigurationValues(Container<KeyVault> container)
         {
             return base.GetConfigurationValues(container).Concat(container.Infrastructure.Secrets.Values);
         }
 
-        protected override async Task Configure(Container<KeyVault> container, AzureContainerInfrastructureConfigurationElementValueResolverContext context)
+        protected override async Task Configure(Container<KeyVault> container, AzureConfigurationValueResolverContext context)
         {
             foreach (var secret in container.Infrastructure.Secrets)
             {

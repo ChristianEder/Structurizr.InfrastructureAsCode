@@ -4,14 +4,14 @@
     {
         public AppService()
         {
-            Settings = new ContainerInfrastructureConfiguration<AppServiceSetting>();
-            ConnectionStrings = new ContainerInfrastructureConfiguration<AppServiceConnectionString>();
+            Settings = new Configuration<AppServiceSetting>();
+            ConnectionStrings = new Configuration<AppServiceConnectionString>();
         }
-        public ContainerInfrastructureConfiguration<AppServiceSetting> Settings { get; set; }
-        public ContainerInfrastructureConfiguration<AppServiceConnectionString> ConnectionStrings { get; set; }
+        public Configuration<AppServiceSetting> Settings { get; set; }
+        public Configuration<AppServiceConnectionString> ConnectionStrings { get; set; }
     }
 
-    public class AppServiceSetting : ContainerInfrastructureConfigurationElement
+    public class AppServiceSetting : ConfigurationElement
     {
         public AppServiceSetting()
         {
@@ -20,13 +20,13 @@
         public AppServiceSetting(string name, string value)
         {
             Name = name;
-            Value = new ContainerInfrastructureConfigurationElementValue<string>(value);
+            Value = new ConfigurationValue<string>(value);
         }
 
         public string Name { get; set; }
     }
 
-    public class AppServiceConnectionString : ContainerInfrastructureConfigurationElement
+    public class AppServiceConnectionString : ConfigurationElement
     {
         public AppServiceConnectionString()
         {
@@ -37,7 +37,7 @@
         {
             Name = name;
             Type = type;
-            Value = new ContainerInfrastructureConfigurationElementValue<string>(value);
+            Value = new ConfigurationValue<string>(value);
         }
 
         public string Name { get; set; }

@@ -45,7 +45,7 @@ namespace Structurizr.InfrastructureAsCode.Azure.Sample
 
         private static void RenderInfrastructure(Workspace workspace, IAzureInfrastructureEnvironment environment, IConfigurationRoot configuration)
         {
-            var renderer = Renderer(configuration);
+            var renderer = Renderer(environment, configuration);
             renderer.Render(workspace.Model, environment).Wait();
         }
 
@@ -54,7 +54,7 @@ namespace Structurizr.InfrastructureAsCode.Azure.Sample
             return new AzureInfrastructureEnvironment(environment, configuration["Azure:TenantId"], configuration["Azure:Administrators"].Split(",".ToCharArray()));
         }
 
-        private static InfrastructureRenderer Renderer(IConfiguration configuration)
+        private static InfrastructureRenderer Renderer(IAzureInfrastructureEnvironment environment, IConfiguration configuration)
         {
 
             // In order for this to run, you need to create an Azure AD application for this tool first, then configure the AD Apps credentials in the configuration file
@@ -63,14 +63,17 @@ namespace Structurizr.InfrastructureAsCode.Azure.Sample
             // New-AzureRmADServicePrincipal -ApplicationId $app.ApplicationId
             // New-AzureRmRoleAssignment -RoleDefinitionName Contributor -ServicePrincipalName $app.ApplicationId
 
-            return new InfrastructureRenderer(
-                new ResourceGroupPerEnvironmentStrategy(e => $"shop-{e.Name}"),
-                new FixedResourceLocationTargetingStrategy("westeurope"),
-                configuration["Azure:ClientId"],
-                configuration["Azure:ClientSecret"],
-                configuration["Azure:TenantId"],
-                configuration["Azure:SubscriptionId"]
-                );
+            return new InfrastructureRendererBuilder()
+                .In(environment)
+                .UsingResourceGroupPerEnvironment(e => $"shop-{e.Name}")
+                .UsingLocation("westeurope")
+                .UsingCredentials(
+                    new AzureSubscriptionCredentials(
+                    configuration["Azure:ClientId"],
+                    configuration["Azure:ClientSecret"],
+                    configuration["Azure:TenantId"],
+                    configuration["Azure:SubscriptionId"]))
+                .Build();
         }
 
         private static Workspace ArchitectureModel(IAzureInfrastructureEnvironment environment)

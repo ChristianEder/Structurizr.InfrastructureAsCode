@@ -5,54 +5,41 @@ using System.Threading.Tasks;
 using Newtonsoft.Json.Linq;
 using Structurizr.InfrastructureAsCode.Azure.ARM.Configuration;
 using Structurizr.InfrastructureAsCode.Azure.InfrastructureRendering;
-using Structurizr.InfrastructureAsCode.InfrastructureRendering;
 
 namespace Structurizr.InfrastructureAsCode.Azure.ARM
 {
-    public abstract class AzureResourceRenderer
+    public interface IAzureResourceRenderer
     {
-        public abstract bool CanRender(Container container);
-        public abstract IEnumerable<JObject> Render(Container container, IAzureInfrastructureEnvironment environment, string resourceGroup, string location);
-        public abstract bool CanConfigure(Container container);
-        public abstract IEnumerable<ContainerInfrastructureConfigurationElementValue> GetConfigurationValues(Container container);
-        public abstract Task Configure(Container container, AzureContainerInfrastructureConfigurationElementValueResolverContext context);
+        IEnumerable<JObject> Render(Container container, IAzureInfrastructureEnvironment environment, string resourceGroup, string location);
+        IEnumerable<ConfigurationValue> GetConfigurationValues(Container container);
+        Task Configure(Container container, AzureConfigurationValueResolverContext context);
     }
 
-    public abstract class AzureResourceRenderer<TInfrastructure> : AzureResourceRenderer
+    public abstract class AzureResourceRenderer<TInfrastructure> : IAzureResourceRenderer
         where TInfrastructure : ContainerInfrastructure
     {
-        public override bool CanRender(Container container)
-        {
-            return container is Container<TInfrastructure>;
-        }
-
-        public override IEnumerable<JObject> Render(Container container, IAzureInfrastructureEnvironment environment, string resourceGroup, string location)
+        public IEnumerable<JObject> Render(Container container, IAzureInfrastructureEnvironment environment, string resourceGroup, string location)
         {
             return Render((Container<TInfrastructure>) container, environment, resourceGroup, location);
         }
 
-        public override bool CanConfigure(Container container)
-        {
-            return container is Container<TInfrastructure>;
-        }
-
-        public override IEnumerable<ContainerInfrastructureConfigurationElementValue> GetConfigurationValues(Container container)
+        public IEnumerable<ConfigurationValue> GetConfigurationValues(Container container)
         {
             return GetConfigurationValues((Container<TInfrastructure>)container);
         }
 
-        public override Task Configure(Container container, AzureContainerInfrastructureConfigurationElementValueResolverContext context)
+        public Task Configure(Container container, AzureConfigurationValueResolverContext context)
         {
             return Configure((Container<TInfrastructure>)container, context);
         }
 
-        protected virtual IEnumerable<ContainerInfrastructureConfigurationElementValue> GetConfigurationValues(
+        protected virtual IEnumerable<ConfigurationValue> GetConfigurationValues(
             Container<TInfrastructure> container)
         {
-            return Enumerable.Empty<ContainerInfrastructureConfigurationElementValue>();
+            return Enumerable.Empty<ConfigurationValue>();
         }
 
-        protected virtual Task Configure(Container<TInfrastructure> container, AzureContainerInfrastructureConfigurationElementValueResolverContext context)
+        protected virtual Task Configure(Container<TInfrastructure> container, AzureConfigurationValueResolverContext context)
         {
             return Task.FromResult(0);
         }
@@ -68,6 +55,15 @@ namespace Structurizr.InfrastructureAsCode.Azure.ARM
                 default:
                     throw new InvalidOperationException();
             }
+        }
+    }
+
+    public static class AzureResourceRendererExtensions
+    {
+        public static IAzureResourceRenderer GetRendererFor(this TinyIoC.TinyIoCContainer ioc, Container container)        {
+            var resolverType = typeof(AzureResourceRenderer<>).MakeGenericType(container.Infrastructure.GetType());
+            var resolver = ioc.Resolve(resolverType);
+            return (IAzureResourceRenderer)resolver;
         }
     }
 }

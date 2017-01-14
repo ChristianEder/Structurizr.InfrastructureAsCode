@@ -4,9 +4,9 @@ using System.Linq;
 
 namespace Structurizr.InfrastructureAsCode
 {
-    public class ContainerInfrastructureConfiguration<TElement>
+    public class Configuration<TElement>
         : IEnumerable<TElement>
-        where TElement : ContainerInfrastructureConfigurationElement
+        where TElement : ConfigurationElement
     {
         private readonly List<TElement> _elements = new List<TElement>();
 
@@ -15,7 +15,7 @@ namespace Structurizr.InfrastructureAsCode
             _elements.Add(element);
         }
 
-        public IEnumerable<ContainerInfrastructureConfigurationElementValue> Values => _elements.Select(e => e.Value);
+        public IEnumerable<ConfigurationValue> Values => _elements.Select(e => e.Value);
         public IEnumerator<TElement> GetEnumerator()
         {
             return _elements.GetEnumerator();
@@ -27,18 +27,18 @@ namespace Structurizr.InfrastructureAsCode
         }
     }
 
-    public abstract class ContainerInfrastructureConfigurationElement
+    public abstract class ConfigurationElement
     {
-        public ContainerInfrastructureConfigurationElementValue Value { get; set; }
+        public ConfigurationValue Value { get; set; }
     }
 
-    public abstract class ContainerInfrastructureConfigurationElementValue { }
+    public abstract class ConfigurationValue { }
 
-    public class ContainerInfrastructureConfigurationElementValue<T> : ContainerInfrastructureConfigurationElementValue
+    public class ConfigurationValue<T> : ConfigurationValue
     {
         public T Value { get; }
 
-        public ContainerInfrastructureConfigurationElementValue(T value)
+        public ConfigurationValue(T value)
         {
             Value = value;
         }

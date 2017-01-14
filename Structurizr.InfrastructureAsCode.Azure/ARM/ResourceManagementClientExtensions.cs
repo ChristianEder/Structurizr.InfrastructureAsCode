@@ -46,9 +46,16 @@ namespace Structurizr.InfrastructureAsCode.Azure.ARM
             var deploymentState = deploymentResult.Deployment;
 
             Console.WriteLine($"Deployment status: {deploymentState.Properties.ProvisioningState}");
+            var lastProvisioningState = deploymentState.Properties.ProvisioningState;
 
             while (!IsCompleted(deploymentState))
             {
+                if (lastProvisioningState != deploymentState.Properties.ProvisioningState)
+                {
+                    Console.Write($" {deploymentState.Properties.ProvisioningState} ");
+                    lastProvisioningState = deploymentState.Properties.ProvisioningState;
+                }
+
                 Console.Write(".");
                 await Task.Delay(500);
                 var current = await client.Deployments.GetAsync(resourceGroupName, deploymentName);

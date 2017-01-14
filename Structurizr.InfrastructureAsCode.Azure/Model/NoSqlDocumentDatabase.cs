@@ -5,7 +5,7 @@
         public NoSqlDocumentDatabaseAccessKey PrimaryMasterKey => new NoSqlDocumentDatabaseAccessKey { Type = "PrimaryMaster" };
     }
 
-    public class NoSqlDocumentDatabaseAccessKey : ContainerInfrastructureConfigurationElementValue
+    public class NoSqlDocumentDatabaseAccessKey : ConfigurationValue
     {
         public string Type { get; set; }
     }
