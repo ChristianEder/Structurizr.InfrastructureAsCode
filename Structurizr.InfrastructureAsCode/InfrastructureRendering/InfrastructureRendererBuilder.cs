@@ -6,7 +6,7 @@ using TinyIoC;
 namespace Structurizr.InfrastructureAsCode.InfrastructureRendering
 {
     public abstract class InfrastructureRendererBuilder<TBuilder, TRenderer, TEnvironment> 
-        where TRenderer : class, IInfrastructureRenderer<TEnvironment> 
+        where TRenderer : class, IInfrastructureRenderer 
         where TEnvironment : class, IInfrastructureEnvironment
         where TBuilder : InfrastructureRendererBuilder<TBuilder, TRenderer, TEnvironment>
     {

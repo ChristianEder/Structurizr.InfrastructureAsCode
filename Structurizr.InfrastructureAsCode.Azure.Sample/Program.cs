@@ -46,7 +46,7 @@ namespace Structurizr.InfrastructureAsCode.Azure.Sample
         private static void RenderInfrastructure(Workspace workspace, IAzureInfrastructureEnvironment environment, IConfigurationRoot configuration)
         {
             var renderer = Renderer(environment, configuration);
-            renderer.Render(workspace.Model, environment).Wait();
+            renderer.Render(workspace.Model).Wait();
         }
 
         private static IAzureInfrastructureEnvironment Environment(string environment, IConfigurationRoot configuration)

@@ -15,26 +15,29 @@ using TinyIoC;
 
 namespace Structurizr.InfrastructureAsCode.Azure.InfrastructureRendering
 {
-    public class InfrastructureRenderer : IInfrastructureRenderer<IAzureInfrastructureEnvironment>
+    public class InfrastructureRenderer : IInfrastructureRenderer
     {
         private readonly IResourceGroupTargetingStrategy _resourceGroupTargetingStrategy;
         private readonly IResourceLocationTargetingStrategy _resourceLocationTargetingStrategy;
         private readonly IAzureSubscriptionCredentials _subscriptionCredentials;
+        private readonly IAzureInfrastructureEnvironment _environment;
         private readonly TinyIoCContainer _ioc;
 
         public InfrastructureRenderer(
             IResourceGroupTargetingStrategy resourceGroupTargetingStrategy,
             IResourceLocationTargetingStrategy resourceLocationTargetingStrategy,
             IAzureSubscriptionCredentials subscriptionCredentials,
+            IAzureInfrastructureEnvironment environment,
             TinyIoCContainer ioc)
         {
             _resourceGroupTargetingStrategy = resourceGroupTargetingStrategy;
             _resourceLocationTargetingStrategy = resourceLocationTargetingStrategy;
             _subscriptionCredentials = subscriptionCredentials;
+            _environment = environment;
             _ioc = ioc;
         }
 
-        public async Task Render(Structurizr.Model model, IAzureInfrastructureEnvironment environment)
+        public async Task Render(Structurizr.Model model)
         {
             var client = await LoginClient();
 
@@ -46,22 +49,22 @@ namespace Structurizr.InfrastructureAsCode.Azure.InfrastructureRendering
                      .OfType<Container>()
                      .Distinct();
 
-                foreach (var elementsInLocation in azureInfrastructureElements.GroupBy(e => _resourceLocationTargetingStrategy.TargetLocation(environment, e)))
+                foreach (var elementsInLocation in azureInfrastructureElements.GroupBy(e => _resourceLocationTargetingStrategy.TargetLocation(_environment, e)))
                 {
-                    foreach (var elementsInResourceGroup in elementsInLocation.GroupBy(e => _resourceGroupTargetingStrategy.TargetResourceGroup(environment, e)))
+                    foreach (var elementsInResourceGroup in elementsInLocation.GroupBy(e => _resourceGroupTargetingStrategy.TargetResourceGroup(_environment, e)))
                     {
-                        await DeployInfrastructure(client, environment, elementsInResourceGroup.Key, elementsInLocation.Key, elementsInResourceGroup.ToArray(), softwareSystem.Name, configContext);
+                        await DeployInfrastructure(client, elementsInResourceGroup.Key, elementsInLocation.Key, elementsInResourceGroup.ToArray(), softwareSystem.Name, configContext);
                     }
                 }
             }
         }
         
-        private async Task DeployInfrastructure(ResourceManagementClient client, IAzureInfrastructureEnvironment environment, string resourceGroupName, string location, Container[] containers, string deploymentName, AzureConfigurationValueResolverContext configContext)
+        private async Task DeployInfrastructure(ResourceManagementClient client, string resourceGroupName, string location, Container[] containers, string deploymentName, AzureConfigurationValueResolverContext configContext)
         {
             await client.EnsureResourceGroupExists(resourceGroupName, location);
 
             var deployments = await client.Deployments.ListAsync(resourceGroupName, new DeploymentListParameters());
-            var template = ToTemplate(resourceGroupName, environment, location, containers, deployments.Deployments.Count);
+            var template = ToTemplate(resourceGroupName, location, containers, deployments.Deployments.Count);
             await client.Deploy(resourceGroupName, location, template, $"{deploymentName}.{deployments.Deployments.Count}");
 
             //await Configure(environment, containers, configContext);
@@ -122,7 +125,7 @@ namespace Structurizr.InfrastructureAsCode.Azure.InfrastructureRendering
             return null;
         }
 
-        private JObject ToTemplate(string resourceGroupName, IAzureInfrastructureEnvironment environment, string location, IEnumerable<Container> containers, int deploymentsCount)
+        private JObject ToTemplate(string resourceGroupName, string location, IEnumerable<Container> containers, int deploymentsCount)
         {
             var template = new JObject
             {
@@ -130,7 +133,7 @@ namespace Structurizr.InfrastructureAsCode.Azure.InfrastructureRendering
                 ["contentVersion"] = $"1.0.0.{deploymentsCount}",
                 ["parameters"] = new JObject(),
                 ["resources"] = new JArray(
-                    containers.SelectMany(e => ToResource(e, environment, resourceGroupName, location))
+                    containers.SelectMany(e => ToResource(e, resourceGroupName, location))
                     .Where(r => r != null)
                     .Cast<object>()
                     .ToArray())
@@ -139,10 +142,10 @@ namespace Structurizr.InfrastructureAsCode.Azure.InfrastructureRendering
             return template;
         }
 
-        private IEnumerable<JObject> ToResource(Container container, IAzureInfrastructureEnvironment environment, string resourceGroupName, string location)
+        private IEnumerable<JObject> ToResource(Container container, string resourceGroupName, string location)
         {
             var renderer = _ioc.GetRendererFor(container);
-            return renderer?.Render(container, environment, resourceGroupName, location);
+            return renderer?.Render(container, _environment, resourceGroupName, location);
         }
 
         private async Task<ResourceManagementClient> LoginClient()
