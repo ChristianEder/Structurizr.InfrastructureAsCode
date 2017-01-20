@@ -1,16 +1,17 @@
 using System.Collections.Generic;
 using Microsoft.Azure.Management.AppService.Fluent;
+using Microsoft.Azure.Management.Fluent;
 
 namespace Structurizr.InfrastructureAsCode.Azure.ARM.Configuration
 {
     public class AzureConfigurationValueResolverContext
     {
-        public IAppServiceManager AppServiceManager { get; }
+        public IAzure Azure { get; }
         public string ResourceGroupName { get; }
 
-        public AzureConfigurationValueResolverContext(IAppServiceManager appServiceManager, string resourceGroupName)
+        public AzureConfigurationValueResolverContext(IAzure azure, string resourceGroupName)
         {
-            AppServiceManager = appServiceManager;
+            Azure = azure;
             ResourceGroupName = resourceGroupName;
             Values = new Dictionary<ConfigurationValue, object>();
         }

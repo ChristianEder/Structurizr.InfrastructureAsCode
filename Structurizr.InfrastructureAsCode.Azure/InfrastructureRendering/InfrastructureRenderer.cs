@@ -2,12 +2,9 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.Azure.Management.AppService.Fluent;
+using Microsoft.Azure.Management.Fluent;
 using Microsoft.Azure.Management.Resource.Fluent;
 using Microsoft.Azure.Management.Resource.Fluent.Authentication;
-using Microsoft.Azure.Management.Resource.Fluent.Core;
-using Microsoft.Azure.Management.Resource.Fluent.Models;
-using Microsoft.IdentityModel.Clients.ActiveDirectory;
 using Newtonsoft.Json.Linq;
 using Structurizr.InfrastructureAsCode.Azure.ARM;
 using Structurizr.InfrastructureAsCode.Azure.ARM.Configuration;
@@ -59,19 +56,19 @@ namespace Structurizr.InfrastructureAsCode.Azure.InfrastructureRendering
             }
         }
 
-        private async Task DeployInfrastructure(IAppServiceManager appServiceManager, string resourceGroupName, string location, Container[] containers, string deploymentName)
+        private async Task DeployInfrastructure(IAzure azure, string resourceGroupName, string location, Container[] containers, string deploymentName)
         {
-            var configContext = SetContextToConfigurationResolvers(appServiceManager, resourceGroupName);
+            var configContext = SetContextToConfigurationResolvers(azure, resourceGroupName);
 
-            await appServiceManager.EnsureResourceGroupExists(resourceGroupName, location);
+            await azure.EnsureResourceGroupExists(resourceGroupName, location);
 
-            var deployments = appServiceManager.ResourceManager.Deployments.List()
+            var deployments = azure.Deployments.List()
                 .Where(d => d.ResourceGroupName == resourceGroupName)
                 .Distinct()
                 .Count();
 
             var template = ToTemplate(resourceGroupName, location, containers, deployments);
-            await appServiceManager.Deploy(resourceGroupName, location, template, $"{deploymentName}.{deployments}");
+            await azure.Deploy(resourceGroupName, location, template, $"{deploymentName}.{deployments}");
 
             await Configure(containers, configContext);
         }
@@ -158,22 +155,18 @@ namespace Structurizr.InfrastructureAsCode.Azure.InfrastructureRendering
             return renderer?.Render(container, _environment, resourceGroupName, location);
         }
 
-        private IAppServiceManager LoginClient()
+        private IAzure LoginClient()
         {
-            var client = AppServiceManager.Authenticate(
-                  AzureCredentials.FromServicePrincipal(
-                      _subscriptionCredentials.ClientId, 
-                      _subscriptionCredentials.ClientSecret,
-                      _subscriptionCredentials.TenantId, 
-                      AzureEnvironment.AzureGlobalCloud),
-                  _subscriptionCredentials.SubscriptionId);
-
-            return client;
+            return Microsoft.Azure.Management.Fluent.Azure.Authenticate(AzureCredentials.FromServicePrincipal(
+                _subscriptionCredentials.ClientId,
+                _subscriptionCredentials.ClientSecret,
+                _subscriptionCredentials.TenantId,
+                AzureEnvironment.AzureGlobalCloud)).WithSubscription(_subscriptionCredentials.SubscriptionId);
         }
 
-        private AzureConfigurationValueResolverContext SetContextToConfigurationResolvers(IAppServiceManager appServiceManager, string resourceGroupName)
+        private AzureConfigurationValueResolverContext SetContextToConfigurationResolvers(IAzure azure, string resourceGroupName)
         {
-            var configContext = new AzureConfigurationValueResolverContext(appServiceManager, resourceGroupName);
+            var configContext = new AzureConfigurationValueResolverContext(azure, resourceGroupName);
             _ioc.Register(configContext);
             return configContext;
         }

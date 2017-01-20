@@ -2,6 +2,7 @@
 using System.Threading.Tasks;
 using Microsoft.Azure.Management.AppService.Fluent;
 using Microsoft.Azure.Management.AppService.Fluent.Models;
+using Microsoft.Azure.Management.Fluent;
 using Microsoft.Azure.Management.Resource.Fluent;
 using Microsoft.Azure.Management.Resource.Fluent.Core.CollectionActions;
 using Microsoft.Azure.Management.Resource.Fluent.Models;
@@ -12,9 +13,9 @@ namespace Structurizr.InfrastructureAsCode.Azure.ARM
     public static class ResourceManagementClientExtensions
     {
         public static async Task EnsureResourceGroupExists(
-            this IAppServiceManager appServiceManager, string resourceGroupName, string resourceGroupLocation)
+            this IAzure azure, string resourceGroupName, string resourceGroupLocation)
         {
-            var exists = appServiceManager.ResourceManager.ResourceGroups.CheckExistence(resourceGroupName);
+            var exists = azure.AppServices.ResourceManager.ResourceGroups.CheckExistence(resourceGroupName);
             if (exists)
             {
                 Console.WriteLine($"Using existing resource group '{resourceGroupName}'");
@@ -23,7 +24,7 @@ namespace Structurizr.InfrastructureAsCode.Azure.ARM
             {
                 Console.WriteLine($"Creating resource group '{resourceGroupName}' in location '{resourceGroupLocation}'");
 
-                await appServiceManager.ResourceManager.ResourceGroups
+                await azure.AppServices.ResourceManager.ResourceGroups
                     .Define(resourceGroupName)
                     .WithRegion(resourceGroupLocation)
                     .CreateAsync();
@@ -32,7 +33,7 @@ namespace Structurizr.InfrastructureAsCode.Azure.ARM
             }
         }
 
-        public static async Task Deploy(this IAppServiceManager appServiceManager, string resourceGroupName, string resourceGroupLocation, JObject template, string deploymentName)
+        public static async Task Deploy(this IAzure azure, string resourceGroupName, string resourceGroupLocation, JObject template, string deploymentName)
         {
             if (template == null)
             {
@@ -40,8 +41,8 @@ namespace Structurizr.InfrastructureAsCode.Azure.ARM
             }
 
             Console.WriteLine($"Starting template deployment '{deploymentName}' in resource group '{resourceGroupName}'");
-            
-            appServiceManager.ResourceManager.Deployments
+
+            azure.AppServices.ResourceManager.Deployments
                 .Define(deploymentName)
                 .WithExistingResourceGroup(resourceGroupName)
                 .WithTemplate(template.ToString())
@@ -49,7 +50,7 @@ namespace Structurizr.InfrastructureAsCode.Azure.ARM
                 .WithMode(DeploymentMode.Incremental)
                 .BeginCreate();
 
-            var deployment = await appServiceManager.ResourceManager.Deployments.GetByGroupAsync(resourceGroupName, deploymentName);
+            var deployment = await azure.AppServices.ResourceManager.Deployments.GetByGroupAsync(resourceGroupName, deploymentName);
 
 
             Console.WriteLine($"Deployment status: {deployment.ProvisioningState}");
@@ -68,7 +69,7 @@ namespace Structurizr.InfrastructureAsCode.Azure.ARM
                 Console.Write(".");
                 await Task.Delay(500);
 
-                deployment = await appServiceManager.ResourceManager.Deployments.GetByGroupAsync(resourceGroupName, deploymentName);
+                deployment = await azure.AppServices.ResourceManager.Deployments.GetByGroupAsync(resourceGroupName, deploymentName);
             }
             Console.WriteLine();
             Console.WriteLine($"Deployment status: {deployment.ProvisioningState}");

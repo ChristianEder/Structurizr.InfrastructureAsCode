@@ -1,11 +1,7 @@
 ﻿using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.Azure;
-using Microsoft.Azure.Management.AppService.Fluent;
 using Microsoft.Azure.Management.AppService.Fluent.Models;
 using Newtonsoft.Json.Linq;
 using Structurizr.InfrastructureAsCode.Azure.ARM.Configuration;
@@ -72,7 +68,7 @@ namespace Structurizr.InfrastructureAsCode.Azure.ARM
 
         protected override async Task Configure(Container<AppService> container, AzureConfigurationValueResolverContext context)
         {
-            var webapp = await context.AppServiceManager.WebApps.GetByGroupAsync(context.ResourceGroupName, container.Infrastructure.Name);
+            var webapp = await context.Azure.WebApps.GetByGroupAsync(context.ResourceGroupName, container.Infrastructure.Name);
 
             var appSettings = new Dictionary<string, string>();
 
