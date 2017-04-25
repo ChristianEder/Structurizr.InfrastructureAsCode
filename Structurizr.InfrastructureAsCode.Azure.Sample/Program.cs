@@ -1,10 +1,17 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Net.Http;
+using System.Text;
+using Microsoft.Azure.Management.Graph.RBAC.Fluent;
+using Microsoft.Azure.Management.Graph.RBAC.Fluent.Models;
+using Microsoft.Azure.Management.Resource.Fluent;
+using Microsoft.Azure.Management.Resource.Fluent.Authentication;
 using Microsoft.Extensions.Configuration;
 using Structurizr.Client;
 using Structurizr.InfrastructureAsCode.Azure.InfrastructureRendering;
+using Structurizr.InfrastructureAsCode.Azure.Model;
 using Structurizr.InfrastructureAsCode.Azure.Sample.Model;
-using Structurizr.InfrastructureAsCode.InfrastructureRendering;
+using Structurizr.InfrastructureAsCode.Policies;
 
 namespace Structurizr.InfrastructureAsCode.Azure.Sample
 {
@@ -12,6 +19,56 @@ namespace Structurizr.InfrastructureAsCode.Azure.Sample
     {
         public static void Main(string[] args)
         {
+            var config = Configuration();
+            var x = new GraphRbacManagementClient(AzureCredentials.FromUser(
+                config["Azure:UserName"],
+                config["Azure:Password"],
+                config["Azure:ClientId"],
+                config["Azure:TenantId"],
+                AzureEnvironment.AzureGlobalCloud))
+            {
+                TenantID = config["Azure:TenantId"]
+            };
+
+
+            var applicationCreateParametersInner = new ApplicationCreateParametersInner
+            {
+                DisplayName = "chedtest",
+                Homepage = $"https://chedtest",
+                IdentifierUris = new List<string> { $"https://chedtest" },
+                PasswordCredentials =
+                   new List<PasswordCredential>
+                   {
+                        new PasswordCredential { EndDate = DateTime.Now.AddYears(1000), Value = "xle324j_sdf2"}
+                   }
+            };
+            try
+            {
+                var application = x.Applications.CreateAsync(
+               applicationCreateParametersInner).Result;
+            }
+            catch (Exception ex)
+            {
+
+                throw;
+            }
+
+            HttpClient client = new HttpClient();
+
+            string body = String.Format("resource={0}&grant_type=password&username={1}&password={2}", 
+                Uri.EscapeDataString("https://graph.windows.net"),
+                //"a4a45fb7-a6f2-4f3c-a710-5be5187e9425", 
+                //Uri.EscapeDataString("4fsj3jhsd93ls"), 
+                Uri.EscapeDataString("christian.eder@zuehlke.com"), 
+                Uri.EscapeDataString("ze6:Delirium17"));
+
+            StringContent sc = new StringContent(body, Encoding.UTF8, "application/x-www-form-urlencoded");
+            var resoult = client.PostAsync("https://login.microsoftonline.com/xxx.onmicrosoft.com/oauth2/token", sc).Result.Content.ReadAsStringAsync().Result;
+
+
+
+
+
             if (args.Length == 2 && args[0] == "infrastructure")
             {
                 var configuration = Configuration();
@@ -43,10 +100,32 @@ namespace Structurizr.InfrastructureAsCode.Azure.Sample
             client.PutWorkspace(int.Parse(configuration["Structurizr:WorkspaceId"]), workspace);
         }
 
-        private static void RenderInfrastructure(Workspace workspace, IAzureInfrastructureEnvironment environment, IConfigurationRoot configuration)
+        private static void RenderInfrastructure(Workspace workspace, IAzureInfrastructureEnvironment environment,
+            IConfigurationRoot configuration)
         {
             var renderer = Renderer(environment, configuration);
-            renderer.Render(workspace.Model).Wait();
+            try
+            {
+                renderer.Render(workspace.Model).Wait();
+            }
+            catch (AggregateException ex)
+            {
+                if (ex.InnerException != null)
+                {
+                    Console.Error.WriteLine(ex.InnerException.ToString());
+                }
+                else
+                {
+                    foreach (var innerException in ex.InnerExceptions)
+                    {
+                        Console.Error.WriteLine(innerException.ToString());
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.Error.WriteLine(ex.ToString());
+            }
         }
 
         private static IAzureInfrastructureEnvironment Environment(string environment, IConfigurationRoot configuration)
@@ -67,6 +146,7 @@ namespace Structurizr.InfrastructureAsCode.Azure.Sample
                 .In(environment)
                 .UsingResourceGroupPerEnvironment(e => $"shop-{e.Name}")
                 .UsingLocation("westeurope")
+                .Using<IPasswordPolicy, RandomPasswordPolicy>()
                 .UsingCredentials(
                     new AzureSubscriptionCredentials(
                     configuration["Azure:ClientId"],

@@ -57,7 +57,7 @@ namespace Structurizr.InfrastructureAsCode.Azure.Sample.Model
 
             //Infrastructure.ConnectionStrings.Add(new AppServiceConnectionString
             //{
-            //    Name = "KeyVaultAppId",
+            //    Name = "KeyVaultAppSecret",
             //    Type = "Custom",
             //    Value = keyVault.Infrastructure.ActiveDirectoryApplicationSecretFor(Infrastructure.Name)
             //});

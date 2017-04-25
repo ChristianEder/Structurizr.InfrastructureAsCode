@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Azure.Management.Fluent;
+using Microsoft.Azure.Management.Graph.RBAC.Fluent;
 using Microsoft.Azure.Management.Resource.Fluent;
 using Microsoft.Azure.Management.Resource.Fluent.Authentication;
 using Newtonsoft.Json.Linq;
@@ -38,8 +39,9 @@ namespace Structurizr.InfrastructureAsCode.Azure.InfrastructureRendering
 
         public async Task Render(Structurizr.Model model)
         {
-            var client = LoginClient();
-            
+            var azure = GetAzureConnection();
+            var graph = GetGraphConnection();
+
             foreach (var softwareSystem in model.SoftwareSystems)
             {
                 var azureInfrastructureElements = softwareSystem.Containers
@@ -50,15 +52,15 @@ namespace Structurizr.InfrastructureAsCode.Azure.InfrastructureRendering
                 {
                     foreach (var elementsInResourceGroup in elementsInLocation.GroupBy(e => _resourceGroupTargetingStrategy.TargetResourceGroup(_environment, e)))
                     {
-                        await DeployInfrastructure(client, elementsInResourceGroup.Key, elementsInLocation.Key, elementsInResourceGroup.ToArray(), softwareSystem.Name);
+                        await DeployInfrastructure(azure, graph, elementsInResourceGroup.Key, elementsInLocation.Key, elementsInResourceGroup.ToArray(), softwareSystem.Name);
                     }
                 }
             }
         }
 
-        private async Task DeployInfrastructure(IAzure azure, string resourceGroupName, string location, Container[] containers, string deploymentName)
+        private async Task DeployInfrastructure(IAzure azure, IGraphRbacManagementClient graph, string resourceGroupName, string location, Container[] containers, string deploymentName)
         {
-            var configContext = SetContextToConfigurationResolvers(azure, resourceGroupName);
+            var configContext = SetContextToConfigurationResolvers(azure, graph, resourceGroupName);
 
             await azure.EnsureResourceGroupExists(resourceGroupName, location);
 
@@ -155,20 +157,35 @@ namespace Structurizr.InfrastructureAsCode.Azure.InfrastructureRendering
             return renderer?.Render(container, _environment, resourceGroupName, location);
         }
 
-        private IAzure LoginClient()
+        private IAzure GetAzureConnection()
         {
-            return Microsoft.Azure.Management.Fluent.Azure.Authenticate(AzureCredentials.FromServicePrincipal(
-                _subscriptionCredentials.ClientId,
-                _subscriptionCredentials.ClientSecret,
-                _subscriptionCredentials.TenantId,
-                AzureEnvironment.AzureGlobalCloud)).WithSubscription(_subscriptionCredentials.SubscriptionId);
+            return Microsoft.Azure.Management.Fluent.Azure.Authenticate(AzureCredentials).WithSubscription(_subscriptionCredentials.SubscriptionId);
         }
 
-        private AzureConfigurationValueResolverContext SetContextToConfigurationResolvers(IAzure azure, string resourceGroupName)
+        private IGraphRbacManagementClient GetGraphConnection()
         {
-            var configContext = new AzureConfigurationValueResolverContext(azure, resourceGroupName);
-            _ioc.Register(configContext);
-            return configContext;
+            var graph = new GraphRbacManagementClient(AzureCredentials)
+            {
+                TenantID = _subscriptionCredentials.TenantId
+            };
+            return graph;
         }
+
+
+        private AzureConfigurationValueResolverContext SetContextToConfigurationResolvers(IAzure azure, IGraphRbacManagementClient graph, string resourceGroupName)
+        {
+
+            var configContext = new AzureConfigurationValueResolverContext(azure, graph, resourceGroupName);
+            _ioc.Register(configContext);
+
+            return configContext;
+
+        }
+        private AzureCredentials AzureCredentials => AzureCredentials.FromServicePrincipal(
+            _subscriptionCredentials.ClientId,
+            _subscriptionCredentials.ClientSecret,
+            _subscriptionCredentials.TenantId,
+            AzureEnvironment.AzureGlobalCloud)
+            .WithDefaultSubscription(_subscriptionCredentials.SubscriptionId);
     }
 }

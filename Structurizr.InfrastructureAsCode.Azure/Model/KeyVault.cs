@@ -18,7 +18,7 @@
 
         public KeyVaultActiveDirectoryApplicationSecret ActiveDirectoryApplicationSecretFor(string clientName)
         {
-            return new KeyVaultActiveDirectoryApplicationSecret { ClientName = clientName };
+            return new KeyVaultActiveDirectoryApplicationSecret(clientName);
         }
 
         protected override bool IsNameValid(string name)
@@ -34,7 +34,28 @@
 
     public class KeyVaultActiveDirectoryApplicationSecret : ConfigurationValue
     {
-        public string ClientName { get; set; }
+        public KeyVaultActiveDirectoryApplicationSecret(string clientName)
+        {
+            ClientName = clientName;
+        }
+
+        public string ClientName { get; }
+
+        public override bool Equals(object obj)
+        {
+            var other = obj as KeyVaultActiveDirectoryApplicationSecret;
+            return other != null && Equals(other);
+        }
+
+        protected bool Equals(KeyVaultActiveDirectoryApplicationSecret other)
+        {
+            return string.Equals(ClientName, other.ClientName);
+        }
+
+        public override int GetHashCode()
+        {
+            return ClientName?.GetHashCode() ?? 0;
+        }
     }
 
     public class KeyVaultSecret : ConfigurationElement

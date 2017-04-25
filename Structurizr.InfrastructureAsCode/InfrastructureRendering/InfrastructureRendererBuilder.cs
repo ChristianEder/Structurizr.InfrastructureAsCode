@@ -5,8 +5,8 @@ using TinyIoC;
 
 namespace Structurizr.InfrastructureAsCode.InfrastructureRendering
 {
-    public abstract class InfrastructureRendererBuilder<TBuilder, TRenderer, TEnvironment> 
-        where TRenderer : class, IInfrastructureRenderer 
+    public abstract class InfrastructureRendererBuilder<TBuilder, TRenderer, TEnvironment>
+        where TRenderer : class, IInfrastructureRenderer
         where TEnvironment : class, IInfrastructureEnvironment
         where TBuilder : InfrastructureRendererBuilder<TBuilder, TRenderer, TEnvironment>
     {
@@ -34,15 +34,23 @@ namespace Structurizr.InfrastructureAsCode.InfrastructureRendering
         public TBuilder In(TEnvironment environment)
         {
             Ioc.Register(environment);
-            return (TBuilder) this;
+            return (TBuilder)this;
         }
 
-        public TBuilder UsingConfigurationValueResolver<TValue, TResolver>() 
+        public TBuilder UsingConfigurationValueResolver<TValue, TResolver>()
             where TValue : ConfigurationValue
             where TResolver : class, IConfigurationValueResolver<TValue>
         {
             Ioc.Register<IConfigurationValueResolver<TValue>, TResolver>().AsMultiInstance();
-            return (TBuilder) this;
+            return (TBuilder)this;
+        }
+
+        public TBuilder Using<TInterface, TImplementation>()
+            where TImplementation : class, TInterface 
+            where TInterface : class
+        {
+            Ioc.Register<TInterface, TImplementation>().AsMultiInstance();
+            return (TBuilder)this;
         }
 
         public TRenderer Build()
