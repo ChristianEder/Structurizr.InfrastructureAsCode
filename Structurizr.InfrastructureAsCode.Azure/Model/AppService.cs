@@ -9,6 +9,8 @@
         }
         public Configuration<AppServiceSetting> Settings { get; set; }
         public Configuration<AppServiceConnectionString> ConnectionStrings { get; set; }
+
+        public AppServiceUrl Url => new AppServiceUrl(this);
     }
 
     public class AppServiceSetting : ConfigurationElement
@@ -42,5 +44,15 @@
 
         public string Name { get; set; }
         public string Type { get; set; }
+    }
+
+    public class AppServiceUrl : ConfigurationValue
+    {
+        public AppService AppService { get; }
+
+        public AppServiceUrl(AppService appService)
+        {
+            AppService = appService;
+        }
     }
 }
