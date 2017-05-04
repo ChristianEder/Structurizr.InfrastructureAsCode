@@ -11,12 +11,10 @@ namespace Structurizr.InfrastructureAsCode.Azure.Sample.Model
         public Shop(IInfrastructureEnvironment environment)
         {
             Name = "Shop";
-            //KeyVault = new ShopKeyVault(environment);
             Database = new ShopDatabase(environment);
             Frontend = new ShopFrontend(environment, Database);
         }
 
-        //public ShopKeyVault KeyVault { get; set; }
         public ShopFrontend Frontend { get; set; }
         public ShopDatabase Database { get; set; }
         public Person Customer { get; set; }

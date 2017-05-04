@@ -6,7 +6,6 @@ namespace Structurizr.InfrastructureAsCode.Azure.Sample.Model
     public class ShopFrontend : Container<AppService>
     {
         private readonly ShopDatabase _database;
-        //private readonly ShopKeyVault _keyVault;
 
         public ShopFrontend(ShopDatabase database) : this(null, database)
         {
@@ -29,14 +28,6 @@ namespace Structurizr.InfrastructureAsCode.Azure.Sample.Model
                     Type = "Custom",
                     Value = database.Infrastructure.Uri
                 });
-
-                //AddKeyVaultAccessConfiguration(keyVault);
-
-                //keyVault.Infrastructure.Secrets.Add(new KeyVaultSecret
-                //{
-                //    Name = "shop-frontend-db-key",
-                //    Value = database.Infrastructure.PrimaryMasterKey
-                //});
             }
         }
 
@@ -44,30 +35,6 @@ namespace Structurizr.InfrastructureAsCode.Azure.Sample.Model
         {
             base.InitializeUsings();
             Uses(_database, "Stores and loads products and orders");
-            //Uses(_keyVault, "Loads access secrets to the shop database");
-        }
-
-        private void AddKeyVaultAccessConfiguration(ShopKeyVault keyVault)
-        {
-            //Infrastructure.Settings.Add(new AppServiceSetting
-            //{
-            //    Name = "KeyVaultUrl",
-            //    Value = keyVault.Infrastructure.Url
-            //});
-
-            //Infrastructure.ConnectionStrings.Add(new AppServiceConnectionString
-            //{
-            //    Name = "KeyVaultAppId",
-            //    Type = "Custom",
-            //    Value = keyVault.Infrastructure.ActiveDirectoryApplicationIdFor(Infrastructure.Name)
-            //});
-
-            //Infrastructure.ConnectionStrings.Add(new AppServiceConnectionString
-            //{
-            //    Name = "KeyVaultAppSecret",
-            //    Type = "Custom",
-            //    Value = keyVault.Infrastructure.ActiveDirectoryApplicationSecretFor(Infrastructure.Name)
-            //});
         }
     }
 }
