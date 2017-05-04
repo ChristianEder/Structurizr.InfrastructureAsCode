@@ -12,10 +12,12 @@ namespace Structurizr.InfrastructureAsCode.Azure.Sample.Model
         {
             Name = "Shop";
             Database = new ShopDatabase(environment);
-            Frontend = new ShopFrontend(environment, Database);
+            Api = new ShopApi(environment, Database);
+            Frontend = new ShopFrontend(environment, Api);
         }
 
         public ShopFrontend Frontend { get; set; }
+        public ShopApi Api { get; set; }
         public ShopDatabase Database { get; set; }
         public Person Customer { get; set; }
 

@@ -5,15 +5,15 @@ namespace Structurizr.InfrastructureAsCode.Azure.Sample.Model
 {
     public class ShopFrontend : Container<AppService>
     {
-        private readonly ShopDatabase _database;
+        private readonly ShopApi _api;
 
-        public ShopFrontend(ShopDatabase database) : this(null, database)
+        public ShopFrontend(ShopApi api) : this(null, api)
         {
         }
 
-        public ShopFrontend(IInfrastructureEnvironment environment, ShopDatabase database)
+        public ShopFrontend(IInfrastructureEnvironment environment, ShopApi api)
         {
-            _database = database;
+            _api = api;
             Name = "Shop Frontend";
             Description = "Allows the user to browse and order products";
             Technology = "ASP.NET Core MVC Web Application";
@@ -24,9 +24,9 @@ namespace Structurizr.InfrastructureAsCode.Azure.Sample.Model
 
                 Infrastructure.ConnectionStrings.Add(new AppServiceConnectionString
                 {
-                    Name = "shop-db-uri",
+                    Name = "shop-api-uri",
                     Type = "Custom",
-                    Value = database.Infrastructure.Uri
+                    Value = _api.Infrastructure.Url
                 });
             }
         }
@@ -34,7 +34,7 @@ namespace Structurizr.InfrastructureAsCode.Azure.Sample.Model
         public override void InitializeUsings()
         {
             base.InitializeUsings();
-            Uses(_database, "Stores and loads products and orders");
+            Uses(_api, "Stores and loads products and orders");
         }
     }
 }
