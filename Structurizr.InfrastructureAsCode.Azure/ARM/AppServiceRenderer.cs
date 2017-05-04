@@ -68,7 +68,7 @@ namespace Structurizr.InfrastructureAsCode.Azure.ARM
 
         protected override async Task Configure(Container<AppService> container, AzureConfigurationValueResolverContext context)
         {
-            var webapp = await context.Azure.WebApps.GetByGroupAsync(context.ResourceGroupName, container.Infrastructure.Name);
+            var webapp = await context.Azure.WebApps.GetByResourceGroupAsync(context.ResourceGroupName, container.Infrastructure.Name);
 
             var appSettings = new Dictionary<string, string>();
 

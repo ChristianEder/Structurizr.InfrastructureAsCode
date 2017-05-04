@@ -7,7 +7,7 @@ namespace Structurizr.InfrastructureAsCode.Azure.Sample.Model
     {
         public ShopKeyVault() : this(null)
         {
-            
+
         }
 
         public ShopKeyVault(IInfrastructureEnvironment environment)
@@ -17,7 +17,7 @@ namespace Structurizr.InfrastructureAsCode.Azure.Sample.Model
 
             if (environment != null)
             {
-                Infrastructure = new KeyVault {Name = $"aac-keyvault-{environment.Name}"};
+                Infrastructure = new KeyVault { Name = $"aac-keyvault-{environment.Name}" };
             }
         }
     }

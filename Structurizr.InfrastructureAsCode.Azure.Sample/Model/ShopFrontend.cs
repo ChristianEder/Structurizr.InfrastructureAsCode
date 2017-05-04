@@ -6,16 +6,15 @@ namespace Structurizr.InfrastructureAsCode.Azure.Sample.Model
     public class ShopFrontend : Container<AppService>
     {
         private readonly ShopDatabase _database;
-        private readonly ShopKeyVault _keyVault;
+        //private readonly ShopKeyVault _keyVault;
 
-        public ShopFrontend(ShopDatabase database, ShopKeyVault keyVault) : this(null, database, keyVault)
+        public ShopFrontend(ShopDatabase database) : this(null, database)
         {
         }
 
-        public ShopFrontend(IInfrastructureEnvironment environment, ShopDatabase database, ShopKeyVault keyVault)
+        public ShopFrontend(IInfrastructureEnvironment environment, ShopDatabase database)
         {
             _database = database;
-            _keyVault = keyVault;
             Name = "Shop Frontend";
             Description = "Allows the user to browse and order products";
             Technology = "ASP.NET Core MVC Web Application";
@@ -23,7 +22,15 @@ namespace Structurizr.InfrastructureAsCode.Azure.Sample.Model
             if (environment != null)
             {
                 Infrastructure = new AppService { Name = $"aac-sample-shop-{environment.Name}" };
-                AddKeyVaultAccessConfiguration(keyVault);
+
+                Infrastructure.ConnectionStrings.Add(new AppServiceConnectionString
+                {
+                    Name = "shop-db-uri",
+                    Type = "Custom",
+                    Value = database.Infrastructure.Uri
+                });
+
+                //AddKeyVaultAccessConfiguration(keyVault);
 
                 //keyVault.Infrastructure.Secrets.Add(new KeyVaultSecret
                 //{
@@ -37,16 +44,16 @@ namespace Structurizr.InfrastructureAsCode.Azure.Sample.Model
         {
             base.InitializeUsings();
             Uses(_database, "Stores and loads products and orders");
-            Uses(_keyVault, "Loads access secrets to the shop database");
+            //Uses(_keyVault, "Loads access secrets to the shop database");
         }
 
         private void AddKeyVaultAccessConfiguration(ShopKeyVault keyVault)
         {
-            Infrastructure.Settings.Add(new AppServiceSetting
-            {
-                Name = "KeyVaultUrl",
-                Value = keyVault.Infrastructure.Url
-            });
+            //Infrastructure.Settings.Add(new AppServiceSetting
+            //{
+            //    Name = "KeyVaultUrl",
+            //    Value = keyVault.Infrastructure.Url
+            //});
 
             //Infrastructure.ConnectionStrings.Add(new AppServiceConnectionString
             //{

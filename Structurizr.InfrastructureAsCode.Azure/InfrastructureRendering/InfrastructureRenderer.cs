@@ -4,8 +4,8 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Azure.Management.Fluent;
 using Microsoft.Azure.Management.Graph.RBAC.Fluent;
-using Microsoft.Azure.Management.Resource.Fluent;
-using Microsoft.Azure.Management.Resource.Fluent.Authentication;
+using Microsoft.Azure.Management.ResourceManager.Fluent;
+using Microsoft.Azure.Management.ResourceManager.Fluent.Authentication;
 using Newtonsoft.Json.Linq;
 using Structurizr.InfrastructureAsCode.Azure.ARM;
 using Structurizr.InfrastructureAsCode.Azure.ARM.Configuration;
@@ -42,19 +42,27 @@ namespace Structurizr.InfrastructureAsCode.Azure.InfrastructureRendering
             var azure = GetAzureConnection();
             var graph = GetGraphConnection();
 
-            foreach (var softwareSystem in model.SoftwareSystems)
+            try
             {
-                var azureInfrastructureElements = softwareSystem.Containers
-                     .OfType<Container>()
-                     .Distinct();
-
-                foreach (var elementsInLocation in azureInfrastructureElements.GroupBy(e => _resourceLocationTargetingStrategy.TargetLocation(_environment, e)))
+                foreach (var softwareSystem in model.SoftwareSystems)
                 {
-                    foreach (var elementsInResourceGroup in elementsInLocation.GroupBy(e => _resourceGroupTargetingStrategy.TargetResourceGroup(_environment, e)))
+                    var azureInfrastructureElements = softwareSystem.Containers
+                        .OfType<Container>()
+                        .Distinct();
+
+                    foreach (var elementsInLocation in azureInfrastructureElements.GroupBy(e => _resourceLocationTargetingStrategy.TargetLocation(_environment, e)))
                     {
-                        await DeployInfrastructure(azure, graph, elementsInResourceGroup.Key, elementsInLocation.Key, elementsInResourceGroup.ToArray(), softwareSystem.Name);
+                        foreach (var elementsInResourceGroup in elementsInLocation.GroupBy(e => _resourceGroupTargetingStrategy.TargetResourceGroup(_environment, e)))
+                        {
+                            await DeployInfrastructure(azure, graph, elementsInResourceGroup.Key, elementsInLocation.Key, elementsInResourceGroup.ToArray(), softwareSystem.Name);
+                        }
                     }
                 }
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                throw;
             }
         }
 
@@ -180,8 +188,10 @@ namespace Structurizr.InfrastructureAsCode.Azure.InfrastructureRendering
 
             return configContext;
 
+            
+
         }
-        private AzureCredentials AzureCredentials => AzureCredentials.FromServicePrincipal(
+        private AzureCredentials AzureCredentials => new AzureCredentialsFactory().FromServicePrincipal(
             _subscriptionCredentials.ClientId,
             _subscriptionCredentials.ClientSecret,
             _subscriptionCredentials.TenantId,

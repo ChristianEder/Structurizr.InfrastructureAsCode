@@ -1,11 +1,8 @@
 ﻿using System;
 using System.Threading.Tasks;
-using Microsoft.Azure.Management.AppService.Fluent;
 using Microsoft.Azure.Management.AppService.Fluent.Models;
 using Microsoft.Azure.Management.Fluent;
-using Microsoft.Azure.Management.Resource.Fluent;
-using Microsoft.Azure.Management.Resource.Fluent.Core.CollectionActions;
-using Microsoft.Azure.Management.Resource.Fluent.Models;
+using Microsoft.Azure.Management.ResourceManager.Fluent.Models;
 using Newtonsoft.Json.Linq;
 
 namespace Structurizr.InfrastructureAsCode.Azure.ARM
@@ -50,7 +47,7 @@ namespace Structurizr.InfrastructureAsCode.Azure.ARM
                 .WithMode(DeploymentMode.Incremental)
                 .BeginCreate();
 
-            var deployment = await azure.AppServices.ResourceManager.Deployments.GetByGroupAsync(resourceGroupName, deploymentName);
+            var deployment = await azure.AppServices.ResourceManager.Deployments.GetByResourceGroupAsync(resourceGroupName, deploymentName);
 
 
             Console.WriteLine($"Deployment status: {deployment.ProvisioningState}");
@@ -69,7 +66,7 @@ namespace Structurizr.InfrastructureAsCode.Azure.ARM
                 Console.Write(".");
                 await Task.Delay(500);
 
-                deployment = await azure.AppServices.ResourceManager.Deployments.GetByGroupAsync(resourceGroupName, deploymentName);
+                deployment = await azure.AppServices.ResourceManager.Deployments.GetByResourceGroupAsync(resourceGroupName, deploymentName);
             }
             Console.WriteLine();
             Console.WriteLine($"Deployment status: {deployment.ProvisioningState}");
