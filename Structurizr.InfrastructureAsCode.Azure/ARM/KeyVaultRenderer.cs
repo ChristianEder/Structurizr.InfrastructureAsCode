@@ -10,7 +10,7 @@ namespace Structurizr.InfrastructureAsCode.Azure.ARM
 {
     public class KeyVaultRenderer : AzureResourceRenderer<KeyVault>
     {
-        protected override IEnumerable<JObject> Render(Container<KeyVault> container, IAzureInfrastructureEnvironment environment, string resourceGroup, string location)
+        protected override IEnumerable<JObject> Render(ContainerWithInfrastructure<KeyVault> container, IAzureInfrastructureEnvironment environment, string resourceGroup, string location)
         {
             yield return new JObject
             {
@@ -46,12 +46,12 @@ namespace Structurizr.InfrastructureAsCode.Azure.ARM
             };
         }
 
-        protected override IEnumerable<ConfigurationValue> GetConfigurationValues(Container<KeyVault> container)
+        protected override IEnumerable<ConfigurationValue> GetConfigurationValues(ContainerWithInfrastructure<KeyVault> container)
         {
             return base.GetConfigurationValues(container).Concat(container.Infrastructure.Secrets.Values);
         }
 
-        protected override async Task Configure(Container<KeyVault> container, AzureConfigurationValueResolverContext context)
+        protected override async Task Configure(ContainerWithInfrastructure<KeyVault> container, AzureConfigurationValueResolverContext context)
         {
             foreach (var secret in container.Infrastructure.Secrets)
             {

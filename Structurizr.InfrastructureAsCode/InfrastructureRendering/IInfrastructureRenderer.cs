@@ -4,6 +4,6 @@ namespace Structurizr.InfrastructureAsCode.InfrastructureRendering
 {
     public interface IInfrastructureRenderer
     {
-        Task Render(Model model);
+        Task Render(SoftwareSystemWithInfrastructure system);
     }
 }

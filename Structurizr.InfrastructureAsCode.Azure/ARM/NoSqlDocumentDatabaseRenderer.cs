@@ -7,7 +7,7 @@ namespace Structurizr.InfrastructureAsCode.Azure.ARM
 {
     public class NoSqlDocumentDatabaseRenderer : AzureResourceRenderer<NoSqlDocumentDatabase>
     {
-        protected override IEnumerable<JObject> Render(Container<NoSqlDocumentDatabase> container, IAzureInfrastructureEnvironment environment, string resourceGroup,
+        protected override IEnumerable<JObject> Render(ContainerWithInfrastructure<NoSqlDocumentDatabase> container, IAzureInfrastructureEnvironment environment, string resourceGroup,
             string location)
         {
             yield return new JObject

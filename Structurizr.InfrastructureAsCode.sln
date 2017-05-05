@@ -3,15 +3,11 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.26228.9
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Structurizr", "Structurizr", "{F8A6A4BA-A2FD-41E6-9618-0ECB0C0598C6}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Structurizr.InfrastructureAsCode", "Structurizr.InfrastructureAsCode\Structurizr.InfrastructureAsCode.csproj", "{D3D0112B-81CA-4401-AD24-E6187698FBE3}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Structurizr.InfrastructureAsCode.Azure", "Structurizr.InfrastructureAsCode.Azure\Structurizr.InfrastructureAsCode.Azure.csproj", "{0B9571E0-151B-4EBA-9E0F-1B4781A1FFDB}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Structurizr.InfrastructureAsCode.Azure.Sample", "Structurizr.InfrastructureAsCode.Azure.Sample\Structurizr.InfrastructureAsCode.Azure.Sample.csproj", "{A129B28A-7950-468B-BC8D-84770AD5703F}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Structurizr.Core", "structurizr\Structurizr.Core\Structurizr.Core.csproj", "{F9C9B68E-8CC9-4404-94FD-1FF6A87AC3AA}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -31,15 +27,8 @@ Global
 		{A129B28A-7950-468B-BC8D-84770AD5703F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A129B28A-7950-468B-BC8D-84770AD5703F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A129B28A-7950-468B-BC8D-84770AD5703F}.Release|Any CPU.Build.0 = Release|Any CPU
-		{F9C9B68E-8CC9-4404-94FD-1FF6A87AC3AA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{F9C9B68E-8CC9-4404-94FD-1FF6A87AC3AA}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{F9C9B68E-8CC9-4404-94FD-1FF6A87AC3AA}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{F9C9B68E-8CC9-4404-94FD-1FF6A87AC3AA}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
-	EndGlobalSection
-	GlobalSection(NestedProjects) = preSolution
-		{F9C9B68E-8CC9-4404-94FD-1FF6A87AC3AA} = {F8A6A4BA-A2FD-41E6-9618-0ECB0C0598C6}
 	EndGlobalSection
 EndGlobal

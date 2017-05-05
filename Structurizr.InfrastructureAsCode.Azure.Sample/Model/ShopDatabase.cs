@@ -3,23 +3,16 @@ using Structurizr.InfrastructureAsCode.InfrastructureRendering;
 
 namespace Structurizr.InfrastructureAsCode.Azure.Sample.Model
 {
-    public class ShopDatabase : Container<NoSqlDocumentDatabase>
+    public class ShopDatabase : ContainerWithInfrastructure<NoSqlDocumentDatabase>
     {
-        public ShopDatabase() : this(null)
+        public ShopDatabase(Shop shop, IInfrastructureEnvironment environment)
         {
+            Container = shop.System.AddContainer(
+                "Shop database",
+                "Stores product, customer and order data",
+                "DocumentDB");
 
-        }
-
-        public ShopDatabase(IInfrastructureEnvironment environment)
-        {
-            Name = "Shop database";
-            Description = "Stores product, customer and order data";
-            Technology = "DocumentDB";
-
-            if (environment != null)
-            {
-                Infrastructure = new NoSqlDocumentDatabase { Name = $"aac-sample-shop-db-{environment.Name}" };
-            }
+            Infrastructure = new NoSqlDocumentDatabase { Name = $"aac-sample-shop-db-{environment.Name}" };
         }
     }
 }

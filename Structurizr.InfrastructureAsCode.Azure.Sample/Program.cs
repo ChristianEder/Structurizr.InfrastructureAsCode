@@ -1,13 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
-using Microsoft.Azure.Management.Graph.RBAC.Fluent;
-using Microsoft.Azure.Management.Graph.RBAC.Fluent.Models;
-using Microsoft.Azure.Management.ResourceManager.Fluent;
-using Microsoft.Azure.Management.ResourceManager.Fluent.Authentication;
 using Microsoft.Extensions.Configuration;
 using Structurizr.Client;
 using Structurizr.InfrastructureAsCode.Azure.InfrastructureRendering;
 using Structurizr.InfrastructureAsCode.Azure.Sample.Model;
+using Structurizr.InfrastructureAsCode.InfrastructureRendering;
 using Structurizr.InfrastructureAsCode.Policies;
 
 namespace Structurizr.InfrastructureAsCode.Azure.Sample
@@ -18,15 +14,11 @@ namespace Structurizr.InfrastructureAsCode.Azure.Sample
         {
             if (args.Length == 2 && args[0] == "infrastructure")
             {
-                var configuration = Configuration();
-                var environment = Environment(args[1], configuration);
-                var workspace = ArchitectureModel(environment);
-                RenderInfrastructure(workspace, environment, Configuration());
+                RenderInfrastructure(args[1]);
             }
             else if (args.Length == 1 && args[0] == "structurizr")
             {
-                var workspace = ArchitectureModel(null);
-                UploadToStructurizr(workspace);
+                UploadToStructurizr();
             }
             else
             {
@@ -37,8 +29,10 @@ namespace Structurizr.InfrastructureAsCode.Azure.Sample
             }
         }
 
-        private static void UploadToStructurizr(Workspace workspace)
+        private static void UploadToStructurizr()
         {
+            var workspace = ArchitectureModel(new InfrastructureEnvironment("prod"));
+
             var configuration = Configuration();
             var client = new StructurizrClient(configuration["Structurizr:Key"], configuration["Structurizr:Secret"])
             {
@@ -47,13 +41,16 @@ namespace Structurizr.InfrastructureAsCode.Azure.Sample
             client.PutWorkspace(int.Parse(configuration["Structurizr:WorkspaceId"]), workspace);
         }
 
-        private static void RenderInfrastructure(Workspace workspace, IAzureInfrastructureEnvironment environment,
-            IConfigurationRoot configuration)
+        private static void RenderInfrastructure(string environmentName)
         {
+            var configuration = Configuration();
+            var environment = Environment(environmentName, configuration);
+            var shop = InfrastructureModel(environment);
+
             var renderer = Renderer(environment, configuration);
             try
             {
-                renderer.Render(workspace.Model).Wait();
+                renderer.Render(shop).Wait();
             }
             catch (AggregateException ex)
             {
@@ -103,24 +100,34 @@ namespace Structurizr.InfrastructureAsCode.Azure.Sample
                 .Build();
         }
 
-        private static Workspace ArchitectureModel(IAzureInfrastructureEnvironment environment)
+        private static Workspace ArchitectureModel(IInfrastructureEnvironment environment)
         {
-            var workspace = new Workspace("Shop architecture", "Some generic web implemented with Azure cloud infrastructure");
+            var workspace = CreateWorkspace();
 
-            var shop = new Shop(environment);
-            workspace.Model.Add(shop);
-            shop.Initialize();
+            var shop = new Shop(workspace, environment);
 
-            var contextView = workspace.Views.CreateSystemContextView(shop, "Shop context view", "Overview over the shop system");
+            var contextView = workspace.Views.CreateSystemContextView(shop.System, "Shop context view", "Overview over the shop system");
             contextView.AddAllSoftwareSystems();
             contextView.AddAllPeople();
 
-            var containerView = workspace.Views.CreateContainerView(shop, "Shop Container View", "Overview over the shop system architecture");
+            var containerView = workspace.Views.CreateContainerView(shop.System, "Shop Container View", "Overview over the shop system architecture");
             containerView.AddAllContainers();
             containerView.AddAllPeople();
 
             return workspace;
         }
+
+        private static Shop InfrastructureModel(IAzureInfrastructureEnvironment environment)
+        {
+            return new Shop(CreateWorkspace(), environment);
+        }
+
+        private static Workspace CreateWorkspace()
+        {
+            var workspace = new Workspace("Shop architecture", "Some generic web implemented with Azure cloud infrastructure");
+            return workspace;
+        }
+
         private static IConfigurationRoot Configuration()
         {
             return new ConfigurationBuilder().AddJsonFile(

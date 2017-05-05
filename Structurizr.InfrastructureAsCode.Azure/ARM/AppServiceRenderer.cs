@@ -12,7 +12,7 @@ namespace Structurizr.InfrastructureAsCode.Azure.ARM
 {
     public class AppServiceRenderer : AzureResourceRenderer<AppService>
     {
-        protected override IEnumerable<JObject> Render(Container<AppService> container, IAzureInfrastructureEnvironment environment,
+        protected override IEnumerable<JObject> Render(ContainerWithInfrastructure<AppService> container, IAzureInfrastructureEnvironment environment,
             string resourceGroup, string location)
         {
             yield return new JObject
@@ -61,12 +61,12 @@ namespace Structurizr.InfrastructureAsCode.Azure.ARM
             };
         }
 
-        protected override IEnumerable<ConfigurationValue> GetConfigurationValues(Container<AppService> container)
+        protected override IEnumerable<ConfigurationValue> GetConfigurationValues(ContainerWithInfrastructure<AppService> container)
         {
             return container.Infrastructure.Settings.Values.Concat(container.Infrastructure.ConnectionStrings.Values);
         }
 
-        protected override async Task Configure(Container<AppService> container, AzureConfigurationValueResolverContext context)
+        protected override async Task Configure(ContainerWithInfrastructure<AppService> container, AzureConfigurationValueResolverContext context)
         {
             var webapp = await context.Azure.WebApps.GetByResourceGroupAsync(context.ResourceGroupName, container.Infrastructure.Name);
 

@@ -37,25 +37,20 @@ namespace Structurizr.InfrastructureAsCode.Azure.InfrastructureRendering
             _ioc = ioc;
         }
 
-        public async Task Render(Structurizr.Model model)
+        public async Task Render(SoftwareSystemWithInfrastructure softwareSystem)
         {
             var azure = GetAzureConnection();
             var graph = GetGraphConnection();
 
             try
             {
-                foreach (var softwareSystem in model.SoftwareSystems)
-                {
-                    var azureInfrastructureElements = softwareSystem.Containers
-                        .OfType<Container>()
-                        .Distinct();
+                var azureInfrastructureElements = softwareSystem.Containers().Distinct();
 
-                    foreach (var elementsInLocation in azureInfrastructureElements.GroupBy(e => _resourceLocationTargetingStrategy.TargetLocation(_environment, e)))
+                foreach (var elementsInLocation in azureInfrastructureElements.GroupBy(e => _resourceLocationTargetingStrategy.TargetLocation(_environment, e)))
+                {
+                    foreach (var elementsInResourceGroup in elementsInLocation.GroupBy(e => _resourceGroupTargetingStrategy.TargetResourceGroup(_environment, e)))
                     {
-                        foreach (var elementsInResourceGroup in elementsInLocation.GroupBy(e => _resourceGroupTargetingStrategy.TargetResourceGroup(_environment, e)))
-                        {
-                            await DeployInfrastructure(azure, graph, elementsInResourceGroup.Key, elementsInLocation.Key, elementsInResourceGroup.ToArray(), softwareSystem.Name);
-                        }
+                        await DeployInfrastructure(azure, graph, elementsInResourceGroup.Key, elementsInLocation.Key, elementsInResourceGroup.ToArray(), softwareSystem.System.Name);
                     }
                 }
             }
@@ -66,7 +61,7 @@ namespace Structurizr.InfrastructureAsCode.Azure.InfrastructureRendering
             }
         }
 
-        private async Task DeployInfrastructure(IAzure azure, IGraphRbacManagementClient graph, string resourceGroupName, string location, Container[] containers, string deploymentName)
+        private async Task DeployInfrastructure(IAzure azure, IGraphRbacManagementClient graph, string resourceGroupName, string location, ContainerWithInfrastructure[] containers, string deploymentName)
         {
             var configContext = SetContextToConfigurationResolvers(azure, graph, resourceGroupName);
 
@@ -83,7 +78,7 @@ namespace Structurizr.InfrastructureAsCode.Azure.InfrastructureRendering
             await Configure(containers, configContext);
         }
 
-        private async Task Configure(Container[] containers, AzureConfigurationValueResolverContext configContext)
+        private async Task Configure(ContainerWithInfrastructure[] containers, AzureConfigurationValueResolverContext configContext)
         {
             await ResolveConfigurationValuesToContext(containers, configContext);
             foreach (var container in containers)
@@ -100,7 +95,7 @@ namespace Structurizr.InfrastructureAsCode.Azure.InfrastructureRendering
             }
         }
 
-        private async Task ResolveConfigurationValuesToContext(IEnumerable<Container> containers,
+        private async Task ResolveConfigurationValuesToContext(IEnumerable<ContainerWithInfrastructure> containers,
             AzureConfigurationValueResolverContext configContext)
         {
             var valuesAndResolvers = containers.SelectMany(c =>
@@ -142,7 +137,7 @@ namespace Structurizr.InfrastructureAsCode.Azure.InfrastructureRendering
             return null;
         }
 
-        private JObject ToTemplate(string resourceGroupName, string location, IEnumerable<Container> containers, int deploymentsCount)
+        private JObject ToTemplate(string resourceGroupName, string location, IEnumerable<ContainerWithInfrastructure> containers, int deploymentsCount)
         {
             var template = new JObject
             {
@@ -159,7 +154,7 @@ namespace Structurizr.InfrastructureAsCode.Azure.InfrastructureRendering
             return template;
         }
 
-        private IEnumerable<JObject> ToResource(Container container, string resourceGroupName, string location)
+        private IEnumerable<JObject> ToResource(ContainerWithInfrastructure container, string resourceGroupName, string location)
         {
             var renderer = _ioc.GetRendererFor(container);
             return renderer?.Render(container, _environment, resourceGroupName, location);
@@ -188,7 +183,7 @@ namespace Structurizr.InfrastructureAsCode.Azure.InfrastructureRendering
 
             return configContext;
 
-            
+
 
         }
         private AzureCredentials AzureCredentials => new AzureCredentialsFactory().FromServicePrincipal(
