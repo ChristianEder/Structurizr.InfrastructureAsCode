@@ -4,8 +4,6 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Azure.Management.Fluent;
 using Microsoft.Azure.Management.Graph.RBAC.Fluent;
-using Microsoft.Azure.Management.ResourceManager.Fluent;
-using Microsoft.Azure.Management.ResourceManager.Fluent.Authentication;
 using Newtonsoft.Json.Linq;
 using Structurizr.InfrastructureAsCode.Azure.ARM;
 using Structurizr.InfrastructureAsCode.Azure.ARM.Configuration;
@@ -19,28 +17,28 @@ namespace Structurizr.InfrastructureAsCode.Azure.InfrastructureRendering
     {
         private readonly IResourceGroupTargetingStrategy _resourceGroupTargetingStrategy;
         private readonly IResourceLocationTargetingStrategy _resourceLocationTargetingStrategy;
-        private readonly IAzureSubscriptionCredentials _subscriptionCredentials;
+        private readonly IAzureConnector _azureConnector;
         private readonly IAzureInfrastructureEnvironment _environment;
         private readonly TinyIoCContainer _ioc;
 
         public InfrastructureRenderer(
             IResourceGroupTargetingStrategy resourceGroupTargetingStrategy,
             IResourceLocationTargetingStrategy resourceLocationTargetingStrategy,
-            IAzureSubscriptionCredentials subscriptionCredentials,
+            IAzureConnector azureConnector,
             IAzureInfrastructureEnvironment environment,
             TinyIoCContainer ioc)
         {
             _resourceGroupTargetingStrategy = resourceGroupTargetingStrategy;
             _resourceLocationTargetingStrategy = resourceLocationTargetingStrategy;
-            _subscriptionCredentials = subscriptionCredentials;
+            _azureConnector = azureConnector;
             _environment = environment;
             _ioc = ioc;
         }
 
         public async Task Render(SoftwareSystemWithInfrastructure softwareSystem)
         {
-            var azure = GetAzureConnection();
-            var graph = GetGraphConnection();
+            var azure = _azureConnector.Azure();
+            var graph = _azureConnector.Graph();
 
             try
             {
@@ -73,7 +71,11 @@ namespace Structurizr.InfrastructureAsCode.Azure.InfrastructureRendering
                 .Count();
 
             var template = ToTemplate(resourceGroupName, location, containers, deployments);
-            await azure.Deploy(resourceGroupName, location, template, $"{deploymentName}.{deployments}");
+
+            if (template != null)
+            {
+                await azure.Deploy(resourceGroupName, location, template, $"{deploymentName}.{deployments}");
+            }
 
             await Configure(containers, configContext);
         }
@@ -139,16 +141,24 @@ namespace Structurizr.InfrastructureAsCode.Azure.InfrastructureRendering
 
         private JObject ToTemplate(string resourceGroupName, string location, IEnumerable<ContainerWithInfrastructure> containers, int deploymentsCount)
         {
+            var resources = containers.Select(e => ToResource(e, resourceGroupName, location))
+                .Where(r => r != null)
+                .SelectMany(r => r)
+                .Where(r => r != null)
+                .Cast<object>()
+                .ToArray();
+
+            if (!resources.Any())
+            {
+                return null;
+            }
+
             var template = new JObject
             {
                 ["$schema"] = "http://schema.management.azure.com/schemas/2014-04-01-preview/deploymentTemplate.json#",
                 ["contentVersion"] = $"1.0.0.{deploymentsCount}",
                 ["parameters"] = new JObject(),
-                ["resources"] = new JArray(
-                    containers.SelectMany(e => ToResource(e, resourceGroupName, location))
-                    .Where(r => r != null)
-                    .Cast<object>()
-                    .ToArray())
+                ["resources"] = new JArray(resources)
             };
 
             return template;
@@ -160,19 +170,7 @@ namespace Structurizr.InfrastructureAsCode.Azure.InfrastructureRendering
             return renderer?.Render(container, _environment, resourceGroupName, location);
         }
 
-        private IAzure GetAzureConnection()
-        {
-            return Microsoft.Azure.Management.Fluent.Azure.Authenticate(AzureCredentials).WithSubscription(_subscriptionCredentials.SubscriptionId);
-        }
 
-        private IGraphRbacManagementClient GetGraphConnection()
-        {
-            var graph = new GraphRbacManagementClient(AzureCredentials)
-            {
-                TenantID = _subscriptionCredentials.TenantId
-            };
-            return graph;
-        }
 
 
         private AzureConfigurationValueResolverContext SetContextToConfigurationResolvers(IAzure azure, IGraphRbacManagementClient graph, string resourceGroupName)
@@ -186,11 +184,5 @@ namespace Structurizr.InfrastructureAsCode.Azure.InfrastructureRendering
 
 
         }
-        private AzureCredentials AzureCredentials => new AzureCredentialsFactory().FromServicePrincipal(
-            _subscriptionCredentials.ClientId,
-            _subscriptionCredentials.ClientSecret,
-            _subscriptionCredentials.TenantId,
-            AzureEnvironment.AzureGlobalCloud)
-            .WithDefaultSubscription(_subscriptionCredentials.SubscriptionId);
     }
 }

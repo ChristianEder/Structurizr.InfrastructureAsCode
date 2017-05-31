@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Newtonsoft.Json.Linq;
 using Structurizr.InfrastructureAsCode.Azure.ARM.Configuration;
 using Structurizr.InfrastructureAsCode.Azure.InfrastructureRendering;
+using TinyIoC;
 
 namespace Structurizr.InfrastructureAsCode.Azure.ARM
 {
@@ -61,8 +62,16 @@ namespace Structurizr.InfrastructureAsCode.Azure.ARM
     {
         public static IAzureResourceRenderer GetRendererFor(this TinyIoC.TinyIoCContainer ioc, ContainerWithInfrastructure container)        {
             var resolverType = typeof(AzureResourceRenderer<>).MakeGenericType(container.Infrastructure.GetType());
-            var resolver = ioc.Resolve(resolverType);
-            return (IAzureResourceRenderer)resolver;
+            try
+            {
+                var resolver = ioc.Resolve(resolverType);
+                return (IAzureResourceRenderer)resolver;
+            }
+            catch (TinyIoCResolutionException e)
+            {
+                Console.WriteLine(e);
+                return null;
+            }
         }
     }
 }

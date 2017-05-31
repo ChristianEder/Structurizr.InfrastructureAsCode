@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Linq;
+using System.Reflection;
 using Structurizr.InfrastructureAsCode.InfrastructureRendering.Configuration;
+using Structurizr.InfrastructureAsCode.IoC;
 using TinyIoC;
 
 namespace Structurizr.InfrastructureAsCode.InfrastructureRendering
@@ -14,8 +16,11 @@ namespace Structurizr.InfrastructureAsCode.InfrastructureRendering
 
         protected InfrastructureRendererBuilder()
         {
-            var resolverTypes = AppDomain.CurrentDomain.GetAssemblies()
+            var allTypes = AppDomain.CurrentDomain.GetAssemblies()
                 .SelectMany(a => a.GetTypes())
+                .ToArray();
+
+            var resolverTypes = allTypes
                 .Where(t => typeof(IConfigurationValueResolver).IsAssignableFrom(t))
                 .Where(t => !t.IsAbstract && !t.IsGenericTypeDefinition);
 
@@ -29,6 +34,14 @@ namespace Structurizr.InfrastructureAsCode.InfrastructureRendering
 
             Ioc.Register<IConfigurationValueResolver<ConfigurationValue<string>>, FixedConfigurationValueResolver<string>>().AsMultiInstance();
             Ioc.Register<IConfigurationValueResolver<ConfigurationValue<int>>, FixedConfigurationValueResolver<int>>().AsMultiInstance();
+
+            foreach (var injectable in allTypes.Where(t => t.GetCustomAttribute(typeof(InjectableAttribute)) != null))
+            {
+                foreach (var injectableInterface in injectable.GetInterfaces())
+                {
+                    Ioc.Register(injectableInterface, injectable).AsMultiInstance();
+                }
+            }
         }
 
         public TBuilder In(TEnvironment environment)
