@@ -101,12 +101,13 @@ namespace Structurizr.InfrastructureAsCode.Azure.InfrastructureRendering
             AzureConfigurationValueResolverContext configContext)
         {
             var valuesAndResolvers = containers.SelectMany(c =>
-            {
-                var renderer = _ioc.GetRendererFor(c);
-                return renderer != null
-                    ? renderer.GetConfigurationValues(c)
-                    : Enumerable.Empty<ConfigurationValue>();
-            }).ToDictionary(v => v, v => _ioc.GetResolverFor(v));
+                {
+                    var renderer = _ioc.GetRendererFor(c);
+                    return renderer != null
+                        ? renderer.GetConfigurationValues(c)
+                        : Enumerable.Empty<ConfigurationValue>();
+                })
+                .ToDictionary(v => v, v => _ioc.GetResolverFor(v));
 
             var value = FindFirstValueToBeResolved(valuesAndResolvers);
             while (value != null)
@@ -130,8 +131,8 @@ namespace Structurizr.InfrastructureAsCode.Azure.InfrastructureRendering
 
             foreach (var valueAndResolver in valuesAndResolvers)
             {
-
-                if (valueAndResolver.Value.CanResolve(valueAndResolver.Key))
+                if (valueAndResolver.Value != null && 
+                    valueAndResolver.Value.CanResolve(valueAndResolver.Key))
                 {
                     return valueAndResolver.Key;
                 }

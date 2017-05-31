@@ -2,7 +2,9 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.Azure.Management.AppService.Fluent;
 using Microsoft.Azure.Management.AppService.Fluent.Models;
+using Microsoft.Azure.Management.AppService.Fluent.WebAppBase.Update;
 using Newtonsoft.Json.Linq;
 using Structurizr.InfrastructureAsCode.Azure.ARM.Configuration;
 using Structurizr.InfrastructureAsCode.Azure.InfrastructureRendering;
@@ -81,21 +83,29 @@ namespace Structurizr.InfrastructureAsCode.Azure.ARM
                 }
             }
 
-            var update = webapp.Update().WithAppSettings(appSettings);
+            IUpdate<IWebApp> update = null;
+            if (appSettings.Any())
+            {
+                update = webapp.Update().WithAppSettings(appSettings);
+
+            }
 
             foreach (var connectionString in container.Infrastructure.ConnectionStrings)
             {
                 object value;
                 if (context.Values.TryGetValue(connectionString.Value, out value))
                 {
-                    update = update.WithConnectionString(
-                        connectionString.Name, 
-                        value.ToString(), 
-                        (ConnectionStringType) Enum.Parse(typeof(ConnectionStringType), connectionString.Type));
+                    update = (update ?? webapp.Update()).WithConnectionString(
+                        connectionString.Name,
+                        value.ToString(),
+                        (ConnectionStringType)Enum.Parse(typeof(ConnectionStringType), connectionString.Type));
                 }
             }
 
-            await update.ApplyAsync();
+            if (update != null)
+            {
+                await update.ApplyAsync();
+            }
         }
     }
 }

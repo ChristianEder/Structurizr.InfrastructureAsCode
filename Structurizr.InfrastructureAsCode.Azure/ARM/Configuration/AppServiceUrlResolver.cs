@@ -19,7 +19,7 @@ namespace Structurizr.InfrastructureAsCode.Azure.ARM.Configuration
 
         public override async Task<object> Resolve(AppServiceUrl value)
         {
-           var webApp = await _context.Azure.AppServices.WebApps.GetByResourceGroupAsync(_context.ResourceGroupName, value.AppService.Name);
+           var webApp = await _context.Azure.WebApps.GetByResourceGroupAsync(_context.ResourceGroupName, value.AppService.Name);
             return webApp.DefaultHostName;
         }
     }

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Threading.Tasks;
+using TinyIoC;
 
 namespace Structurizr.InfrastructureAsCode.InfrastructureRendering.Configuration
 {
@@ -40,8 +41,17 @@ namespace Structurizr.InfrastructureAsCode.InfrastructureRendering.Configuration
             ConfigurationValue value)
         {
             var resolverType = typeof(IConfigurationValueResolver<>).MakeGenericType(value.GetType());
-            var resolver = ioc.Resolve(resolverType);
-            return (IConfigurationValueResolver) resolver;
+            try
+            {
+                var resolver = ioc.Resolve(resolverType);
+                return (IConfigurationValueResolver)resolver;
+            }
+            catch (TinyIoCResolutionException e)
+            {
+                Console.WriteLine(e);
+                return null;
+                throw;
+            }
         }
     }
 }

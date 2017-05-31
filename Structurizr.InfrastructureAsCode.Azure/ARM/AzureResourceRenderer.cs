@@ -52,6 +52,8 @@ namespace Structurizr.InfrastructureAsCode.Azure.ARM
             {
                 case "westeurope":
                     return "West Europe";
+                case "northeurope":
+                    return "North Europe";
                 default:
                     throw new InvalidOperationException();
             }
