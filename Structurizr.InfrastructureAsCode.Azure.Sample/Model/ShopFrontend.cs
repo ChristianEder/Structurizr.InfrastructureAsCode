@@ -5,21 +5,21 @@ namespace Structurizr.InfrastructureAsCode.Azure.Sample.Model
 {
     public class ShopFrontend : ContainerWithInfrastructure<AppService>
     {
-        public ShopFrontend(Shop shop, ShopApi api, IInfrastructureEnvironment environment)
+        public ShopFrontend(Shop shop, ShopDatabase database, IInfrastructureEnvironment environment)
         {
             Container = shop.System.AddContainer("Shop Frontend",
                 "Allows the user to browse and order products",
                 "ASP.NET Core MVC Web Application");
 
-            Container.Uses(api.Container, "Stores and loads products and orders");
+            Container.Uses(database.Container, "Stores and loads products and orders");
 
             Infrastructure = new AppService { Name = $"aac-sample-shop-{environment.Name}" };
 
             Infrastructure.ConnectionStrings.Add(new AppServiceConnectionString
             {
-                Name = "shop-api-uri",
+                Name = "shop-db-uri",
                 Type = "Custom",
-                Value = api.Infrastructure.Url
+                Value = database.Infrastructure.Uri
             });
         }
     }

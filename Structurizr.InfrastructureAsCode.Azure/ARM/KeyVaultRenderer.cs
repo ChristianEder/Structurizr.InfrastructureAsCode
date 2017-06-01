@@ -51,7 +51,7 @@ namespace Structurizr.InfrastructureAsCode.Azure.ARM
             return base.GetConfigurationValues(container).Concat(container.Infrastructure.Secrets.Values);
         }
 
-        protected override async Task Configure(ContainerWithInfrastructure<KeyVault> container, AzureConfigurationValueResolverContext context)
+        protected override Task Configure(ContainerWithInfrastructure<KeyVault> container, AzureConfigurationValueResolverContext context)
         {
             foreach (var secret in container.Infrastructure.Secrets)
             {
@@ -61,6 +61,8 @@ namespace Structurizr.InfrastructureAsCode.Azure.ARM
                     // TODO: add secret to key vault using the context.Client
                 }
             }
+
+            return Task.FromResult(1);
         }
     }
 }
