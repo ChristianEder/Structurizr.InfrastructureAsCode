@@ -13,11 +13,11 @@ namespace Structurizr.InfrastructureAsCode.Azure.ARM
             string resourceGroup, string location)
         {
             var resourcesTemplate = JObject.Parse(container.Infrastructure.Template);
+            Merge(template.Parameters, resourcesTemplate);
 
-            var parameters = resourcesTemplate["parameters"] as IEnumerable<KeyValuePair<string, JToken>>;
-            if (parameters != null && parameters.Any())
+            if (container.Infrastructure.Parameters != null)
             {
-                throw new InvalidOperationException("Parameters are not supported, please use variables instead. You can set those depending on the target environment.");
+                Merge(template.ParameterValues, JObject.Parse(container.Infrastructure.Parameters));
             }
 
             var variables = resourcesTemplate["variables"] as JObject;
@@ -35,6 +35,23 @@ namespace Structurizr.InfrastructureAsCode.Azure.ARM
                 foreach (var resource in resources)
                 {
                     template.Resources.Add((JObject) resource);
+                }
+            }
+        }
+
+        private static void Merge(JObject target, JObject source)
+        {
+            var parameters = source["parameters"] as JObject;
+            if (parameters != null)
+            {
+                foreach (var parameter in parameters)
+                {
+                    if (target[parameter.Key] != null)
+                    {
+                        throw new InvalidOperationException("Parameter " + parameter.Key + " already exists.");
+                    }
+
+                    target[parameter.Key] = parameter.Value;
                 }
             }
         }

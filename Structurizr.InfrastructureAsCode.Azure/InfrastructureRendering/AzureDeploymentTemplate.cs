@@ -12,8 +12,12 @@ namespace Structurizr.InfrastructureAsCode.Azure.InfrastructureRendering
             _contentVersion = contentVersion;
             Variables = new Dictionary<string, string>();
             Resources = new List<JObject>();
+            Parameters = new JObject();
+            ParameterValues = new JObject();
         }
 
+        public JObject Parameters { get; }
+        public JObject ParameterValues { get; }
         public Dictionary<string, string> Variables { get; }
         public List<JObject> Resources { get; }
 
@@ -23,7 +27,7 @@ namespace Structurizr.InfrastructureAsCode.Azure.InfrastructureRendering
             {
                 ["$schema"] = "http://schema.management.azure.com/schemas/2014-04-01-preview/deploymentTemplate.json#",
                 ["contentVersion"] = _contentVersion,
-                ["parameters"] = new JObject(),
+                ["parameters"] = Parameters,
                 ["resources"] = new JArray(Resources)
             };
 

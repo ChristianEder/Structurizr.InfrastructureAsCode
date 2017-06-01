@@ -33,18 +33,13 @@ namespace Structurizr.InfrastructureAsCode.Azure.ARM
 
         public static async Task Deploy(this IAzure azure, string resourceGroupName, string resourceGroupLocation, AzureDeploymentTemplate template, string deploymentName)
         {
-            if (template == null)
-            {
-                return;
-            }
-
             Console.WriteLine($"Starting template deployment '{deploymentName}' in resource group '{resourceGroupName}'");
 
             azure.AppServices.ResourceManager.Deployments
                 .Define(deploymentName)
                 .WithExistingResourceGroup(resourceGroupName)
                 .WithTemplate(template.ToString())
-                .WithParameters(new {})
+                .WithParameters(template.Parameters.ToString())
                 .WithMode(DeploymentMode.Incremental)
                 .BeginCreate();
 
