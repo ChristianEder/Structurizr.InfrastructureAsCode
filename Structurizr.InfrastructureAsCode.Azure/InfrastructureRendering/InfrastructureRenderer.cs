@@ -72,7 +72,7 @@ namespace Structurizr.InfrastructureAsCode.Azure.InfrastructureRendering
 
             var template = ToTemplate(resourceGroupName, location, containers, deployments);
 
-            if (template != null)
+            if (template.Resources.Any())
             {
                 await azure.Deploy(resourceGroupName, location, template, $"{deploymentName}.{deployments}");
             }
@@ -140,40 +140,22 @@ namespace Structurizr.InfrastructureAsCode.Azure.InfrastructureRendering
             return null;
         }
 
-        private JObject ToTemplate(string resourceGroupName, string location, IEnumerable<ContainerWithInfrastructure> containers, int deploymentsCount)
+        private AzureDeploymentTemplate ToTemplate(string resourceGroupName, string location, IEnumerable<ContainerWithInfrastructure> containers, int deploymentsCount)
         {
-            var resources = containers.Select(e => ToResource(e, resourceGroupName, location))
-                .Where(r => r != null)
-                .SelectMany(r => r)
-                .Where(r => r != null)
-                .Cast<object>()
-                .ToArray();
+            var template = new AzureDeploymentTemplate($"1.0.0.{deploymentsCount}");
 
-            if (!resources.Any())
+            foreach (var container in containers)
             {
-                return null;
+                var renderer = _ioc.GetRendererFor(container);
+                if (renderer != null)
+                {
+                    renderer.Render(template, container, _environment, resourceGroupName, location);
+                }
             }
-
-            var template = new JObject
-            {
-                ["$schema"] = "http://schema.management.azure.com/schemas/2014-04-01-preview/deploymentTemplate.json#",
-                ["contentVersion"] = $"1.0.0.{deploymentsCount}",
-                ["parameters"] = new JObject(),
-                ["resources"] = new JArray(resources)
-            };
 
             return template;
         }
-
-        private IEnumerable<JObject> ToResource(ContainerWithInfrastructure container, string resourceGroupName, string location)
-        {
-            var renderer = _ioc.GetRendererFor(container);
-            return renderer?.Render(container, _environment, resourceGroupName, location);
-        }
-
-
-
-
+        
         private AzureConfigurationValueResolverContext SetContextToConfigurationResolvers(IAzure azure, IGraphRbacManagementClient graph, string resourceGroupName)
         {
 
@@ -181,9 +163,6 @@ namespace Structurizr.InfrastructureAsCode.Azure.InfrastructureRendering
             _ioc.Register(configContext);
 
             return configContext;
-
-
-
         }
     }
 }

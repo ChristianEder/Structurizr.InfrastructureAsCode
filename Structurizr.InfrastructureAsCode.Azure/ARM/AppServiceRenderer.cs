@@ -12,12 +12,17 @@ using Structurizr.InfrastructureAsCode.Azure.Model;
 
 namespace Structurizr.InfrastructureAsCode.Azure.ARM
 {
+
     public class AppServiceRenderer : AzureResourceRenderer<AppService>
     {
-        protected override IEnumerable<JObject> Render(ContainerWithInfrastructure<AppService> container, IAzureInfrastructureEnvironment environment,
-            string resourceGroup, string location)
+        protected override void Render(
+            AzureDeploymentTemplate template,
+            ContainerWithInfrastructure<AppService> container,
+            IAzureInfrastructureEnvironment environment,
+            string resourceGroup,
+            string location)
         {
-            yield return new JObject
+            template.Resources.Add(new JObject
             {
                 ["type"] = "Microsoft.Web/serverfarms",
                 ["name"] = container.Infrastructure.Name,
@@ -36,9 +41,9 @@ namespace Structurizr.InfrastructureAsCode.Azure.ARM
                     ["reserved"] = false,
                     ["hostingEnvironment"] = ""
                 }
-            };
+            });
 
-            yield return new JObject
+            template.Resources.Add(new JObject
             {
                 ["type"] = "Microsoft.Web/sites",
                 ["name"] = container.Infrastructure.Name,
@@ -60,7 +65,7 @@ namespace Structurizr.InfrastructureAsCode.Azure.ARM
                 {
                     $"[concat(\'Microsoft.Web/serverfarms/\', \'{container.Infrastructure.Name}\')]"
                 }
-            };
+            });
         }
 
         protected override IEnumerable<ConfigurationValue> GetConfigurationValues(ContainerWithInfrastructure<AppService> container)

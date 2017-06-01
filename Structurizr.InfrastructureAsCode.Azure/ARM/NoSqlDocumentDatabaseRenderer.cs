@@ -7,10 +7,10 @@ namespace Structurizr.InfrastructureAsCode.Azure.ARM
 {
     public class NoSqlDocumentDatabaseRenderer : AzureResourceRenderer<NoSqlDocumentDatabase>
     {
-        protected override IEnumerable<JObject> Render(ContainerWithInfrastructure<NoSqlDocumentDatabase> container, IAzureInfrastructureEnvironment environment, string resourceGroup,
+        protected override void Render(AzureDeploymentTemplate template, ContainerWithInfrastructure<NoSqlDocumentDatabase> container, IAzureInfrastructureEnvironment environment, string resourceGroup,
             string location)
         {
-            yield return new JObject
+            template.Resources.Add(new JObject
             {
                 ["type"] = "Microsoft.DocumentDb/databaseAccounts",
                 ["kind"] = "GlobalDocumentDB",
@@ -30,7 +30,7 @@ namespace Structurizr.InfrastructureAsCode.Azure.ARM
                         }
                     }
                 }
-            };
+            });
         }
     }
 }

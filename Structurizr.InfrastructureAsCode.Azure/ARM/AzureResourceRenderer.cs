@@ -11,7 +11,7 @@ namespace Structurizr.InfrastructureAsCode.Azure.ARM
 {
     public interface IAzureResourceRenderer
     {
-        IEnumerable<JObject> Render(ContainerWithInfrastructure container, IAzureInfrastructureEnvironment environment, string resourceGroup, string location);
+        void Render(AzureDeploymentTemplate template, ContainerWithInfrastructure container, IAzureInfrastructureEnvironment environment, string resourceGroup, string location);
         IEnumerable<ConfigurationValue> GetConfigurationValues(ContainerWithInfrastructure container);
         Task Configure(ContainerWithInfrastructure container, AzureConfigurationValueResolverContext context);
     }
@@ -19,9 +19,9 @@ namespace Structurizr.InfrastructureAsCode.Azure.ARM
     public abstract class AzureResourceRenderer<TInfrastructure> : IAzureResourceRenderer
         where TInfrastructure : ContainerInfrastructure
     {
-        public IEnumerable<JObject> Render(ContainerWithInfrastructure container, IAzureInfrastructureEnvironment environment, string resourceGroup, string location)
+        public void Render(AzureDeploymentTemplate template, ContainerWithInfrastructure container, IAzureInfrastructureEnvironment environment, string resourceGroup, string location)
         {
-            return Render((ContainerWithInfrastructure<TInfrastructure>) container, environment, resourceGroup, location);
+            Render(template, (ContainerWithInfrastructure<TInfrastructure>) container, environment, resourceGroup, location);
         }
 
         public IEnumerable<ConfigurationValue> GetConfigurationValues(ContainerWithInfrastructure container)
@@ -44,7 +44,7 @@ namespace Structurizr.InfrastructureAsCode.Azure.ARM
             return Task.FromResult(0);
         }
 
-        protected abstract IEnumerable<JObject> Render(ContainerWithInfrastructure<TInfrastructure> container, IAzureInfrastructureEnvironment environment, string resourceGroup, string location);
+        protected abstract void Render(AzureDeploymentTemplate template, ContainerWithInfrastructure<TInfrastructure> container, IAzureInfrastructureEnvironment environment, string resourceGroup, string location);
 
         protected string ToLocationName(string location)
         {
