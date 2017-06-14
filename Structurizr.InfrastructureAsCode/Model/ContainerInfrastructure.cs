@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace Structurizr.InfrastructureAsCode
 {
@@ -8,7 +9,7 @@ namespace Structurizr.InfrastructureAsCode
 
         public string Name
         {
-            get { return _name; }
+            get => _name;
             set
             {
                 if (!IsNameValid(value))

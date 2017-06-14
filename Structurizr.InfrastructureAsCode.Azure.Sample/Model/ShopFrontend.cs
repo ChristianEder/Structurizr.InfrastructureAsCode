@@ -1,5 +1,6 @@
 ﻿using Structurizr.InfrastructureAsCode.Azure.Model;
 using Structurizr.InfrastructureAsCode.InfrastructureRendering;
+using Structurizr.InfrastructureAsCode.Model.Connectors;
 
 namespace Structurizr.InfrastructureAsCode.Azure.Sample.Model
 {
@@ -11,16 +12,13 @@ namespace Structurizr.InfrastructureAsCode.Azure.Sample.Model
                 "Allows the user to browse and order products",
                 "ASP.NET Core MVC Web Application");
 
-            Container.Uses(api.Container, "Stores and loads products and orders");
-
-            Infrastructure = new AppService { Name = $"aac-sample-shop-{environment.Name}" };
-
-            Infrastructure.ConnectionStrings.Add(new AppServiceConnectionString
+            Infrastructure = new AppService
             {
-                Name = "shop-api-uri",
-                Type = "Custom",
-                Value = api.Infrastructure.Url
-            });
+                Name = $"aac-sample-shop-{environment.Name}",
+                EnvironmentInvariantName = "aac-sample-shop"
+            };
+
+            Uses(api).Over("JSON").Over<Https>().InOrderTo("Stores and loads products and orders");
         }
     }
 }

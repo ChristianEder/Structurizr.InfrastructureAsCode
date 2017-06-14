@@ -12,7 +12,11 @@ namespace Structurizr.InfrastructureAsCode.Azure.Sample.Model
                 "Stores product, customer and order data",
                 "DocumentDB");
 
-            Infrastructure = new NoSqlDocumentDatabase { Name = $"aac-sample-shop-db-{environment.Name}" };
+            Infrastructure = new NoSqlDocumentDatabase
+            {
+                Name = $"aac-sample-shop-db-{environment.Name}",
+                EnvironmentInvariantName = "aac-sample-shop-db"
+            };
         }
     }
 }
