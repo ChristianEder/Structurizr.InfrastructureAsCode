@@ -7,7 +7,10 @@ namespace Structurizr.InfrastructureAsCode.Azure.Model
     public class NoSqlDocumentDatabase : ContainerInfrastructure, IConnectionSource
     {
         public ConfigurationValue<string> Uri => new ConfigurationValue<string>($"https://{Name}.documents.azure.com:443/");
-        public NoSqlDocumentDatabaseAccessKey PrimaryMasterKey => new NoSqlDocumentDatabaseAccessKey { Type = "PrimaryMaster" };
+        public NoSqlDocumentDatabaseAccessKey PrimaryMasterKey => new NoSqlDocumentDatabaseAccessKey(this)
+        {
+            Type = NoSqlDocumentDatabaseAccessKeyType.Primary
+        };
 
         public string EnvironmentInvariantName { get; set; }
 
@@ -24,6 +27,18 @@ namespace Structurizr.InfrastructureAsCode.Azure.Model
 
     public class NoSqlDocumentDatabaseAccessKey : ConfigurationValue
     {
-        public string Type { get; set; }
+        public NoSqlDocumentDatabase Database { get; }
+
+        public NoSqlDocumentDatabaseAccessKey(NoSqlDocumentDatabase database)
+        {
+            Database = database;
+        }
+        public NoSqlDocumentDatabaseAccessKeyType Type { get; set; }
+
+        
+    }
+    public enum NoSqlDocumentDatabaseAccessKeyType
+    {
+        Primary
     }
 }
