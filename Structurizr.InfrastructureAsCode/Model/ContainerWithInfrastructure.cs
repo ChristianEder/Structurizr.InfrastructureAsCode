@@ -2,7 +2,7 @@
 
 namespace Structurizr.InfrastructureAsCode
 {
-    public abstract class ContainerWithInfrastructure
+    public abstract class ContainerWithInfrastructure : IHaveInfrastructure
     {
         public virtual void InitializeUsings()
         {
@@ -12,7 +12,7 @@ namespace Structurizr.InfrastructureAsCode
         public ContainerInfrastructure Infrastructure { get; protected set; }
     }
 
-    public class ContainerWithInfrastructure<TInfrastructure> : ContainerWithInfrastructure
+    public class ContainerWithInfrastructure<TInfrastructure> : ContainerWithInfrastructure, IHaveInfrastructure<TInfrastructure>
         where TInfrastructure : ContainerInfrastructure
     {
         public new TInfrastructure Infrastructure

@@ -10,7 +10,7 @@ namespace Structurizr.InfrastructureAsCode.Azure.InfrastructureRendering
         {
             _location = location;
         }
-        public string TargetLocation(IInfrastructureEnvironment environment, ContainerWithInfrastructure container)
+        public string TargetLocation(IInfrastructureEnvironment environment, IHaveInfrastructure elementWithInfrastructure)
         {
             return _location;
         }

@@ -4,6 +4,6 @@ namespace Structurizr.InfrastructureAsCode.Azure.InfrastructureRendering
 {
     public interface IResourceLocationTargetingStrategy
     {
-        string TargetLocation(IInfrastructureEnvironment environment, ContainerWithInfrastructure container);
+        string TargetLocation(IInfrastructureEnvironment environment, IHaveInfrastructure elementWithInfrastructure);
     }
 }

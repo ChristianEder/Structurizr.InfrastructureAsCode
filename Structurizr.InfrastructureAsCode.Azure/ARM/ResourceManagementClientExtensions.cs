@@ -3,7 +3,6 @@ using System.Threading.Tasks;
 using Microsoft.Azure.Management.AppService.Fluent.Models;
 using Microsoft.Azure.Management.Fluent;
 using Microsoft.Azure.Management.ResourceManager.Fluent.Models;
-using Newtonsoft.Json.Linq;
 using Structurizr.InfrastructureAsCode.Azure.InfrastructureRendering;
 
 namespace Structurizr.InfrastructureAsCode.Azure.ARM

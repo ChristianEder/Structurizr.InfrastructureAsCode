@@ -217,7 +217,7 @@ namespace Structurizr.InfrastructureAsCode.Azure.Tests
                     .Define(It.IsAny<string>())
                     .WithExistingResourceGroup(It.IsAny<string>())
                     .WithTemplate(It.IsAny<string>())
-                    .WithParameters(It.IsAny<object>())
+                    .WithParameters(It.IsAny<string>())
                     .WithMode(DeploymentMode.Incremental)
                     .BeginCreate()
                 )

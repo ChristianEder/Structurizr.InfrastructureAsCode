@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using Newtonsoft.Json.Linq;
 using Structurizr.InfrastructureAsCode.Azure.InfrastructureRendering;
 using Structurizr.InfrastructureAsCode.Azure.Model;
@@ -9,15 +7,15 @@ namespace Structurizr.InfrastructureAsCode.Azure.ARM
 {
     public class JsonDefinedInfrastructureRenderer : AzureResourceRenderer<JsonDefinedInfrastructure>
     {
-        protected override void Render(AzureDeploymentTemplate template, ContainerWithInfrastructure<JsonDefinedInfrastructure> container, IAzureInfrastructureEnvironment environment,
+        protected override void Render(AzureDeploymentTemplate template, IHaveInfrastructure<JsonDefinedInfrastructure> elementWithInfrastructure, IAzureInfrastructureEnvironment environment,
             string resourceGroup, string location)
         {
-            var resourcesTemplate = JObject.Parse(container.Infrastructure.Template);
+            var resourcesTemplate = JObject.Parse(elementWithInfrastructure.Infrastructure.Template);
             Merge(template.Parameters, resourcesTemplate);
 
-            if (container.Infrastructure.Parameters != null)
+            if (elementWithInfrastructure.Infrastructure.Parameters != null)
             {
-                Merge(template.ParameterValues, JObject.Parse(container.Infrastructure.Parameters));
+                Merge(template.ParameterValues, JObject.Parse(elementWithInfrastructure.Infrastructure.Parameters));
             }
 
             var variables = resourcesTemplate["variables"] as JObject;

@@ -10,12 +10,12 @@ namespace Structurizr.InfrastructureAsCode.Azure.ARM
 {
     public class KeyVaultRenderer : AzureResourceRenderer<KeyVault>
     {
-        protected override void Render(AzureDeploymentTemplate template, ContainerWithInfrastructure<KeyVault> container, IAzureInfrastructureEnvironment environment, string resourceGroup, string location)
+        protected override void Render(AzureDeploymentTemplate template, IHaveInfrastructure<KeyVault> elementWithInfrastructure, IAzureInfrastructureEnvironment environment, string resourceGroup, string location)
         {
             template.Resources.Add(new JObject
             {
                 ["type"] = "Microsoft.KeyVault/vaults",
-                ["name"] = container.Infrastructure.Name,
+                ["name"] = elementWithInfrastructure.Infrastructure.Name,
                 ["apiVersion"] = "2015-06-01",
                 ["location"] = location,
                 ["properties"] = new JObject
@@ -46,14 +46,14 @@ namespace Structurizr.InfrastructureAsCode.Azure.ARM
             });
         }
 
-        protected override IEnumerable<ConfigurationValue> GetConfigurationValues(ContainerWithInfrastructure<KeyVault> container)
+        protected override IEnumerable<ConfigurationValue> GetConfigurationValues(IHaveInfrastructure<KeyVault> elementWithInfrastructure)
         {
-            return base.GetConfigurationValues(container).Concat(container.Infrastructure.Secrets.Values);
+            return base.GetConfigurationValues(elementWithInfrastructure).Concat(elementWithInfrastructure.Infrastructure.Secrets.Values);
         }
 
-        protected override Task Configure(ContainerWithInfrastructure<KeyVault> container, AzureConfigurationValueResolverContext context)
+        protected override Task Configure(IHaveInfrastructure<KeyVault> elementWithInfrastructure, AzureConfigurationValueResolverContext context)
         {
-            foreach (var secret in container.Infrastructure.Secrets)
+            foreach (var secret in elementWithInfrastructure.Infrastructure.Secrets)
             {
                 object value;
                 if (context.Values.TryGetValue(secret.Value, out value))

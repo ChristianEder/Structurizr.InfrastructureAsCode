@@ -17,7 +17,7 @@ namespace Structurizr.InfrastructureAsCode.Azure.ARM
     {
         protected override void Render(
             AzureDeploymentTemplate template,
-            ContainerWithInfrastructure<AppService> container,
+            IHaveInfrastructure<AppService> container,
             IAzureInfrastructureEnvironment environment,
             string resourceGroup,
             string location)
@@ -68,18 +68,18 @@ namespace Structurizr.InfrastructureAsCode.Azure.ARM
             });
         }
 
-        protected override IEnumerable<ConfigurationValue> GetConfigurationValues(ContainerWithInfrastructure<AppService> container)
+        protected override IEnumerable<ConfigurationValue> GetConfigurationValues(IHaveInfrastructure<AppService> elementWithInfrastructure)
         {
-            return container.Infrastructure.Settings.Values.Concat(container.Infrastructure.ConnectionStrings.Values);
+            return elementWithInfrastructure.Infrastructure.Settings.Values.Concat(elementWithInfrastructure.Infrastructure.ConnectionStrings.Values);
         }
 
-        protected override async Task Configure(ContainerWithInfrastructure<AppService> container, AzureConfigurationValueResolverContext context)
+        protected override async Task Configure(IHaveInfrastructure<AppService> elementWithInfrastructure, AzureConfigurationValueResolverContext context)
         {
-            var webapp = await context.Azure.WebApps.GetByResourceGroupAsync(context.ResourceGroupName, container.Infrastructure.Name);
+            var webapp = await context.Azure.WebApps.GetByResourceGroupAsync(context.ResourceGroupName, elementWithInfrastructure.Infrastructure.Name);
 
             var appSettings = new Dictionary<string, string>();
 
-            foreach (var setting in container.Infrastructure.Settings)
+            foreach (var setting in elementWithInfrastructure.Infrastructure.Settings)
             {
                 object value;
                 if (context.Values.TryGetValue(setting.Value, out value))
@@ -95,7 +95,7 @@ namespace Structurizr.InfrastructureAsCode.Azure.ARM
 
             }
 
-            foreach (var connectionString in container.Infrastructure.ConnectionStrings)
+            foreach (var connectionString in elementWithInfrastructure.Infrastructure.ConnectionStrings)
             {
                 object value;
                 if (context.Values.TryGetValue(connectionString.Value, out value))

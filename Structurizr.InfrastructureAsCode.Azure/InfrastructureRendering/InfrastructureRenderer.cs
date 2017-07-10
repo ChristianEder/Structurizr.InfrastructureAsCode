@@ -42,7 +42,7 @@ namespace Structurizr.InfrastructureAsCode.Azure.InfrastructureRendering
 
             try
             {
-                var azureInfrastructureElements = softwareSystem.Containers().Distinct();
+                var azureInfrastructureElements = softwareSystem.ElementsWithInfrastructure().Distinct();
 
                 foreach (var elementsInLocation in azureInfrastructureElements.GroupBy(e => _resourceLocationTargetingStrategy.TargetLocation(_environment, e)))
                 {
@@ -59,7 +59,7 @@ namespace Structurizr.InfrastructureAsCode.Azure.InfrastructureRendering
             }
         }
 
-        private async Task DeployInfrastructure(IAzure azure, IGraphRbacManagementClient graph, string resourceGroupName, string location, ContainerWithInfrastructure[] containers, string deploymentName)
+        private async Task DeployInfrastructure(IAzure azure, IGraphRbacManagementClient graph, string resourceGroupName, string location, IHaveInfrastructure[] elementsWithInfrastructure, string deploymentName)
         {
             var configContext = SetContextToConfigurationResolvers(azure, graph, resourceGroupName);
 
@@ -70,20 +70,20 @@ namespace Structurizr.InfrastructureAsCode.Azure.InfrastructureRendering
                 .Distinct()
                 .Count();
 
-            var template = ToTemplate(resourceGroupName, location, containers, deployments);
+            var template = ToTemplate(resourceGroupName, location, elementsWithInfrastructure, deployments);
 
             if (template.Resources.Any())
             {
                 await azure.Deploy(resourceGroupName, location, template, $"{deploymentName}.{deployments}");
             }
 
-            await Configure(containers, configContext);
+            await Configure(elementsWithInfrastructure, configContext);
         }
 
-        private async Task Configure(ContainerWithInfrastructure[] containers, AzureConfigurationValueResolverContext configContext)
+        private async Task Configure(IHaveInfrastructure[] elementsWithInfrastructure, AzureConfigurationValueResolverContext configContext)
         {
-            await ResolveConfigurationValuesToContext(containers, configContext);
-            foreach (var container in containers)
+            await ResolveConfigurationValuesToContext(elementsWithInfrastructure, configContext);
+            foreach (var container in elementsWithInfrastructure)
             {
                 var renderer = _ioc.GetRendererFor(container);
                 if (renderer != null)
@@ -97,10 +97,10 @@ namespace Structurizr.InfrastructureAsCode.Azure.InfrastructureRendering
             }
         }
 
-        private async Task ResolveConfigurationValuesToContext(IEnumerable<ContainerWithInfrastructure> containers,
+        private async Task ResolveConfigurationValuesToContext(IEnumerable<IHaveInfrastructure> elementsWithInfrastructure,
             AzureConfigurationValueResolverContext configContext)
         {
-            var valuesAndResolvers = containers.SelectMany(c =>
+            var valuesAndResolvers = elementsWithInfrastructure.SelectMany(c =>
                 {
                     var renderer = _ioc.GetRendererFor(c);
                     return renderer != null
@@ -140,16 +140,16 @@ namespace Structurizr.InfrastructureAsCode.Azure.InfrastructureRendering
             return null;
         }
 
-        private AzureDeploymentTemplate ToTemplate(string resourceGroupName, string location, IEnumerable<ContainerWithInfrastructure> containers, int deploymentsCount)
+        private AzureDeploymentTemplate ToTemplate(string resourceGroupName, string location, IHaveInfrastructure[] elementsWithInfrastructure, int deploymentsCount)
         {
             var template = new AzureDeploymentTemplate($"1.0.0.{deploymentsCount}");
 
-            foreach (var container in containers)
+            foreach (var elementWithInfrastructure in elementsWithInfrastructure)
             {
-                var renderer = _ioc.GetRendererFor(container);
+                var renderer = _ioc.GetRendererFor(elementWithInfrastructure);
                 if (renderer != null)
                 {
-                    renderer.Render(template, container, _environment, resourceGroupName, location);
+                    renderer.Render(template, elementWithInfrastructure, _environment, resourceGroupName, location);
                 }
             }
 

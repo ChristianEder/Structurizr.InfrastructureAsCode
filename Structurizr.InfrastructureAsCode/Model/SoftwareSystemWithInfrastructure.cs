@@ -1,9 +1,9 @@
-﻿using System.Linq;
+﻿using Structurizr.InfrastructureAsCode.InfrastructureRendering;
 
 namespace Structurizr.InfrastructureAsCode
 {
     public abstract class SoftwareSystemWithInfrastructure
     {
-      public Structurizr.SoftwareSystem System { get; protected set; }
+      public SoftwareSystem System { get; protected set; }
     }
 }
