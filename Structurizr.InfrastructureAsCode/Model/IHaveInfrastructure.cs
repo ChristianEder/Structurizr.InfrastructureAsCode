@@ -5,9 +5,9 @@
         ContainerInfrastructure Infrastructure { get; }
     }
 
-    public interface IHaveInfrastructure<out TInfrastructure>
+    public interface IHaveInfrastructure<out TInfrastructure> : IHaveInfrastructure
         where TInfrastructure : ContainerInfrastructure
     {
-        TInfrastructure Infrastructure { get; }
+        new TInfrastructure Infrastructure { get; }
     }
 }

@@ -1,4 +1,6 @@
-﻿using Structurizr.InfrastructureAsCode.InfrastructureRendering;
+﻿using System;
+using Structurizr.InfrastructureAsCode.Azure.Model;
+using Structurizr.InfrastructureAsCode.InfrastructureRendering;
 
 namespace Structurizr.InfrastructureAsCode.Azure.Sample.Model
 {
@@ -20,9 +22,9 @@ namespace Structurizr.InfrastructureAsCode.Azure.Sample.Model
             Customer.Uses(System, "buys stuff");
         }
 
-        public ShopFrontend Frontend { get; set; }
-        public ShopApi Api { get; set; }
-        public ShopDatabase Database { get; set; }
-        public Person Customer { get; set; }
+        public ShopFrontend Frontend { get; }
+        public ShopApi Api { get; }
+        public ShopDatabase Database { get; }
+        public Person Customer { get;  }
     }
 }
