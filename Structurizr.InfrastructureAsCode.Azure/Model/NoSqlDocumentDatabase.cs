@@ -4,7 +4,7 @@ using Structurizr.InfrastructureAsCode.Model.Connectors;
 
 namespace Structurizr.InfrastructureAsCode.Azure.Model
 {
-    public class NoSqlDocumentDatabase : ContainerInfrastructure, IConnectionSource
+    public class NoSqlDocumentDatabase : ContainerInfrastructure, IHttpsConnectionSource
     {
         public ConfigurationValue<string> Uri => new ConfigurationValue<string>($"https://{Name}.documents.azure.com:443/");
         public NoSqlDocumentDatabaseAccessKey PrimaryMasterKey => new NoSqlDocumentDatabaseAccessKey(this)
@@ -14,7 +14,7 @@ namespace Structurizr.InfrastructureAsCode.Azure.Model
 
         public string EnvironmentInvariantName { get; set; }
 
-        IEnumerable<KeyValuePair<string, ConfigurationValue>> IConnectionSource.GetConnectionInformation()
+        IEnumerable<KeyValuePair<string, ConfigurationValue>> IHttpsConnectionSource.ConnectionInformation()
         {
             if (string.IsNullOrWhiteSpace(EnvironmentInvariantName))
             {
@@ -23,6 +23,7 @@ namespace Structurizr.InfrastructureAsCode.Azure.Model
             yield return new KeyValuePair<string, ConfigurationValue>(EnvironmentInvariantName + "-url", Uri);
             yield return new KeyValuePair<string, ConfigurationValue>(EnvironmentInvariantName + "-key", PrimaryMasterKey);
         }
+
     }
 
     public class NoSqlDocumentDatabaseAccessKey : ConfigurationValue

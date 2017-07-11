@@ -12,9 +12,10 @@ namespace Structurizr.InfrastructureAsCode.Azure.Sample.Model
             System = workspace.Model.AddSoftwareSystem("Shop", "");
             Customer = workspace.Model.AddPerson(Location.External, "Customer", "Buys stuff in our shop");
 
+            ServiceBus = new ShopServiceBus(this, environment);
             Database = new ShopDatabase(this, environment);
             Api = new ShopApi(this, Database, environment);
-            Frontend = new ShopFrontend(this, Api, environment);
+            Frontend = new ShopFrontend(this, Api, ServiceBus, environment);
 
             Customer.Uses(Frontend.Container, "buys stuff");
 
@@ -22,6 +23,7 @@ namespace Structurizr.InfrastructureAsCode.Azure.Sample.Model
             Customer.Uses(System, "buys stuff");
         }
 
+        public ShopServiceBus ServiceBus { get; }
         public ShopFrontend Frontend { get; }
         public ShopApi Api { get; }
         public ShopDatabase Database { get; }

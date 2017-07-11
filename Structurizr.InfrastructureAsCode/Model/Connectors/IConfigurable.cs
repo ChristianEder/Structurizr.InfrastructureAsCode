@@ -1,6 +1,6 @@
 ﻿namespace Structurizr.InfrastructureAsCode.Model.Connectors
 {
-    public interface IConnectionTarget
+    public interface IConfigurable
     {
         void Configure(string name, ConfigurationValue value);
     }

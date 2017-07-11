@@ -6,7 +6,7 @@ namespace Structurizr.InfrastructureAsCode.Azure.Sample.Model
 {
     public class ShopFrontend : ContainerWithInfrastructure<AppService>
     {
-        public ShopFrontend(Shop shop, ShopApi api, IInfrastructureEnvironment environment)
+        public ShopFrontend(Shop shop, ShopApi api, ShopServiceBus serviceBus, IInfrastructureEnvironment environment)
         {
             Container = shop.System.AddContainer("Shop Frontend",
                 "Allows the user to browse and order products",
@@ -18,7 +18,9 @@ namespace Structurizr.InfrastructureAsCode.Azure.Sample.Model
                 EnvironmentInvariantName = "aac-sample-shop"
             };
 
-            Uses(api).Over("JSON").Over<Https>().InOrderTo("Stores and loads products and orders");
+            Uses(api).Over("JSON").Over<Https>().InOrderTo("Loads products and orders");
+
+            Uses(api).Over(serviceBus.Infrastructure.Queue("order")).InOrderTo("Notify about orders");
         }
     }
 }

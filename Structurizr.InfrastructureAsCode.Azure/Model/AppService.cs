@@ -5,7 +5,7 @@ using Structurizr.InfrastructureAsCode.Model.Connectors;
 namespace Structurizr.InfrastructureAsCode.Azure.Model
 {
 
-    public class AppService : ContainerInfrastructure, IConnectionSource, IConnectionTarget
+    public class AppService : ContainerInfrastructure, IHttpsConnectionSource, IConfigurable
     {
         public AppService()
         {
@@ -21,7 +21,7 @@ namespace Structurizr.InfrastructureAsCode.Azure.Model
 
         public string EnvironmentInvariantName { get; set; }
 
-        IEnumerable<KeyValuePair<string, ConfigurationValue>> IConnectionSource.GetConnectionInformation()
+        IEnumerable<KeyValuePair<string, ConfigurationValue>> IHttpsConnectionSource.ConnectionInformation()
         {
             if (string.IsNullOrWhiteSpace(EnvironmentInvariantName))
             {
@@ -30,7 +30,7 @@ namespace Structurizr.InfrastructureAsCode.Azure.Model
             yield return new KeyValuePair<string, ConfigurationValue>(EnvironmentInvariantName + "-url", Url);
         }
 
-        void IConnectionTarget.Configure(string name, ConfigurationValue value)
+        void IConfigurable.Configure(string name, ConfigurationValue value)
         {
             ConnectionStrings.Add(new AppServiceConnectionString
             {

@@ -25,7 +25,7 @@ namespace Structurizr.InfrastructureAsCode.Azure.ARM
                     ["location"] = location,
                     ["properties"] = new JObject
                     {
-                        ["defaultMessageTimeToLive"] = "10675199.02:48:05.4775807",
+                        ["defaultMessageTimeToLive"] = "14.00:00:00",
                         ["maxSizeInMegabytes"] = "1024",
                         ["deadLetteringOnMessageExpiration"] = false,
                         ["requiresDuplicateDetection"] = false,
@@ -49,7 +49,7 @@ namespace Structurizr.InfrastructureAsCode.Azure.ARM
                     ["location"] = location,
                     ["properties"] = new JObject
                     {
-                        ["defaultMessageTimeToLive"] = "10675199.02:48:05.4775807",
+                        ["defaultMessageTimeToLive"] = "14.00:00:00",
                         ["maxSizeInMegabytes"] = "1024",
                         ["requiresDuplicateDetection"] = false,
                         ["enablePartitioning"] = true,
