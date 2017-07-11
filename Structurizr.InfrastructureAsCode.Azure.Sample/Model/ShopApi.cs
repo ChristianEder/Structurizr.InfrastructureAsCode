@@ -6,7 +6,7 @@ namespace Structurizr.InfrastructureAsCode.Azure.Sample.Model
 {
     public class ShopApi : ContainerWithInfrastructure<AppService>
     {
-        public ShopApi(Shop shop, ShopDatabase database, IInfrastructureEnvironment environment)
+        public ShopApi(Shop shop, ShopDatabase database, ShopServiceBus serviceBus, IInfrastructureEnvironment environment)
         {
             Container = shop.System.AddContainer(
                 "Shop API",
@@ -20,6 +20,8 @@ namespace Structurizr.InfrastructureAsCode.Azure.Sample.Model
             };
 
             Uses(database).Over<Https>().InOrderTo("Stores and loads products and orders");
+
+            Uses(serviceBus).Over(serviceBus.Infrastructure.Queue("order")).InvertUsage().InOrderTo("Get notified about orders");
         }
     }
 }

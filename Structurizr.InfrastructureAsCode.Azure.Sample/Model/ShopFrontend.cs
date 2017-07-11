@@ -20,7 +20,7 @@ namespace Structurizr.InfrastructureAsCode.Azure.Sample.Model
 
             Uses(api).Over("JSON").Over<Https>().InOrderTo("Loads products and orders");
 
-            Uses(api).Over(serviceBus.Infrastructure.Queue("order")).InOrderTo("Notify about orders");
+            Uses(serviceBus).Over(serviceBus.Infrastructure.Queue("order")).InOrderTo("Notify about orders");
         }
     }
 }

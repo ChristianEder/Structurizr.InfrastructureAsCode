@@ -31,20 +31,23 @@ namespace Structurizr.InfrastructureAsCode.Model.Connectors
             Configure(usingContainer, connectionSource);
         }
 
-        protected void Configure(ContainerWithInfrastructure target, TConnectionSource connectionSource)
+        protected void Configure(ContainerWithInfrastructure target, TConnectionSource connectionSource, bool failIfNoTarget = true)
         {
-            var connectionTarget = GetConfigurable(target);
+            var connectionTarget = GetConfigurable(target, failIfNoTarget);
 
-            foreach (var c in ConnectionInformation(connectionSource))
+            if (!ReferenceEquals(null, connectionTarget))
             {
-                connectionTarget.Configure(c.Key, c.Value);
+                foreach (var c in ConnectionInformation(connectionSource))
+                {
+                    connectionTarget.Configure(c.Key, c.Value);
+                }
             }
         }
 
-        protected IConfigurable GetConfigurable(ContainerWithInfrastructure container) 
+        private IConfigurable GetConfigurable(ContainerWithInfrastructure container, bool failIfNoTarget)
         {
             var configurable = container.Infrastructure as IConfigurable ?? container as IConfigurable;
-            if (configurable == null)
+            if (configurable == null && failIfNoTarget)
             {
                 throw new InvalidOperationException(
                     "When using connector classes, the using container has to have an infrastructure implementing the IConfigurable interface or implement IConfigurable itself. I did not figure out an easy way yet to check this at compile time...");

@@ -17,8 +17,8 @@ namespace Structurizr.InfrastructureAsCode.Model.Connectors
 
         public override void Connect<TUsing, TUsed>(ContainerWithInfrastructure<TUsing> usingContainer, ContainerWithInfrastructure<TUsed> usedContainer)
         {
-            Configure(usingContainer, _connectionSource);
-            Configure(usedContainer, _connectionSource);
+            Configure(usingContainer, _connectionSource, failIfNoTarget: true);
+            Configure(usedContainer, _connectionSource, failIfNoTarget: false);
         }
 
         protected override IEnumerable<KeyValuePair<string, ConfigurationValue>> ConnectionInformation(IAmqpConnectionSource source)
@@ -26,7 +26,7 @@ namespace Structurizr.InfrastructureAsCode.Model.Connectors
             return source.ConnectionInformation(_queue);
         }
     }
-    
+
     public interface IAmqpConnectionSource
     {
         IEnumerable<KeyValuePair<string, ConfigurationValue>> ConnectionInformation(string queue);

@@ -2,9 +2,16 @@
 
 namespace Structurizr.InfrastructureAsCode.Model.Connectors
 {
+    public enum UsageDirection
+    {
+        ToUsedContainer,
+        ToUsingContainer
+    }
+
     public interface ICanConfigureConnectorDescription
     {
         void InOrderTo(string description);
+        ICanConfigureConnectorDescription InvertUsage();
     }
 
     public interface ICanConfigureTechnologies<TUsing, TUsed> : ICanConfigureConnectorDescription
@@ -18,6 +25,7 @@ namespace Structurizr.InfrastructureAsCode.Model.Connectors
         where TUsing : ContainerInfrastructure 
         where TUsed : ContainerInfrastructure
     {
+        private UsageDirection _direction = UsageDirection.ToUsedContainer;
         private readonly ContainerWithInfrastructure<TUsing> _usingContainer;
         private readonly ContainerWithInfrastructure<TUsed> _usedContainer;
 
@@ -53,16 +61,40 @@ namespace Structurizr.InfrastructureAsCode.Model.Connectors
         public void InOrderTo(string description)
         {
             var technology = string.Join(" over ", _connectorTechnologies);
+
+            ContainerWithInfrastructure usageTarget = _usedContainer;
+            ContainerWithInfrastructure usageSource = _usingContainer;
+
+            if (_direction == UsageDirection.ToUsingContainer)
+            {
+                usageTarget = _usingContainer;
+                usageSource = _usedContainer;
+            }
+
             if (!string.IsNullOrWhiteSpace(technology))
             {
-                _usingContainer.Container.Uses(_usedContainer.Container, description, technology);
+                usageSource.Container.Uses(usageTarget.Container, description, technology);
             }
             else
             {
-                _usingContainer.Container.Uses(_usedContainer.Container, description);
+                usageSource.Container.Uses(usageTarget.Container, description);
             }
 
             _containerConnector?.Connect(_usingContainer, _usedContainer);
+        }
+
+        public ICanConfigureConnectorDescription InvertUsage()
+        {
+            switch (_direction)
+            {
+                case UsageDirection.ToUsedContainer:
+                    _direction = UsageDirection.ToUsingContainer;
+                    break;
+                case UsageDirection.ToUsingContainer:
+                    _direction = UsageDirection.ToUsedContainer;
+                    break;
+            }
+            return this;
         }
     }
 }

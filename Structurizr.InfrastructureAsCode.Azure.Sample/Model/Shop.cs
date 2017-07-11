@@ -14,7 +14,7 @@ namespace Structurizr.InfrastructureAsCode.Azure.Sample.Model
 
             ServiceBus = new ShopServiceBus(this, environment);
             Database = new ShopDatabase(this, environment);
-            Api = new ShopApi(this, Database, environment);
+            Api = new ShopApi(this, Database, ServiceBus, environment);
             Frontend = new ShopFrontend(this, Api, ServiceBus, environment);
 
             Customer.Uses(Frontend.Container, "buys stuff");
