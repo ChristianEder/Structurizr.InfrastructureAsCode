@@ -12,7 +12,7 @@ using Structurizr.InfrastructureAsCode.Azure.Model;
 
 namespace Structurizr.InfrastructureAsCode.Azure.ARM
 {
-    public class WebAppServiceRenderer : AzureResourceRenderer<WebAppService>
+    public class WebAppServiceRenderer : AppServiceRenderer<WebAppService>
     {
         protected override void Render(
             AzureDeploymentTemplate template,
@@ -44,7 +44,7 @@ namespace Structurizr.InfrastructureAsCode.Azure.ARM
                 }
             });
 
-            template.Resources.Add(new JObject
+            var appService = new JObject
             {
                 ["type"] = "Microsoft.Web/sites",
                 ["name"] = name,
@@ -56,17 +56,25 @@ namespace Structurizr.InfrastructureAsCode.Azure.ARM
                         $"[concat(\'hidden-related:\', resourceGroup().id, \'/providers/Microsoft.Web/serverfarms/\', \'{name}\')]"
                     ] = "empty"
                 },
-                ["properties"] = new JObject
-                {
-                    ["name"] = name,
-                    ["serverFarmId"] = $"[concat(resourceGroup().id, \'/providers/Microsoft.Web/serverfarms/\', \'{name}\')]",
-                    ["hostingEnvironment"] = ""
-                },
-                ["dependsOn"] = new JArray
-                {
-                    $"[concat(\'Microsoft.Web/serverfarms/\', \'{name}\')]"
-                }
-            });
+                ["properties"] = Properties(elementWithInfrastructure)
+            };
+            AddDependsOn(elementWithInfrastructure, appService);
+            template.Resources.Add(appService);
+        }
+
+        protected override IEnumerable<string> DependsOn(IHaveInfrastructure<AppService> elementWithInfrastructure)
+        {
+            return base.DependsOn(elementWithInfrastructure).Concat(Enumerable.Repeat($"[concat(\'Microsoft.Web/serverfarms/\', \'{elementWithInfrastructure.Infrastructure.Name}\')]", 1));
+        }
+
+
+        protected override JObject Properties(IHaveInfrastructure<AppService> elementWithInfrastructure)
+        {
+            var properties = base.Properties(elementWithInfrastructure);
+            properties["serverFarmId"] =
+                $"[concat(resourceGroup().id, \'/providers/Microsoft.Web/serverfarms/\', \'{elementWithInfrastructure.Infrastructure.Name}\')]";
+            properties["hostingEnvironment"] = "";
+            return properties;
         }
 
         protected override IEnumerable<IConfigurationValue> GetConfigurationValues(IHaveInfrastructure<WebAppService> elementWithInfrastructure)
