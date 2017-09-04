@@ -32,8 +32,8 @@ namespace Structurizr.InfrastructureAsCode.InfrastructureRendering
                 }
             }
 
-            Ioc.Register<IConfigurationValueResolver<ConfigurationValue<string>>, FixedConfigurationValueResolver<string>>().AsMultiInstance();
-            Ioc.Register<IConfigurationValueResolver<ConfigurationValue<int>>, FixedConfigurationValueResolver<int>>().AsMultiInstance();
+            Ioc.Register<IConfigurationValueResolver<FixedConfigurationValue<string>>, FixedConfigurationValueResolver<string>>().AsMultiInstance();
+            Ioc.Register<IConfigurationValueResolver<FixedConfigurationValue<int>>, FixedConfigurationValueResolver<int>>().AsMultiInstance();
 
             foreach (var injectable in allTypes.Where(t => t.GetCustomAttribute(typeof(InjectableAttribute)) != null))
             {
@@ -51,7 +51,7 @@ namespace Structurizr.InfrastructureAsCode.InfrastructureRendering
         }
 
         public TBuilder UsingConfigurationValueResolver<TValue, TResolver>()
-            where TValue : ConfigurationValue
+            where TValue : IConfigurationValue
             where TResolver : class, IConfigurationValueResolver<TValue>
         {
             Ioc.Register<IConfigurationValueResolver<TValue>, TResolver>().AsMultiInstance();

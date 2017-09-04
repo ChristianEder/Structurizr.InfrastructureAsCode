@@ -6,7 +6,7 @@ namespace Structurizr.InfrastructureAsCode.Azure.Model
 {
     public class NoSqlDocumentDatabase : ContainerInfrastructure, IHttpsConnectionSource
     {
-        public ConfigurationValue<string> Uri => new ConfigurationValue<string>($"https://{Name}.documents.azure.com:443/");
+        public FixedConfigurationValue<string> Uri => new FixedConfigurationValue<string>($"https://{Name}.documents.azure.com:443/");
         public NoSqlDocumentDatabaseAccessKey PrimaryMasterKey => new NoSqlDocumentDatabaseAccessKey(this)
         {
             Type = NoSqlDocumentDatabaseAccessKeyType.Primary
@@ -14,14 +14,14 @@ namespace Structurizr.InfrastructureAsCode.Azure.Model
 
         public string EnvironmentInvariantName { get; set; }
 
-        IEnumerable<KeyValuePair<string, ConfigurationValue>> IHttpsConnectionSource.ConnectionInformation()
+        IEnumerable<KeyValuePair<string, IConfigurationValue>> IHttpsConnectionSource.ConnectionInformation()
         {
             if (string.IsNullOrWhiteSpace(EnvironmentInvariantName))
             {
                 throw new InvalidOperationException("You have to set the EnvironmentInvariantName in order to use this as a source of connections");
             }
-            yield return new KeyValuePair<string, ConfigurationValue>(EnvironmentInvariantName + "-url", Uri);
-            yield return new KeyValuePair<string, ConfigurationValue>(EnvironmentInvariantName + "-key", PrimaryMasterKey);
+            yield return new KeyValuePair<string, IConfigurationValue>(EnvironmentInvariantName + "-url", Uri);
+            yield return new KeyValuePair<string, IConfigurationValue>(EnvironmentInvariantName + "-key", PrimaryMasterKey);
         }
 
     }

@@ -12,7 +12,7 @@ namespace Structurizr.InfrastructureAsCode.Azure.ARM
     public interface IAzureResourceRenderer
     {
         void Render(AzureDeploymentTemplate template, IHaveInfrastructure elementWithInfrastructure, IAzureInfrastructureEnvironment environment, string resourceGroup, string location);
-        IEnumerable<ConfigurationValue> GetConfigurationValues(IHaveInfrastructure elementWithInfrastructure);
+        IEnumerable<IConfigurationValue> GetConfigurationValues(IHaveInfrastructure elementWithInfrastructure);
         Task Configure(IHaveInfrastructure elementWithInfrastructure, AzureConfigurationValueResolverContext context);
     }
 
@@ -24,7 +24,7 @@ namespace Structurizr.InfrastructureAsCode.Azure.ARM
             Render(template, (IHaveInfrastructure<TInfrastructure>) elementWithInfrastructure, environment, resourceGroup, location);
         }
 
-        public IEnumerable<ConfigurationValue> GetConfigurationValues(IHaveInfrastructure elementWithInfrastructure)
+        public IEnumerable<IConfigurationValue> GetConfigurationValues(IHaveInfrastructure elementWithInfrastructure)
         {
             return GetConfigurationValues((IHaveInfrastructure<TInfrastructure>)elementWithInfrastructure);
         }
@@ -34,9 +34,9 @@ namespace Structurizr.InfrastructureAsCode.Azure.ARM
             return Configure((IHaveInfrastructure<TInfrastructure>)elementWithInfrastructure, context);
         }
 
-        protected virtual IEnumerable<ConfigurationValue> GetConfigurationValues(IHaveInfrastructure<TInfrastructure> elementWithInfrastructure)
+        protected virtual IEnumerable<IConfigurationValue> GetConfigurationValues(IHaveInfrastructure<TInfrastructure> elementWithInfrastructure)
         {
-            return Enumerable.Empty<ConfigurationValue>();
+            return Enumerable.Empty<IConfigurationValue>();
         }
 
         protected virtual Task Configure(IHaveInfrastructure<TInfrastructure> elementWithInfrastructure, AzureConfigurationValueResolverContext context)
@@ -57,6 +57,19 @@ namespace Structurizr.InfrastructureAsCode.Azure.ARM
                 default:
                     throw new InvalidOperationException();
             }
+        }
+
+        protected JObject Template(string type, string name, string location, string apiVersion = "2015-05-01")
+        {
+            var template = new JObject
+            {
+                ["type"] = type,
+                ["name"] = name,
+                ["apiVersion"] = apiVersion,
+                ["location"] = ToLocationName(location)
+            };
+            
+            return template;
         }
     }
 

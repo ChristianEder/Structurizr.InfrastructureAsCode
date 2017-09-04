@@ -6,27 +6,27 @@ namespace Structurizr.InfrastructureAsCode.InfrastructureRendering.Configuration
 {
     public interface IConfigurationValueResolver
     {
-        Task<object> Resolve(ConfigurationValue value);
-        bool CanResolve(ConfigurationValue value);
+        Task<object> Resolve(IConfigurationValue value);
+        bool CanResolve(IConfigurationValue value);
     }
 
     public interface IConfigurationValueResolver<in TValue> : IConfigurationValueResolver
-        where TValue : ConfigurationValue
+        where TValue : IConfigurationValue
     {
         Task<object> Resolve(TValue value);
         bool CanResolve(TValue value);
     }
 
-    public abstract class ConfigurationValueResolver<TValue> : IConfigurationValueResolver<TValue> where TValue : ConfigurationValue
+    public abstract class ConfigurationValueResolver<TValue> : IConfigurationValueResolver<TValue> where TValue : class, IConfigurationValue
     {
-        bool IConfigurationValueResolver.CanResolve(ConfigurationValue value)
+        bool IConfigurationValueResolver.CanResolve(IConfigurationValue value)
         {
             var v = value as TValue;
             return v != null && CanResolve(v);
         }
 
 
-        Task<object> IConfigurationValueResolver.Resolve(ConfigurationValue value)
+        Task<object> IConfigurationValueResolver.Resolve(IConfigurationValue value)
         {
             return Resolve((TValue) value);
         }
@@ -38,7 +38,7 @@ namespace Structurizr.InfrastructureAsCode.InfrastructureRendering.Configuration
     public static class ConfigurationValueResolverExtensions
     {
         public static IConfigurationValueResolver GetResolverFor(this TinyIoC.TinyIoCContainer ioc,
-            ConfigurationValue value)
+            IConfigurationValue value)
         {
             var resolverType = typeof(IConfigurationValueResolver<>).MakeGenericType(value.GetType());
             try

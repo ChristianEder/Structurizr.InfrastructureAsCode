@@ -21,16 +21,16 @@ namespace Structurizr.InfrastructureAsCode.Model.Connectors
         ICanConfigureConnectorDescription Over<TConnector>(TConnector connector) where TConnector : ContainerConnector;
     }
 
-   public class ConnectorBuilder<TUsing, TUsed> : ICanConfigureTechnologies<TUsing, TUsed>
-        where TUsing : ContainerInfrastructure 
-        where TUsed : ContainerInfrastructure
+    public class ConnectorBuilder<TUsing, TUsed> : ICanConfigureTechnologies<TUsing, TUsed>
+         where TUsing : ContainerInfrastructure
+         where TUsed : ContainerInfrastructure
     {
         private UsageDirection _direction = UsageDirection.ToUsedContainer;
         private readonly ContainerWithInfrastructure<TUsing> _usingContainer;
         private readonly ContainerWithInfrastructure<TUsed> _usedContainer;
 
         private readonly List<string> _connectorTechnologies = new List<string>();
-        private ContainerConnector _containerConnector;
+        private IContainerConnector _containerConnector;
 
         public ConnectorBuilder(ContainerWithInfrastructure<TUsing> usingContainer, ContainerWithInfrastructure<TUsed> usedContainer)
         {
@@ -80,7 +80,14 @@ namespace Structurizr.InfrastructureAsCode.Model.Connectors
                 usageSource.Container.Uses(usageTarget.Container, description);
             }
 
-            _containerConnector?.Connect(_usingContainer, _usedContainer);
+            var connector = _containerConnector
+                ?? _usedContainer as IContainerConnector
+                ?? _usedContainer.Infrastructure as IContainerConnector
+                ?? _usingContainer as IContainerConnector
+                ?? _usingContainer.Infrastructure as IContainerConnector;
+
+
+            connector?.Connect(_usingContainer, _usedContainer);
         }
 
         public ICanConfigureConnectorDescription InvertUsage()

@@ -15,7 +15,7 @@ namespace Structurizr.InfrastructureAsCode
             _elements.Add(element);
         }
 
-        public IEnumerable<ConfigurationValue> Values => _elements.Select(e => e.Value);
+        public IEnumerable<IConfigurationValue> Values => _elements.Select(e => e.Value);
         public IEnumerator<TElement> GetEnumerator()
         {
             return _elements.GetEnumerator();
@@ -29,18 +29,33 @@ namespace Structurizr.InfrastructureAsCode
 
     public abstract class ConfigurationElement
     {
-        public ConfigurationValue Value { get; set; }
+        public IConfigurationValue Value { get; set; }
+        public string Name { get; set; }
     }
 
-    public abstract class ConfigurationValue { }
-
-    public class ConfigurationValue<T> : ConfigurationValue
+    public interface IConfigurationValue
     {
-        public T Value { get; }
+        object Value { get;  }
+        bool IsResolved { get; }
+    }
 
-        public ConfigurationValue(T value)
+    public abstract class ConfigurationValue : IConfigurationValue
+    {
+        public object Value { get; set; }
+
+        public virtual bool IsResolved => !ReferenceEquals(null, Value);
+    }
+
+    public class FixedConfigurationValue<T> : IConfigurationValue
+    {
+        public virtual T Value { get; }
+
+        public FixedConfigurationValue(T value)
         {
             Value = value;
         }
+
+        object IConfigurationValue.Value => Value;
+        bool IConfigurationValue.IsResolved => !Equals(default(T), Value);
     }
 }

@@ -21,7 +21,7 @@ namespace Structurizr.InfrastructureAsCode.Model.Connectors
             Configure(usedContainer, _connectionSource, failIfNoTarget: false);
         }
 
-        protected override IEnumerable<KeyValuePair<string, ConfigurationValue>> ConnectionInformation(IAmqpConnectionSource source)
+        protected override IEnumerable<KeyValuePair<string, IConfigurationValue>> ConnectionInformation(IAmqpConnectionSource source)
         {
             return source.ConnectionInformation(_queue);
         }
@@ -29,6 +29,6 @@ namespace Structurizr.InfrastructureAsCode.Model.Connectors
 
     public interface IAmqpConnectionSource
     {
-        IEnumerable<KeyValuePair<string, ConfigurationValue>> ConnectionInformation(string queue);
+        IEnumerable<KeyValuePair<string, IConfigurationValue>> ConnectionInformation(string queue);
     }
 }

@@ -2,14 +2,14 @@
 
 namespace Structurizr.InfrastructureAsCode.InfrastructureRendering.Configuration
 {
-    public class FixedConfigurationValueResolver<T> : ConfigurationValueResolver<ConfigurationValue<T>>
+    public class FixedConfigurationValueResolver<T> : ConfigurationValueResolver<FixedConfigurationValue<T>>
     {
-        public override bool CanResolve(ConfigurationValue<T> value)
+        public override bool CanResolve(FixedConfigurationValue<T> value)
         {
             return true;
         }
 
-        public  override Task<object> Resolve(ConfigurationValue<T> value)
+        public  override Task<object> Resolve(FixedConfigurationValue<T> value)
         {
             return Task.FromResult((object)value.Value);
         }

@@ -25,14 +25,14 @@ namespace Structurizr.InfrastructureAsCode.Azure.Tests.Data
         public SampleApi Api { get; }
     }
 
-    public class SampleWebApplication : ContainerWithInfrastructure<AppService>
+    public class SampleWebApplication : ContainerWithInfrastructure<WebAppService>
     {
         public SampleWebApplication(SampleSystem system, SampleApi api)
         {
             Container = system.System.AddContainer("Sample", "Sample", "ASP.NET");
             Container.Uses(api.Container, "loads data from");
 
-            Infrastructure = new AppService
+            Infrastructure = new WebAppService
             {
                 Name = "sample"
             };
@@ -44,12 +44,12 @@ namespace Structurizr.InfrastructureAsCode.Azure.Tests.Data
             });
         }
     }
-    public class SampleApi : ContainerWithInfrastructure<AppService>
+    public class SampleApi : ContainerWithInfrastructure<WebAppService>
     {
         public SampleApi(SampleSystem system)
         {
             Container = system.System.AddContainer("Sample API", "Sample API", "ASP.NET");
-            Infrastructure = new AppService
+            Infrastructure = new WebAppService
             {
                 Name = "sampleapi"
             };

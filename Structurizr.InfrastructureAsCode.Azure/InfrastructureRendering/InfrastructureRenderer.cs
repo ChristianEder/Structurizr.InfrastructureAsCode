@@ -105,7 +105,7 @@ namespace Structurizr.InfrastructureAsCode.Azure.InfrastructureRendering
                     var renderer = _ioc.GetRendererFor(c);
                     return renderer != null
                         ? renderer.GetConfigurationValues(c)
-                        : Enumerable.Empty<ConfigurationValue>();
+                        : Enumerable.Empty<IConfigurationValue>();
                 })
                 .ToDictionary(v => v, v => _ioc.GetResolverFor(v));
 
@@ -122,7 +122,7 @@ namespace Structurizr.InfrastructureAsCode.Azure.InfrastructureRendering
             }
         }
 
-        private ConfigurationValue FindFirstValueToBeResolved(Dictionary<ConfigurationValue, IConfigurationValueResolver> valuesAndResolvers)
+        private IConfigurationValue FindFirstValueToBeResolved(Dictionary<IConfigurationValue, IConfigurationValueResolver> valuesAndResolvers)
         {
             if (!valuesAndResolvers.Any())
             {

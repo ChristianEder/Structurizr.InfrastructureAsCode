@@ -26,9 +26,9 @@ namespace Structurizr.InfrastructureAsCode.Azure.Model
             return new Amqp(this, queue);
         }
 
-        public IEnumerable<KeyValuePair<string, ConfigurationValue>> ConnectionInformation(string queue)
+        public IEnumerable<KeyValuePair<string, IConfigurationValue>> ConnectionInformation(string queue)
         {
-            yield return new KeyValuePair<string, ConfigurationValue>(EnvironmentInvariantName + "-connectionstring", ConnectionString);
+            yield return new KeyValuePair<string, IConfigurationValue>(EnvironmentInvariantName + "-connectionstring", ConnectionString);
         }
     }
 

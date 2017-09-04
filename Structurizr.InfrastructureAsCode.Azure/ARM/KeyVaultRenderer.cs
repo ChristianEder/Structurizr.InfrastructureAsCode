@@ -46,7 +46,7 @@ namespace Structurizr.InfrastructureAsCode.Azure.ARM
             });
         }
 
-        protected override IEnumerable<ConfigurationValue> GetConfigurationValues(IHaveInfrastructure<KeyVault> elementWithInfrastructure)
+        protected override IEnumerable<IConfigurationValue> GetConfigurationValues(IHaveInfrastructure<KeyVault> elementWithInfrastructure)
         {
             return base.GetConfigurationValues(elementWithInfrastructure).Concat(elementWithInfrastructure.Infrastructure.Secrets.Values);
         }

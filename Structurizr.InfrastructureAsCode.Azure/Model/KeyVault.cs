@@ -9,7 +9,7 @@
 
         public Configuration<KeyVaultSecret> Secrets { get; set; }
 
-        public ConfigurationValue<string> Url => new ConfigurationValue<string>($"https://{Name}.vault.azure.net/");
+        public FixedConfigurationValue<string> Url => new FixedConfigurationValue<string>($"https://{Name}.vault.azure.net/");
 
         public KeyVaultActiveDirectoryApplicationId ActiveDirectoryApplicationIdFor(string clientName)
         {
@@ -60,6 +60,5 @@
 
     public class KeyVaultSecret : ConfigurationElement
     {
-        public string Name { get; set; }
     }
 }

@@ -1,43 +1,35 @@
-﻿using System;
-using System.Collections.Generic;
-using Structurizr.InfrastructureAsCode.Model.Connectors;
+﻿using Structurizr.InfrastructureAsCode.Model.Connectors;
 
 namespace Structurizr.InfrastructureAsCode.Azure.Model
 {
-
-    public class AppService : ContainerInfrastructure, IHttpsConnectionSource, IConfigurable
+    public abstract class AppService : ContainerInfrastructure, IHaveHiddenLink, IConfigurable
     {
-        public AppService()
+        protected AppService()
         {
             Settings = new Configuration<AppServiceSetting>();
             ConnectionStrings = new Configuration<AppServiceConnectionString>();
         }
 
+        public string HiddenLink =>
+            $"[concat('hidden-link:', resourceGroup().id, '/providers/Microsoft.Web/sites/', '{Name}')]";
 
         public Configuration<AppServiceSetting> Settings { get; set; }
         public Configuration<AppServiceConnectionString> ConnectionStrings { get; set; }
-
-        public AppServiceUrl Url => new AppServiceUrl(this);
-
-        public string EnvironmentInvariantName { get; set; }
-
-        IEnumerable<KeyValuePair<string, ConfigurationValue>> IHttpsConnectionSource.ConnectionInformation()
+        void IConfigurable.Configure(string name, IConfigurationValue value, bool secure)
         {
-            if (string.IsNullOrWhiteSpace(EnvironmentInvariantName))
+            if (secure)
             {
-                throw new InvalidOperationException("You have to set the EnvironmentInvariantName in order to use this as a source of connections");
+                ConnectionStrings.Add(new AppServiceConnectionString
+                {
+                    Name = name,
+                    Type = "Custom",
+                    Value = value
+                });
             }
-            yield return new KeyValuePair<string, ConfigurationValue>(EnvironmentInvariantName + "-url", Url);
-        }
-
-        void IConfigurable.Configure(string name, ConfigurationValue value)
-        {
-            ConnectionStrings.Add(new AppServiceConnectionString
+            else
             {
-                Name = name,
-                Type = "Custom",
-                Value = value
-            });
+               Settings.Add(new AppServiceSetting(name, value));
+            }
         }
     }
 
@@ -47,40 +39,33 @@ namespace Structurizr.InfrastructureAsCode.Azure.Model
         {
         }
 
+        public AppServiceSetting(string name, IConfigurationValue value)
+        {
+            Name = name;
+            Value = value;
+        }
+
         public AppServiceSetting(string name, string value)
         {
             Name = name;
-            Value = new ConfigurationValue<string>(value);
+            Value = new FixedConfigurationValue<string>(value);
         }
-
-        public string Name { get; set; }
     }
 
     public class AppServiceConnectionString : ConfigurationElement
     {
         public AppServiceConnectionString()
         {
-            
+
         }
 
         public AppServiceConnectionString(string name, string type, string value)
         {
             Name = name;
             Type = type;
-            Value = new ConfigurationValue<string>(value);
+            Value = new FixedConfigurationValue<string>(value);
         }
 
-        public string Name { get; set; }
         public string Type { get; set; }
-    }
-
-    public class AppServiceUrl : ConfigurationValue
-    {
-        public AppService AppService { get; }
-
-        public AppServiceUrl(AppService appService)
-        {
-            AppService = appService;
-        }
     }
 }

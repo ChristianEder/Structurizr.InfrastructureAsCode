@@ -15,10 +15,10 @@ namespace Structurizr.InfrastructureAsCode.Azure.ARM.Configuration
             Azure = azure;
             Graph = graph;
             ResourceGroupName = resourceGroupName;
-            Values = new Dictionary<ConfigurationValue, object>();
+            Values = new Dictionary<IConfigurationValue, object>();
         }
 
 
-        public Dictionary<ConfigurationValue, object> Values { get; set; }
+        public Dictionary<IConfigurationValue, object> Values { get; set; }
     }
 }

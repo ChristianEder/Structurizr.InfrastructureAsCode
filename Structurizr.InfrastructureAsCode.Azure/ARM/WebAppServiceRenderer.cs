@@ -12,20 +12,21 @@ using Structurizr.InfrastructureAsCode.Azure.Model;
 
 namespace Structurizr.InfrastructureAsCode.Azure.ARM
 {
-
-    public class AppServiceRenderer : AzureResourceRenderer<AppService>
+    public class WebAppServiceRenderer : AzureResourceRenderer<WebAppService>
     {
         protected override void Render(
             AzureDeploymentTemplate template,
-            IHaveInfrastructure<AppService> container,
+            IHaveInfrastructure<WebAppService> elementWithInfrastructure,
             IAzureInfrastructureEnvironment environment,
             string resourceGroup,
             string location)
         {
+            var name = elementWithInfrastructure.Infrastructure.Name;
+
             template.Resources.Add(new JObject
             {
                 ["type"] = "Microsoft.Web/serverfarms",
-                ["name"] = container.Infrastructure.Name,
+                ["name"] = name,
                 ["apiVersion"] = "2016-09-01",
                 ["location"] = ToLocationName(location),
                 ["sku"] = new JObject
@@ -35,7 +36,7 @@ namespace Structurizr.InfrastructureAsCode.Azure.ARM
                 },
                 ["properties"] = new JObject
                 {
-                    ["name"] = container.Infrastructure.Name,
+                    ["name"] = name,
                     ["workerSizeId"] = "0",
                     ["numberOfWorkers"] = "1",
                     ["reserved"] = false,
@@ -46,34 +47,34 @@ namespace Structurizr.InfrastructureAsCode.Azure.ARM
             template.Resources.Add(new JObject
             {
                 ["type"] = "Microsoft.Web/sites",
-                ["name"] = container.Infrastructure.Name,
+                ["name"] = name,
                 ["apiVersion"] = "2015-08-01",
                 ["location"] = location,
                 ["tags"] = new JObject
                 {
                     [
-                        $"[concat(\'hidden-related:\', resourceGroup().id, \'/providers/Microsoft.Web/serverfarms/\', \'{container.Infrastructure.Name}\')]"
+                        $"[concat(\'hidden-related:\', resourceGroup().id, \'/providers/Microsoft.Web/serverfarms/\', \'{name}\')]"
                     ] = "empty"
                 },
                 ["properties"] = new JObject
                 {
-                    ["name"] = container.Infrastructure.Name,
-                    ["serverFarmId"] = $"[concat(resourceGroup().id, \'/providers/Microsoft.Web/serverfarms/\', \'{container.Infrastructure.Name}\')]",
+                    ["name"] = name,
+                    ["serverFarmId"] = $"[concat(resourceGroup().id, \'/providers/Microsoft.Web/serverfarms/\', \'{name}\')]",
                     ["hostingEnvironment"] = ""
                 },
                 ["dependsOn"] = new JArray
                 {
-                    $"[concat(\'Microsoft.Web/serverfarms/\', \'{container.Infrastructure.Name}\')]"
+                    $"[concat(\'Microsoft.Web/serverfarms/\', \'{name}\')]"
                 }
             });
         }
 
-        protected override IEnumerable<ConfigurationValue> GetConfigurationValues(IHaveInfrastructure<AppService> elementWithInfrastructure)
+        protected override IEnumerable<IConfigurationValue> GetConfigurationValues(IHaveInfrastructure<WebAppService> elementWithInfrastructure)
         {
             return elementWithInfrastructure.Infrastructure.Settings.Values.Concat(elementWithInfrastructure.Infrastructure.ConnectionStrings.Values);
         }
 
-        protected override async Task Configure(IHaveInfrastructure<AppService> elementWithInfrastructure, AzureConfigurationValueResolverContext context)
+        protected override async Task Configure(IHaveInfrastructure<WebAppService> elementWithInfrastructure, AzureConfigurationValueResolverContext context)
         {
             var webapp = await context.Azure.WebApps.GetByResourceGroupAsync(context.ResourceGroupName, elementWithInfrastructure.Infrastructure.Name);
 

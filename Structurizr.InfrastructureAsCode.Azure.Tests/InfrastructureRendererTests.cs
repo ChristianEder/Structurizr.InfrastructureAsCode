@@ -171,13 +171,13 @@ namespace Structurizr.InfrastructureAsCode.Azure.Tests
 
         private TinyIoCContainer WithRenderers(TinyIoCContainer ioc)
         {
-            ioc.Register<AzureResourceRenderer<AppService>, AppServiceRenderer>();
+            ioc.Register<AzureResourceRenderer<WebAppService>, WebAppServiceRenderer>();
             return ioc;
         }
 
         private TinyIoCContainer WithConfigurationResolvers(TinyIoCContainer ioc)
         {
-            ioc.Register<IConfigurationValueResolver<AppServiceUrl>, AppServiceUrlResolver>();
+            ioc.Register<IConfigurationValueResolver<WebAppServiceUrl>, WebAppServiceUrlResolver>();
             return ioc;
         }
 

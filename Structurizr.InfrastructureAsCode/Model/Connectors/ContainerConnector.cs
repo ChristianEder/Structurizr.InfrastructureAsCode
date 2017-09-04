@@ -3,7 +3,15 @@ using System.Collections.Generic;
 
 namespace Structurizr.InfrastructureAsCode.Model.Connectors
 {
-    public abstract class ContainerConnector
+    public interface IContainerConnector
+    {
+        void Connect<TUsing, TUsed>(ContainerWithInfrastructure<TUsing> usingContainer,
+            ContainerWithInfrastructure<TUsed> usedContainer)
+            where TUsing : ContainerInfrastructure
+            where TUsed : ContainerInfrastructure;
+    }
+
+    public abstract class ContainerConnector : IContainerConnector
     {
         public abstract string Technology { get; }
 
@@ -11,6 +19,17 @@ namespace Structurizr.InfrastructureAsCode.Model.Connectors
             ContainerWithInfrastructure<TUsed> usedContainer)
             where TUsing : ContainerInfrastructure
             where TUsed : ContainerInfrastructure;
+
+        public static IConfigurable GetConfigurable(ContainerWithInfrastructure container, bool failIfNoTarget = true)
+        {
+            var configurable = container.Infrastructure as IConfigurable ?? container as IConfigurable;
+            if (configurable == null && failIfNoTarget)
+            {
+                throw new InvalidOperationException(
+                    "When using connector classes, the using container has to have an infrastructure implementing the IConfigurable interface or implement IConfigurable itself. I did not figure out an easy way yet to check this at compile time...");
+            }
+            return configurable;
+        }
     }
 
 
@@ -39,22 +58,11 @@ namespace Structurizr.InfrastructureAsCode.Model.Connectors
             {
                 foreach (var c in ConnectionInformation(connectionSource))
                 {
-                    connectionTarget.Configure(c.Key, c.Value);
+                    connectionTarget.Configure(c.Key, c.Value, true);
                 }
             }
         }
 
-        private IConfigurable GetConfigurable(ContainerWithInfrastructure container, bool failIfNoTarget)
-        {
-            var configurable = container.Infrastructure as IConfigurable ?? container as IConfigurable;
-            if (configurable == null && failIfNoTarget)
-            {
-                throw new InvalidOperationException(
-                    "When using connector classes, the using container has to have an infrastructure implementing the IConfigurable interface or implement IConfigurable itself. I did not figure out an easy way yet to check this at compile time...");
-            }
-            return configurable;
-        }
-
-        protected abstract IEnumerable<KeyValuePair<string, ConfigurationValue>> ConnectionInformation(TConnectionSource source);
+        protected abstract IEnumerable<KeyValuePair<string, IConfigurationValue>> ConnectionInformation(TConnectionSource source);
     }
 }
