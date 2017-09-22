@@ -5,27 +5,27 @@ using Structurizr.InfrastructureAsCode.InfrastructureRendering.Configuration;
 
 namespace Structurizr.InfrastructureAsCode.Azure.ARM.Configuration
 {
-    public class NoSqlDocumentDatabaseAccessKeyResolver : ConfigurationValueResolver<NoSqlDocumentDatabaseAccessKey>
+    public class CosmosDocumentDatabaseAccessKeyResolver : ConfigurationValueResolver<CosmosDocumentDatabaseAccessKey>
     {
         private readonly AzureConfigurationValueResolverContext _context;
 
-        public NoSqlDocumentDatabaseAccessKeyResolver(AzureConfigurationValueResolverContext context)
+        public CosmosDocumentDatabaseAccessKeyResolver(AzureConfigurationValueResolverContext context)
         {
             _context = context;
         }
 
-        public override bool CanResolve(NoSqlDocumentDatabaseAccessKey value)
+        public override bool CanResolve(CosmosDocumentDatabaseAccessKey value)
         {
             switch (value.Type)
             {
-                case NoSqlDocumentDatabaseAccessKeyType.Primary:
+                case CosmosDatabaseAccessKeyType.Primary:
                     return true;
                 default:
                     return false;
             }
         }
 
-        public override async Task<object> Resolve(NoSqlDocumentDatabaseAccessKey value)
+        public override async Task<object> Resolve(CosmosDocumentDatabaseAccessKey value)
         {
 
             var account =
@@ -35,7 +35,7 @@ namespace Structurizr.InfrastructureAsCode.Azure.ARM.Configuration
 
             switch (value.Type)
             {
-                case NoSqlDocumentDatabaseAccessKeyType.Primary:
+                case CosmosDatabaseAccessKeyType.Primary:
                     return keys.PrimaryMasterKey;
                 default:
                     throw new InvalidOperationException();

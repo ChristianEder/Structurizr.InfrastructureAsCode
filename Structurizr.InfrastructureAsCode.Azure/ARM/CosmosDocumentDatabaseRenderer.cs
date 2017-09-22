@@ -4,9 +4,9 @@ using Structurizr.InfrastructureAsCode.Azure.Model;
 
 namespace Structurizr.InfrastructureAsCode.Azure.ARM
 {
-    public class NoSqlDocumentDatabaseRenderer : AzureResourceRenderer<NoSqlDocumentDatabase>
+    public class CosmosDocumentDatabaseRenderer : AzureResourceRenderer<CosmosDocumentDatabase>
     {
-        protected override void Render(AzureDeploymentTemplate template, IHaveInfrastructure<NoSqlDocumentDatabase> elementWithInfrastructure, IAzureInfrastructureEnvironment environment, string resourceGroup,
+        protected override void Render(AzureDeploymentTemplate template, IHaveInfrastructure<CosmosDocumentDatabase> elementWithInfrastructure, IAzureInfrastructureEnvironment environment, string resourceGroup,
             string location)
         {
             template.Resources.Add(new JObject

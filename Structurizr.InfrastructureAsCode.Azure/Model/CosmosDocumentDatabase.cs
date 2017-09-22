@@ -4,12 +4,12 @@ using Structurizr.InfrastructureAsCode.Model.Connectors;
 
 namespace Structurizr.InfrastructureAsCode.Azure.Model
 {
-    public class NoSqlDocumentDatabase : ContainerInfrastructure, IHttpsConnectionSource
+    public class CosmosDocumentDatabase : ContainerInfrastructure, IHttpsConnectionSource
     {
         public FixedConfigurationValue<string> Uri => new FixedConfigurationValue<string>($"https://{Name}.documents.azure.com:443/");
-        public NoSqlDocumentDatabaseAccessKey PrimaryMasterKey => new NoSqlDocumentDatabaseAccessKey(this)
+        public CosmosDocumentDatabaseAccessKey PrimaryMasterKey => new CosmosDocumentDatabaseAccessKey(this)
         {
-            Type = NoSqlDocumentDatabaseAccessKeyType.Primary
+            Type = CosmosDatabaseAccessKeyType.Primary
         };
 
         public string EnvironmentInvariantName { get; set; }
@@ -26,19 +26,19 @@ namespace Structurizr.InfrastructureAsCode.Azure.Model
 
     }
 
-    public class NoSqlDocumentDatabaseAccessKey : ConfigurationValue
+    public class CosmosDocumentDatabaseAccessKey : ConfigurationValue
     {
-        public NoSqlDocumentDatabase Database { get; }
+        public CosmosDocumentDatabase Database { get; }
 
-        public NoSqlDocumentDatabaseAccessKey(NoSqlDocumentDatabase database)
+        public CosmosDocumentDatabaseAccessKey(CosmosDocumentDatabase database)
         {
             Database = database;
         }
-        public NoSqlDocumentDatabaseAccessKeyType Type { get; set; }
+        public CosmosDatabaseAccessKeyType Type { get; set; }
 
         
     }
-    public enum NoSqlDocumentDatabaseAccessKeyType
+    public enum CosmosDatabaseAccessKeyType
     {
         Primary
     }
