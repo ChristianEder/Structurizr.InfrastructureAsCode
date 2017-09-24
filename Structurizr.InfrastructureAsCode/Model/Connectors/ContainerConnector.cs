@@ -58,7 +58,7 @@ namespace Structurizr.InfrastructureAsCode.Model.Connectors
             {
                 foreach (var c in ConnectionInformation(connectionSource))
                 {
-                    connectionTarget.Configure(c.Key, c.Value, true);
+                    connectionTarget.Configure(c.Key, c.Value);
                 }
             }
         }

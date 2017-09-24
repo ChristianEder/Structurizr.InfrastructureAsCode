@@ -30,6 +30,7 @@
     public class KeyVaultActiveDirectoryApplicationId : ConfigurationValue
     {
         public string ClientName { get; set; }
+        public override bool ShouldBeStoredSecure => false;
     }
 
     public class KeyVaultActiveDirectoryApplicationSecret : ConfigurationValue
@@ -40,6 +41,7 @@
         }
 
         public string ClientName { get; }
+        public override bool ShouldBeStoredSecure => true;
 
         public override bool Equals(object obj)
         {

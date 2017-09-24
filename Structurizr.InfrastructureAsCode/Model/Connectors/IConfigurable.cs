@@ -2,6 +2,6 @@
 {
     public interface IConfigurable
     {
-        void Configure(string name, IConfigurationValue value, bool secure);
+        void Configure(string name, IConfigurationValue value);
     }
 }

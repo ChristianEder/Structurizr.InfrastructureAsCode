@@ -37,13 +37,15 @@ namespace Structurizr.InfrastructureAsCode
     {
         object Value { get;  }
         bool IsResolved { get; }
+        bool ShouldBeStoredSecure { get; }
     }
 
     public abstract class ConfigurationValue : IConfigurationValue
     {
-        public object Value { get; set; }
+        public virtual object Value { get;  }
 
         public virtual bool IsResolved => !ReferenceEquals(null, Value);
+        public abstract bool ShouldBeStoredSecure { get; }
     }
 
     public class FixedConfigurationValue<T> : IConfigurationValue
@@ -57,5 +59,6 @@ namespace Structurizr.InfrastructureAsCode
 
         object IConfigurationValue.Value => Value;
         bool IConfigurationValue.IsResolved => !Equals(default(T), Value);
+        public bool ShouldBeStoredSecure { get; set; }
     }
 }

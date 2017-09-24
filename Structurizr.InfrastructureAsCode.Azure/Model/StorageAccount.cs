@@ -1,13 +1,32 @@
+using System;
+using System.Collections.Generic;
+using Structurizr.InfrastructureAsCode.Model.Connectors;
+
 namespace Structurizr.InfrastructureAsCode.Azure.Model
 {
-    public class StorageAccount : ContainerInfrastructure, IHaveResourceId
+    public class StorageAccount : ContainerInfrastructure, IHaveResourceId, IHttpsConnectionSource
     {
+        public string EnvironmentInvariantName { get; set; }
+
         public StorageAccountKind Kind { get; set; }
 
-        public StorageAccountConnectionString ConnectionString => new StorageAccountConnectionString(this);
+        public StorageAccountAccessKey AccessKey => new StorageAccountAccessKey(this);
 
         public string ResourceIdReference =>
             $"[resourceId('Microsoft.Storage/storageAccounts', '{Name}')]";
+
+        public IEnumerable<KeyValuePair<string, IConfigurationValue>> ConnectionInformation()
+        {
+            if (string.IsNullOrWhiteSpace(EnvironmentInvariantName))
+            {
+                throw new InvalidOperationException("You have to set the EnvironmentInvariantName in order to use this as a source of connections");
+            }
+            yield return new KeyValuePair<string, IConfigurationValue>(EnvironmentInvariantName + "-key", AccessKey);
+            if (Kind == StorageAccountKind.BlobStorage)
+            {
+                yield return new KeyValuePair<string, IConfigurationValue>(EnvironmentInvariantName + "-endpoint-blob", new StorageAccountBlobEndpoint(this));
+            }
+        }
     }
 
     public enum StorageAccountKind
@@ -16,34 +35,26 @@ namespace Structurizr.InfrastructureAsCode.Azure.Model
         BlobStorage
     }
 
-    public class StorageAccountConnectionString : IDependentConfigurationValue
+    public class StorageAccountBlobEndpoint : DependentConfigurationValue<StorageAccount>
     {
-        private readonly StorageAccount _account;
-
-        public StorageAccountConnectionString(StorageAccount account)
+        public StorageAccountBlobEndpoint(StorageAccount dependentOn) : base(dependentOn)
         {
-            _account = account;
         }
 
-        public object Value =>
-            $"[concat('DefaultEndpointsProtocol=https;AccountName=','{_account.Name}',';AccountKey=',listKeys(resourceId('Microsoft.Storage/storageAccounts', '{_account.Name}'), '2015-05-01-preview').key1)]";
+        public override object Value => $"https://{DependsOn.Name}.blob.core.windows.net/";
+        public override bool ShouldBeStoredSecure => false;
+    }
 
-        public bool IsResolved => true;
-        public IHaveResourceId DependsOn => _account;
-
-        public override bool Equals(object obj)
+    public class StorageAccountAccessKey : DependentConfigurationValue<StorageAccount>
+    {
+        public StorageAccountAccessKey(StorageAccount account)
+            : base(account)
         {
-            return Equals(obj as StorageAccountConnectionString);
         }
 
-        protected bool Equals(StorageAccountConnectionString other)
-        {
-            return !ReferenceEquals(null, other) && Equals(_account, other._account);
-        }
+        public override bool ShouldBeStoredSecure => true;
 
-        public override int GetHashCode()
-        {
-            return _account?.GetHashCode() ?? 0;
-        }
+        public override object Value =>
+            $"[concat('DefaultEndpointsProtocol=https;AccountName=','{ DependsOn.Name}',';AccountKey=',listKeys(resourceId('Microsoft.Storage/storageAccounts', '{DependsOn.Name}'), '2015-05-01-preview').key1)]";
     }
 }

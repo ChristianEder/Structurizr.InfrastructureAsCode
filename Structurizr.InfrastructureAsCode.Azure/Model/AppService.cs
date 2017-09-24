@@ -15,9 +15,9 @@ namespace Structurizr.InfrastructureAsCode.Azure.Model
 
         public Configuration<AppServiceSetting> Settings { get; set; }
         public Configuration<AppServiceConnectionString> ConnectionStrings { get; set; }
-        void IConfigurable.Configure(string name, IConfigurationValue value, bool secure)
+        void IConfigurable.Configure(string name, IConfigurationValue value)
         {
-            if (secure)
+            if (value.ShouldBeStoredSecure)
             {
                 ConnectionStrings.Add(new AppServiceConnectionString
                 {

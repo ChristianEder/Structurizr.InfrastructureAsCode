@@ -35,8 +35,9 @@ namespace Structurizr.InfrastructureAsCode.Azure.Model
             Database = database;
         }
         public CosmosDatabaseAccessKeyType Type { get; set; }
+        public override bool ShouldBeStoredSecure => true;
 
-        
+
     }
     public enum CosmosDatabaseAccessKeyType
     {

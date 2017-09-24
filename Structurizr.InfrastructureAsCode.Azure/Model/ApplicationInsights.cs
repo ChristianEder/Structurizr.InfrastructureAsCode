@@ -28,42 +28,27 @@ namespace Structurizr.InfrastructureAsCode.Azure.Model
                 throw new InvalidOperationException("A container using an ApplicationInsights has to use an infrastructure implementing the IHaveHiddenLink interface");
             }
 
-            configurable.Configure("APPINSIGHTS_INSTRUMENTATIONKEY", InstrumentationKey, false);
+            configurable.Configure("APPINSIGHTS_INSTRUMENTATIONKEY", InstrumentationKey);
             UsedBy.Add(reference);
         }
 
         public string ResourceIdReference => $"[resourceId('microsoft.insights/components/', '{Name}')]";
     }
 
-    public class ApplicationInsightsInstrumentationKey : ConfigurationValue, IDependentConfigurationValue
+    public class ApplicationInsightsInstrumentationKey : DependentConfigurationValue<ApplicationInsights>
     {
-        private readonly ApplicationInsights _applicationInsights;
 
         public ApplicationInsightsInstrumentationKey(ApplicationInsights applicationInsights)
+            : base(applicationInsights)
         {
-            _applicationInsights = applicationInsights;
         }
 
-        public object Value =>
-            $"[reference(resourceId('microsoft.insights/components/', '{_applicationInsights.Name}'), '2015-05-01').InstrumentationKey]";
+        /// <summary>
+        /// Usually I'd say this should be stored secure (e.g. in the connection strings section of web app configuration settings). But it seems that currently, automatic instrumentation will only pick it up from the app settings, not the connection strings.
+        /// </summary>
+        public override bool ShouldBeStoredSecure => false;
 
-        public bool IsResolved => true;
-
-        public IHaveResourceId DependsOn => _applicationInsights;
-
-        public override bool Equals(object obj)
-        {
-            return Equals(obj as ApplicationInsightsInstrumentationKey);
-        }
-
-        protected bool Equals(ApplicationInsightsInstrumentationKey other)
-        {
-            return !ReferenceEquals(null, other) && Equals(_applicationInsights, other._applicationInsights);
-        }
-
-        public override int GetHashCode()
-        {
-            return _applicationInsights?.GetHashCode() ?? 0;
-        }
+        public override object Value =>
+            $"[reference(resourceId('microsoft.insights/components/', '{DependsOn.Name}'), '2015-05-01').InstrumentationKey]";
     }
 }

@@ -36,6 +36,8 @@ namespace Structurizr.InfrastructureAsCode.Azure.Model
     {
         public ServiceBus ServiceBus { get; }
 
+        public override bool ShouldBeStoredSecure => true;
+
         public ServiceBusConnectionString(ServiceBus serviceBus)
         {
             ServiceBus = serviceBus;

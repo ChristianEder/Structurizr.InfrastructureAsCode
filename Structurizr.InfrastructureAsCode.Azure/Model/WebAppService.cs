@@ -25,6 +25,7 @@ namespace Structurizr.InfrastructureAsCode.Azure.Model
     public class WebAppServiceUrl : ConfigurationValue
     {
         public WebAppService AppService { get; }
+        public override bool ShouldBeStoredSecure => false;
 
         public WebAppServiceUrl(WebAppService appService)
         {
