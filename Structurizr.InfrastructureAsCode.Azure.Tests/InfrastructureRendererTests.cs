@@ -121,7 +121,7 @@ namespace Structurizr.InfrastructureAsCode.Azure.Tests
             }
         }
 
-        private InfrastructureRenderer GivenARenderer(
+        private InfrastructureToResourcesRenderer GivenARenderer(
             IAzure azure,
             IResourceGroupTargetingStrategy resourceGroupTargetingStrategy = null,
             IResourceLocationTargetingStrategy resourceLocationTargetingStrategy = null,
@@ -136,7 +136,7 @@ namespace Structurizr.InfrastructureAsCode.Azure.Tests
 
             ioc = ioc ?? WithRenderers(new TinyIoCContainer());
 
-            var renderer = new InfrastructureRenderer(
+            var renderer = new InfrastructureToResourcesRenderer(
                 resourceGroupTargetingStrategy,
                 resourceLocationTargetingStrategy,
                 GetAzureConnector(azure),
@@ -181,9 +181,9 @@ namespace Structurizr.InfrastructureAsCode.Azure.Tests
             return ioc;
         }
 
-        private static async Task WhenRendering(InfrastructureRenderer renderer)
+        private static async Task WhenRendering(InfrastructureToResourcesRenderer toResourcesRenderer)
         {
-            await renderer.Render(new SampleSystem(new Workspace("sample", "sample"), new InfrastructureEnvironment("test")));
+            await toResourcesRenderer.Render(new SampleSystem(new Workspace("sample", "sample"), new InfrastructureEnvironment("test")));
         }
 
         private static IAzureInfrastructureEnvironment Environment

@@ -5,7 +5,8 @@ using System.Linq;
 
 namespace Structurizr.InfrastructureAsCode.Azure.InfrastructureRendering
 {
-    public class InfrastructureRendererBuilder : InfrastructureRendererBuilder<InfrastructureRendererBuilder, InfrastructureRenderer, IAzureInfrastructureEnvironment>
+    public class InfrastructureRendererBuilder<TInfrastructureRenderer> : InfrastructureRendererBuilder<InfrastructureRendererBuilder<TInfrastructureRenderer>, TInfrastructureRenderer, IAzureInfrastructureEnvironment>
+        where TInfrastructureRenderer : AzureInfrastructureRenderer
     {
         public InfrastructureRendererBuilder()
         {
@@ -30,24 +31,24 @@ namespace Structurizr.InfrastructureAsCode.Azure.InfrastructureRendering
                 }
             }
         }
-        public InfrastructureRendererBuilder UsingResourceGroups(IResourceGroupTargetingStrategy resourceGroups)
+        public InfrastructureRendererBuilder<TInfrastructureRenderer> UsingResourceGroups(IResourceGroupTargetingStrategy resourceGroups)
         {
             Ioc.Register(resourceGroups);
             return this;
         }
 
-        public InfrastructureRendererBuilder UsingLocations(IResourceLocationTargetingStrategy locations)
+        public InfrastructureRendererBuilder<TInfrastructureRenderer> UsingLocations(IResourceLocationTargetingStrategy locations)
         {
             Ioc.Register(locations);
             return this;
         }
 
-        public InfrastructureRendererBuilder UsingCredentials(IAzureSubscriptionCredentials credentials)
+        public InfrastructureRendererBuilder<TInfrastructureRenderer> UsingCredentials(IAzureSubscriptionCredentials credentials)
         {
             Ioc.Register(credentials);
             return this;
         }
-        public InfrastructureRendererBuilder UsingResourceRenderer<TResource, TRenderer>()
+        public InfrastructureRendererBuilder<TInfrastructureRenderer> UsingResourceRenderer<TResource, TRenderer>()
           where TResource : ContainerInfrastructure
           where TRenderer : AzureResourceRenderer<TResource>
         {
@@ -58,12 +59,14 @@ namespace Structurizr.InfrastructureAsCode.Azure.InfrastructureRendering
 
     public static class InfrastructureRendererBuilderExtensions
     {
-        public static InfrastructureRendererBuilder UsingResourceGroupPerEnvironment(this InfrastructureRendererBuilder builder, Func<IInfrastructureEnvironment, string> namingConvention)
+        public static InfrastructureRendererBuilder<TInfrastructureRenderer> UsingResourceGroupPerEnvironment<TInfrastructureRenderer>(this InfrastructureRendererBuilder<TInfrastructureRenderer> builder, Func<IInfrastructureEnvironment, string> namingConvention) 
+            where TInfrastructureRenderer : AzureInfrastructureRenderer
         {
             return builder.UsingResourceGroups(new ResourceGroupPerEnvironmentStrategy(namingConvention));
         }
 
-        public static InfrastructureRendererBuilder UsingLocation(this InfrastructureRendererBuilder builder, string location)
+        public static InfrastructureRendererBuilder<TInfrastructureRenderer> UsingLocation<TInfrastructureRenderer>(this InfrastructureRendererBuilder<TInfrastructureRenderer> builder, string location)
+            where TInfrastructureRenderer : AzureInfrastructureRenderer
         {
             return builder.UsingLocations(new FixedResourceLocationTargetingStrategy(location));
         }

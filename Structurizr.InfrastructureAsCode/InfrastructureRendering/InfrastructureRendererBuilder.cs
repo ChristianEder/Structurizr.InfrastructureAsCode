@@ -66,6 +66,13 @@ namespace Structurizr.InfrastructureAsCode.InfrastructureRendering
             return (TBuilder)this;
         }
 
+        public TBuilder Using<TInterface>(TInterface instance)
+            where TInterface : class
+        {
+            Ioc.Register(instance);
+            return (TBuilder)this;
+        }
+
         public TRenderer Build()
         {
             return Ioc.Resolve<TRenderer>();
