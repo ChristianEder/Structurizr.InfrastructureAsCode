@@ -3,7 +3,7 @@ using Structurizr.InfrastructureAsCode.Model.Connectors;
 
 namespace Structurizr.InfrastructureAsCode.Azure.Model
 {
-    public class ServiceBus : ContainerInfrastructure, IAmqpConnectionSource
+    public class ServiceBus : ContainerInfrastructure, IAmqpConnectionSource, IHaveResourceId
     {
         public ServiceBus()
         {
@@ -30,17 +30,19 @@ namespace Structurizr.InfrastructureAsCode.Azure.Model
         {
             yield return new KeyValuePair<string, IConfigurationValue>(EnvironmentInvariantName + "-connectionstring", ConnectionString);
         }
+
+        public string ResourceIdReference => $"[resourceId('Microsoft.ServiceBus/namespaces', '{Name}')]";
     }
 
-    public class ServiceBusConnectionString : ConfigurationValue
+    public class ServiceBusConnectionString : DependentConfigurationValue<ServiceBus>
     {
-        public ServiceBus ServiceBus { get; }
+        public ServiceBusConnectionString(ServiceBus serviceBus) : base(serviceBus)
+        {
+        }
 
         public override bool ShouldBeStoredSecure => true;
 
-        public ServiceBusConnectionString(ServiceBus serviceBus)
-        {
-            ServiceBus = serviceBus;
-        }
+        public override object Value => $"[listKeys(resourceId('Microsoft.ServiceBus/namespaces/authorizationRules', '{DependsOn.Name}', 'RootManageSharedAccessKey'), '2014-09-01').primaryConnectionString]";
+
     }
 }

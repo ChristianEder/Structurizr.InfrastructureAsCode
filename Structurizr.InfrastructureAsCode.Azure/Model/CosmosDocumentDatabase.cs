@@ -4,7 +4,7 @@ using Structurizr.InfrastructureAsCode.Model.Connectors;
 
 namespace Structurizr.InfrastructureAsCode.Azure.Model
 {
-    public class CosmosDocumentDatabase : ContainerInfrastructure, IHttpsConnectionSource
+    public class CosmosDocumentDatabase : ContainerInfrastructure, IHttpsConnectionSource, IHaveResourceId
     {
         public FixedConfigurationValue<string> Uri => new FixedConfigurationValue<string>($"https://{Name}.documents.azure.com:443/");
         public CosmosDocumentDatabaseAccessKey PrimaryMasterKey => new CosmosDocumentDatabaseAccessKey(this)
@@ -13,6 +13,8 @@ namespace Structurizr.InfrastructureAsCode.Azure.Model
         };
 
         public string EnvironmentInvariantName { get; set; }
+
+        public string ResourceIdReference => $"[resourceId('Microsoft.DocumentDb/databaseAccounts', '{Name}')]";
 
         IEnumerable<KeyValuePair<string, IConfigurationValue>> IHttpsConnectionSource.ConnectionInformation()
         {
@@ -26,18 +28,19 @@ namespace Structurizr.InfrastructureAsCode.Azure.Model
 
     }
 
-    public class CosmosDocumentDatabaseAccessKey : ConfigurationValue
+    public class CosmosDocumentDatabaseAccessKey : DependentConfigurationValue<CosmosDocumentDatabase>
     {
-        public CosmosDocumentDatabase Database { get; }
-
-        public CosmosDocumentDatabaseAccessKey(CosmosDocumentDatabase database)
+        public CosmosDocumentDatabaseAccessKey(CosmosDocumentDatabase database) : base(database)
         {
-            Database = database;
         }
+
         public CosmosDatabaseAccessKeyType Type { get; set; }
         public override bool ShouldBeStoredSecure => true;
+        public override object Value => $"[listKeys(resourceId('Microsoft.DocumentDb/databaseAccounts', '{DependsOn.Name}'), '2015-04-08').{KeyTypeIdentifier}]";
 
-
+        private string KeyTypeIdentifier => Type == CosmosDatabaseAccessKeyType.Primary
+            ? "primaryMasterKey"
+            : throw new InvalidOperationException("Currently, only primaryMasterKey is supported");
     }
     public enum CosmosDatabaseAccessKeyType
     {

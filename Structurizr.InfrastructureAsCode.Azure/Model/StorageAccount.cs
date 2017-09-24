@@ -14,7 +14,7 @@ namespace Structurizr.InfrastructureAsCode.Azure.Model
 
         public string ResourceIdReference =>
             $"[resourceId('Microsoft.Storage/storageAccounts', '{Name}')]";
-
+     
         public IEnumerable<KeyValuePair<string, IConfigurationValue>> ConnectionInformation()
         {
             if (string.IsNullOrWhiteSpace(EnvironmentInvariantName))

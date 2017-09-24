@@ -34,7 +34,7 @@ namespace Structurizr.InfrastructureAsCode.Azure.ARM
                     },
                     ["dependsOn"] = new JArray
                     {
-                        $"[resourceId('Microsoft.ServiceBus/namespaces', '{serviceBus.Name}')]"
+                        serviceBus.ResourceIdReference
                     }
                 });
             }
