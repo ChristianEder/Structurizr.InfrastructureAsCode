@@ -2,10 +2,18 @@ namespace Structurizr.InfrastructureAsCode.Azure.Model
 {
     public class StorageAccount : ContainerInfrastructure, IHaveResourceId
     {
+        public StorageAccountKind Kind { get; set; }
+
         public StorageAccountConnectionString ConnectionString => new StorageAccountConnectionString(this);
 
         public string ResourceIdReference =>
             $"[resourceId('Microsoft.Storage/storageAccounts', '{Name}')]";
+    }
+
+    public enum StorageAccountKind
+    {
+        Storage,
+        BlobStorage
     }
 
     public class StorageAccountConnectionString : IDependentConfigurationValue

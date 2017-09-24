@@ -13,13 +13,38 @@ namespace Structurizr.InfrastructureAsCode.Azure.ARM
                 "Microsoft.Storage/storageAccounts",
                 elementWithInfrastructure.Infrastructure.Name,
                 location,
-                "2015-05-01-preview"
+                "2017-06-01"
             );
 
-            storageAccount["properties"] = new JObject
+            const string accountType = "Standard_LRS";
+
+            storageAccount["sku"] = new JObject
             {
-                ["accountType"] = "Standard_LRS"
+                ["name"] = accountType
             };
+
+            storageAccount["kind"] = elementWithInfrastructure.Infrastructure.Kind.ToString();
+
+            var isBlobStorage = elementWithInfrastructure.Infrastructure.Kind == StorageAccountKind.BlobStorage;
+
+            var properties = new JObject
+            {
+                ["supportsHttpsTrafficOnly"] = false,
+                ["encryption"] = new JObject
+                {
+                    ["keySource"] = "Microsoft.Storage",
+                    ["services"] = new JObject
+                    {
+                        ["blob"] = new JObject { ["enabled"] = true },
+                        ["file"] = new JObject { ["enabled"] = !isBlobStorage }
+                    }
+                }
+            };
+            if (isBlobStorage)
+            {
+                properties["accessTier"] = "Hot";
+            }
+            storageAccount["properties"] = properties;
 
             template.Resources.Add(storageAccount);
         }
