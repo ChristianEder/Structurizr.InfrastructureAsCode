@@ -1,4 +1,5 @@
-﻿using Structurizr.InfrastructureAsCode.Model.Connectors;
+﻿using Microsoft.Azure.Management.AppService.Fluent.Models;
+using Structurizr.InfrastructureAsCode.Model.Connectors;
 
 namespace Structurizr.InfrastructureAsCode.Azure.Model
 {
@@ -19,10 +20,20 @@ namespace Structurizr.InfrastructureAsCode.Azure.Model
         {
             if (value.ShouldBeStoredSecure)
             {
+                var type = ConnectionStringType.Custom;
+                if (value is CosmosDocumentDatabaseAccessKey)
+                {
+                    type = ConnectionStringType.DocDb;
+                }
+                if (value is ServiceBusConnectionString)
+                {
+                    type = ConnectionStringType.ServiceBus;
+                }
+
                 ConnectionStrings.Add(new AppServiceConnectionString
                 {
                     Name = name,
-                    Type = "Custom",
+                    Type = type.ToString(),
                     Value = value
                 });
             }
@@ -52,18 +63,16 @@ namespace Structurizr.InfrastructureAsCode.Azure.Model
         }
     }
 
-    public class AppServiceConnectionString : ConfigurationElement
+    public class AppServiceConnectionString : AppServiceSetting
     {
         public AppServiceConnectionString()
         {
 
         }
 
-        public AppServiceConnectionString(string name, string type, string value)
+        public AppServiceConnectionString(string name, string type, string value) : base(name, value)
         {
-            Name = name;
             Type = type;
-            Value = new FixedConfigurationValue<string>(value);
         }
 
         public string Type { get; set; }

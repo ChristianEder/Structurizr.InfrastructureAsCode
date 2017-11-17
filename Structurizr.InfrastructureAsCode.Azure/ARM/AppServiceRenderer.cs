@@ -30,12 +30,12 @@ namespace Structurizr.InfrastructureAsCode.Azure.ARM
         protected virtual JObject Properties(IHaveInfrastructure<AppService> elementWithInfrastructure)
         {
             var properties = new JObject { ["name"] = elementWithInfrastructure.Infrastructure.Name };
-            Append(elementWithInfrastructure.Infrastructure.Settings, properties, "appSettings");
-            Append(elementWithInfrastructure.Infrastructure.ConnectionStrings, properties, "connectionStrings");
+            Append(elementWithInfrastructure.Infrastructure.Settings, properties);
+            Append(elementWithInfrastructure.Infrastructure.ConnectionStrings, properties);
             return properties;
         }
 
-        private static void Append(IEnumerable<ConfigurationElement> settings, JObject properties, string settingsType)
+        private static void Append(IEnumerable<AppServiceSetting> settings, JObject properties) 
         {
             var resolvedSettings = settings
                 .Where(s => s.Value.IsResolved)
@@ -45,11 +45,16 @@ namespace Structurizr.InfrastructureAsCode.Azure.ARM
                 var appSettings = new JArray();
                 foreach (var setting in resolvedSettings)
                 {
-                    appSettings.Add(new JObject
+                    var s = new JObject
                     {
                         ["name"] = setting.Name,
                         ["value"] = JToken.FromObject(setting.Value.Value)
-                    });
+                    };
+                    if (setting is AppServiceConnectionString)
+                    {
+                        s["type"] = (setting as AppServiceConnectionString).Type;
+                    }
+                    appSettings.Add(s);
                 }
 
                 var siteConfig = properties["siteConfig"] as JObject;
@@ -57,7 +62,7 @@ namespace Structurizr.InfrastructureAsCode.Azure.ARM
                 {
                     properties["siteConfig"] = siteConfig = new JObject();
                 }
-                siteConfig[settingsType] = appSettings;
+                siteConfig[settings is IEnumerable<AppServiceConnectionString> ? "connectionStrings" : "appSettings"] = appSettings;
             }
         }
 
