@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using Microsoft.Extensions.Configuration;
 using Structurizr.Client;
 using Structurizr.InfrastructureAsCode.Azure.InfrastructureRendering;
@@ -77,7 +78,7 @@ namespace Structurizr.InfrastructureAsCode.Azure.Sample
             return new AzureInfrastructureEnvironment(environment, configuration["Azure:TenantId"], configuration["Azure:Administrators"].Split(",".ToCharArray()));
         }
 
-        private static InfrastructureRenderer Renderer(IAzureInfrastructureEnvironment environment, IConfiguration configuration)
+        private static AzureInfrastructureRenderer Renderer(IAzureInfrastructureEnvironment environment, IConfiguration configuration)
         {
 
             // In order for this to run, you need to create an Azure AD application for this tool first, then configure the AD Apps credentials in the configuration file
@@ -86,7 +87,7 @@ namespace Structurizr.InfrastructureAsCode.Azure.Sample
             // New-AzureRmADServicePrincipal -ApplicationId $app.ApplicationId
             // New-AzureRmRoleAssignment -RoleDefinitionName Contributor -ServicePrincipalName $app.ApplicationId
 
-            return new InfrastructureRendererBuilder()
+            return new InfrastructureRendererBuilder<InfrastructureToResourcesRenderer>()
                 .In(environment)
                 .UsingResourceGroupPerEnvironment(e => $"shop-{e.Name}")
                 .UsingLocation("westeurope")
@@ -131,7 +132,7 @@ namespace Structurizr.InfrastructureAsCode.Azure.Sample
         private static IConfigurationRoot Configuration()
         {
             return new ConfigurationBuilder().AddJsonFile(
-                "appsettings.json.user",
+                Path.Combine("appsettings.json.user"),
                 optional: false,
                 reloadOnChange: false)
                 .Build();
