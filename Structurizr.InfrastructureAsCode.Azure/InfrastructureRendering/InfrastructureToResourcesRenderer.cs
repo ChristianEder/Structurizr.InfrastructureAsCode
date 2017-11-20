@@ -57,8 +57,7 @@ namespace Structurizr.InfrastructureAsCode.Azure.InfrastructureRendering
             return _azure.Deploy(resourceGroupName, location, template, $"{resourceGroupName}.{DeploymentCount(resourceGroupName)}");
         }
 
-        protected override Task AfterDeployInfrastructure(string resourceGroupName, string location,
-            IHaveInfrastructure[] elementsWithInfrastructure)
+        protected override Task AfterDeployInfrastructure(string resourceGroupName, string location, List<IHaveInfrastructure> elementsWithInfrastructure)
         {
             return Configure(elementsWithInfrastructure);
         }
@@ -71,7 +70,7 @@ namespace Structurizr.InfrastructureAsCode.Azure.InfrastructureRendering
                 .Count();
         }
 
-        private async Task Configure(IHaveInfrastructure[] elementsWithInfrastructure)
+        private async Task Configure(List<IHaveInfrastructure> elementsWithInfrastructure)
         {
             var configContext = Ioc.Resolve<AzureConfigurationValueResolverContext>();
 
@@ -100,6 +99,8 @@ namespace Structurizr.InfrastructureAsCode.Azure.InfrastructureRendering
                         ? renderer.GetConfigurationValues(c)
                         : Enumerable.Empty<IConfigurationValue>();
                 })
+                .Where(v => !v.IsResolved)
+                .Distinct()
                 .ToDictionary(v => v, v => Ioc.GetResolverFor(v));
 
             var value = FindFirstValueToBeResolved(valuesAndResolvers);

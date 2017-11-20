@@ -23,7 +23,6 @@ namespace Structurizr.InfrastructureAsCode.Azure.ARM
                     {
                         new JObject
                         {
-                            ["id"] = $"{elementWithInfrastructure.Infrastructure.Name}-{location}",
                             ["failoverPriority"] = 0,
                             ["locationName"] = ToLocationName(location)
                         }

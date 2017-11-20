@@ -14,9 +14,12 @@ namespace Structurizr.InfrastructureAsCode.Azure.ARM
                 "Microsoft.Web/sites",
                 elementWithInfrastructure.Infrastructure.Name,
                 location,
-                "2016-03-01"
+                ApiVersion
             );
             functionApp["properties"] = Properties(elementWithInfrastructure);
+
+            AddSubResources(elementWithInfrastructure, functionApp);
+
             AddDependsOn(elementWithInfrastructure, functionApp);
             functionApp["kind"] = "functionapp";
 
@@ -26,7 +29,6 @@ namespace Structurizr.InfrastructureAsCode.Azure.ARM
         protected override JObject Properties(IHaveInfrastructure<AppService> elementWithInfrastructure)
         {
             var properties = base.Properties(elementWithInfrastructure);
-            properties["name"] = elementWithInfrastructure.Infrastructure.Name;
             properties["clientAffinityEnabled"] = false;
             return properties;
         }

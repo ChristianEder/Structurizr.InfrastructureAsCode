@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
 using TinyIoC;
@@ -69,8 +70,7 @@ namespace Structurizr.InfrastructureAsCode.Azure.InfrastructureRendering
             return Task.CompletedTask;
         }
 
-        protected override Task AfterDeployInfrastructure(string resourceGroupName, string location,
-            IHaveInfrastructure[] elementsWithInfrastructure)
+        protected override Task AfterDeployInfrastructure(string resourceGroupName, string location, List<IHaveInfrastructure> elementsWithInfrastructure)
         {
             return Task.CompletedTask;
         }

@@ -1,4 +1,5 @@
-﻿using Microsoft.Azure.Management.AppService.Fluent.Models;
+﻿using System.Linq;
+using Microsoft.Azure.Management.AppService.Fluent.Models;
 using Structurizr.InfrastructureAsCode.Model.Connectors;
 
 namespace Structurizr.InfrastructureAsCode.Azure.Model
@@ -42,6 +43,20 @@ namespace Structurizr.InfrastructureAsCode.Azure.Model
                Settings.Add(new AppServiceSetting(name, value));
             }
         }
+
+        bool IConfigurable.IsConfigurationDependentOn(IHaveInfrastructure other)
+        {
+            var resource = other.Infrastructure as IHaveResourceId;
+            if (resource == null)
+            {
+                return false;
+            }
+
+            return Settings.Concat(ConnectionStrings)
+                .Select(s => s.Value)
+                .OfType<IDependentConfigurationValue>()
+                .Any(v => v.DependsOn == resource);
+        }
     }
 
     public class AppServiceSetting : ConfigurationElement
@@ -67,7 +82,6 @@ namespace Structurizr.InfrastructureAsCode.Azure.Model
     {
         public AppServiceConnectionString()
         {
-
         }
 
         public AppServiceConnectionString(string name, string type, string value) : base(name, value)

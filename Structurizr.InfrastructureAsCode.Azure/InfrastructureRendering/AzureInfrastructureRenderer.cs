@@ -1,8 +1,11 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Structurizr.InfrastructureAsCode.Azure.ARM;
+using Structurizr.InfrastructureAsCode.Azure.Model;
 using Structurizr.InfrastructureAsCode.InfrastructureRendering;
+using Structurizr.InfrastructureAsCode.Model.Connectors;
 using TinyIoC;
 
 namespace Structurizr.InfrastructureAsCode.Azure.InfrastructureRendering
@@ -37,7 +40,7 @@ namespace Structurizr.InfrastructureAsCode.Azure.InfrastructureRendering
                 {
                     foreach (var elementsInResourceGroup in elementsInLocation.GroupBy(e => _resourceGroupTargetingStrategy.TargetResourceGroup(_environment, e)))
                     {
-                        await DeployInfrastructure(elementsInResourceGroup.Key, elementsInLocation.Key, elementsInResourceGroup.ToArray(), softwareSystem.System.Name);
+                        await DeployInfrastructure(elementsInResourceGroup.Key, elementsInLocation.Key, elementsInResourceGroup.ToList(), softwareSystem.System.Name);
                     }
                 }
             }
@@ -48,7 +51,7 @@ namespace Structurizr.InfrastructureAsCode.Azure.InfrastructureRendering
             }
         }
 
-        private async Task DeployInfrastructure(string resourceGroupName, string location, IHaveInfrastructure[] elementsWithInfrastructure, string deploymentName)
+        private async Task DeployInfrastructure(string resourceGroupName, string location, List<IHaveInfrastructure> elementsWithInfrastructure, string deploymentName)
         {
             await BeforeDeployInfrastructure(resourceGroupName, location);
 
@@ -62,18 +65,54 @@ namespace Structurizr.InfrastructureAsCode.Azure.InfrastructureRendering
             await AfterDeployInfrastructure(resourceGroupName, location, elementsWithInfrastructure);
         }
 
-        private AzureDeploymentTemplate ToTemplate(string resourceGroupName, string location, IHaveInfrastructure[] elementsWithInfrastructure)
+        private AzureDeploymentTemplate ToTemplate(string resourceGroupName, string location, List<IHaveInfrastructure> elementsWithInfrastructure)
         {
 
             var template = new AzureDeploymentTemplate(TemplateDeploymentVersion(resourceGroupName));
+            
+            elementsWithInfrastructure.Sort(ByConfigurationDependency);
 
             foreach (var elementWithInfrastructure in elementsWithInfrastructure)
             {
-                var renderer = AzureResourceRendererExtensions.GetRendererFor(Ioc, elementWithInfrastructure);
+                var renderer = Ioc.GetRendererFor(elementWithInfrastructure);
                 renderer?.Render(template, elementWithInfrastructure, _environment, resourceGroupName, location);
             }
 
             return template;
+        }
+
+        private int ByConfigurationDependency(IHaveInfrastructure x, IHaveInfrastructure y)
+        {
+            var xDependsOnY = DependsOnConfiguration(x, y);
+            var yDependsOnX = DependsOnConfiguration(y, x);
+
+            if (xDependsOnY && yDependsOnX)
+            {
+                return 0;
+            }
+
+            if (xDependsOnY)
+            {
+                return 1;
+            }
+
+            if (yDependsOnX)
+            {
+                return -1;
+            }
+
+            return 0;
+        }
+
+        private bool DependsOnConfiguration(IHaveInfrastructure x, IHaveInfrastructure y)
+        {
+            var configurable = x.Infrastructure as IConfigurable;
+            if (configurable == null)
+            {
+                return false;
+            }
+
+            return configurable.IsConfigurationDependentOn(y);
         }
 
         protected abstract string TemplateDeploymentVersion(string resourceGroupName);
@@ -82,7 +121,7 @@ namespace Structurizr.InfrastructureAsCode.Azure.InfrastructureRendering
         protected abstract void BeforeRender();
         protected abstract Task BeforeDeployInfrastructure(string resourceGroupName, string location);
         protected abstract Task DeployInfrastructure(string resourceGroupName, string location, AzureDeploymentTemplate template);
-        protected abstract Task AfterDeployInfrastructure(string resourceGroupName, string location, IHaveInfrastructure[] elementsWithInfrastructure);
+        protected abstract Task AfterDeployInfrastructure(string resourceGroupName, string location, List<IHaveInfrastructure> elementsWithInfrastructure);
         protected abstract void AfterRender();
     }
 }

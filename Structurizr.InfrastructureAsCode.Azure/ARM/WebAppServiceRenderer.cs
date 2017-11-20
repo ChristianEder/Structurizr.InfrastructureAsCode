@@ -27,7 +27,7 @@ namespace Structurizr.InfrastructureAsCode.Azure.ARM
             {
                 ["type"] = "Microsoft.Web/serverfarms",
                 ["name"] = name,
-                ["apiVersion"] = "2016-09-01",
+                ["apiVersion"] = ApiVersion,
                 ["location"] = ToLocationName(location),
                 ["sku"] = new JObject
                 {
@@ -48,7 +48,7 @@ namespace Structurizr.InfrastructureAsCode.Azure.ARM
             {
                 ["type"] = "Microsoft.Web/sites",
                 ["name"] = name,
-                ["apiVersion"] = "2015-08-01",
+                ["apiVersion"] = ApiVersion,
                 ["location"] = location,
                 ["tags"] = new JObject
                 {
@@ -56,15 +56,18 @@ namespace Structurizr.InfrastructureAsCode.Azure.ARM
                         $"[concat(\'hidden-related:\', resourceGroup().id, \'/providers/Microsoft.Web/serverfarms/\', \'{name}\')]"
                     ] = "empty"
                 },
-                ["properties"] = Properties(elementWithInfrastructure)
+                ["properties"] = Properties(elementWithInfrastructure),
             };
+
+            AddSubResources(elementWithInfrastructure, appService);
             AddDependsOn(elementWithInfrastructure, appService);
             template.Resources.Add(appService);
         }
 
         protected override IEnumerable<string> DependsOn(IHaveInfrastructure<AppService> elementWithInfrastructure)
         {
-            return base.DependsOn(elementWithInfrastructure).Concat(Enumerable.Repeat($"[concat(\'Microsoft.Web/serverfarms/\', \'{elementWithInfrastructure.Infrastructure.Name}\')]", 1));
+            return base.DependsOn(elementWithInfrastructure)
+                .Concat(Enumerable.Repeat($"[concat(\'Microsoft.Web/serverfarms/\', \'{elementWithInfrastructure.Infrastructure.Name}\')]", 1));
         }
 
 
@@ -75,11 +78,6 @@ namespace Structurizr.InfrastructureAsCode.Azure.ARM
                 $"[concat(resourceGroup().id, \'/providers/Microsoft.Web/serverfarms/\', \'{elementWithInfrastructure.Infrastructure.Name}\')]";
             properties["hostingEnvironment"] = "";
             return properties;
-        }
-
-        protected override IEnumerable<IConfigurationValue> GetConfigurationValues(IHaveInfrastructure<WebAppService> elementWithInfrastructure)
-        {
-            return elementWithInfrastructure.Infrastructure.Settings.Values.Concat(elementWithInfrastructure.Infrastructure.ConnectionStrings.Values);
         }
 
         protected override async Task Configure(IHaveInfrastructure<WebAppService> elementWithInfrastructure, AzureConfigurationValueResolverContext context)

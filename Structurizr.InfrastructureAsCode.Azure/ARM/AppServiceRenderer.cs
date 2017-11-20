@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.InteropServices.WindowsRuntime;
 using Newtonsoft.Json.Linq;
 using Structurizr.InfrastructureAsCode.Azure.Model;
 
@@ -8,6 +9,11 @@ namespace Structurizr.InfrastructureAsCode.Azure.ARM
     public abstract class AppServiceRenderer<TAppService> : AzureResourceRenderer<TAppService>
         where TAppService : AppService
     {
+        protected override IEnumerable<IConfigurationValue> GetConfigurationValues(IHaveInfrastructure<TAppService> elementWithInfrastructure)
+        {
+            return elementWithInfrastructure.Infrastructure.Settings.Values.Concat(elementWithInfrastructure.Infrastructure.ConnectionStrings.Values);
+        }
+
         protected void AddDependsOn(IHaveInfrastructure<AppService> elementWithInfrastructure, JObject template)
         {
             var dependsOn = DependsOn(elementWithInfrastructure);
@@ -19,52 +25,82 @@ namespace Structurizr.InfrastructureAsCode.Azure.ARM
 
         protected virtual IEnumerable<string> DependsOn(IHaveInfrastructure<AppService> elementWithInfrastructure)
         {
-            var appService = elementWithInfrastructure.Infrastructure;
-            var dependsOn = appService.Settings.Values.OfType<IDependentConfigurationValue>()
-                .Concat(appService.ConnectionStrings.Values.OfType<IDependentConfigurationValue>())
-                .Distinct()
-                .Select(s => s.DependsOn.ResourceIdReference);
-            return dependsOn;
+            return Enumerable.Empty<string>();
         }
 
         protected virtual JObject Properties(IHaveInfrastructure<AppService> elementWithInfrastructure)
         {
-            var properties = new JObject { ["name"] = elementWithInfrastructure.Infrastructure.Name };
-            Append(elementWithInfrastructure.Infrastructure.Settings, properties);
-            Append(elementWithInfrastructure.Infrastructure.ConnectionStrings, properties);
+            var appService = elementWithInfrastructure.Infrastructure;
+            var properties = new JObject { ["name"] = appService.Name };
             return properties;
         }
 
-        private static void Append(IEnumerable<AppServiceSetting> settings, JObject properties) 
+        protected virtual void AddSubResources(IHaveInfrastructure<AppService> elementWithInfrastructure, JObject appService)
+        {
+            AppendSettingsResource(elementWithInfrastructure, elementWithInfrastructure.Infrastructure.Settings, appService);
+            AppendSettingsResource(elementWithInfrastructure, elementWithInfrastructure.Infrastructure.ConnectionStrings, appService);
+        }
+
+        private void AppendSettingsResource(IHaveInfrastructure<AppService> elementWithInfrastructure, IEnumerable<AppServiceSetting> settings, JObject appService)
         {
             var resolvedSettings = settings
                 .Where(s => s.Value.IsResolved)
                 .ToArray();
-            if (resolvedSettings.Any())
+            if (!resolvedSettings.Any())
             {
-                var appSettings = new JArray();
-                foreach (var setting in resolvedSettings)
+                return;
+            }
+
+            var isConnectionStrings = resolvedSettings.First() is AppServiceConnectionString;
+
+            var resources = appService["resources"] as JArray;
+            if (resources == null)
+            {
+                appService["resources"] = resources = new JArray();
+            }
+
+            var dependsOn = new JArray
+            {
+                elementWithInfrastructure.Infrastructure.Name
+            };
+
+            var properties = new JObject();
+
+            var config = new JObject
+            {
+                ["apiVersion"] = ApiVersion,
+                ["name"] = isConnectionStrings ? "connectionstrings" : "appsettings",
+                ["type"] = "config",
+                ["dependsOn"] = dependsOn,
+                ["properties"] = properties
+            };
+
+            foreach (var setting in resolvedSettings)
+            {
+                var value = setting.Value;
+                var dependentValue = value as IDependentConfigurationValue;
+                if (dependentValue != null)
                 {
-                    var s = new JObject
-                    {
-                        ["name"] = setting.Name,
-                        ["value"] = JToken.FromObject(setting.Value.Value)
-                    };
-                    if (setting is AppServiceConnectionString)
-                    {
-                        s["type"] = (setting as AppServiceConnectionString).Type;
-                    }
-                    appSettings.Add(s);
+                    dependsOn.Add(dependentValue.DependsOn.ResourceIdReference);
                 }
 
-                var siteConfig = properties["siteConfig"] as JObject;
-                if (siteConfig == null)
+                if (isConnectionStrings)
                 {
-                    properties["siteConfig"] = siteConfig = new JObject();
+                    properties[setting.Name] = new JObject
+                    {
+                        ["value"]  = JToken.FromObject(setting.Value.Value),
+                        ["type"] = ((AppServiceConnectionString) setting).Type
+                    };
                 }
-                siteConfig[settings is IEnumerable<AppServiceConnectionString> ? "connectionStrings" : "appSettings"] = appSettings;
+                else
+                {
+                    properties[setting.Name] = JToken.FromObject(setting.Value.Value);
+                }
             }
+
+            resources.Add(config);
         }
 
+        protected const string ApiVersion = "2016-03-01";
     }
 }

@@ -75,7 +75,7 @@ namespace Structurizr.InfrastructureAsCode.Azure.ARM
 
     public static class AzureResourceRendererExtensions
     {
-        public static IAzureResourceRenderer GetRendererFor(this TinyIoC.TinyIoCContainer ioc, IHaveInfrastructure elementWithInfrastructure)        {
+        public static IAzureResourceRenderer GetRendererFor(this TinyIoCContainer ioc, IHaveInfrastructure elementWithInfrastructure)        {
             var resolverType = typeof(AzureResourceRenderer<>).MakeGenericType(elementWithInfrastructure.Infrastructure.GetType());
             try
             {
