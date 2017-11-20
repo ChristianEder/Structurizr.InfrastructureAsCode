@@ -11,9 +11,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Include="appsettings.json.user">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
+    <None Include="appsettings.json.user" />
   </ItemGroup>
 
   <ItemGroup>
