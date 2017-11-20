@@ -3,7 +3,7 @@ using Structurizr.InfrastructureAsCode.InfrastructureRendering;
 
 namespace Structurizr.InfrastructureAsCode.Azure.Sample.Model
 {
-    public class ShopDatabase : ContainerWithInfrastructure<NoSqlDocumentDatabase>
+    public class ShopDatabase : ContainerWithInfrastructure<CosmosDocumentDatabase>
     {
         public ShopDatabase(Shop shop, IInfrastructureEnvironment environment)
         {
@@ -12,7 +12,7 @@ namespace Structurizr.InfrastructureAsCode.Azure.Sample.Model
                 "Stores product, customer and order data",
                 "DocumentDB");
 
-            Infrastructure = new NoSqlDocumentDatabase
+            Infrastructure = new CosmosDocumentDatabase
             {
                 Name = $"aac-sample-shop-db-{environment.Name}",
                 EnvironmentInvariantName = "aac-sample-shop-db"
