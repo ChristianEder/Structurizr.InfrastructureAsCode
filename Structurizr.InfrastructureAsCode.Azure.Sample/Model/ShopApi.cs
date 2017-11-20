@@ -4,7 +4,7 @@ using Structurizr.InfrastructureAsCode.Model.Connectors;
 
 namespace Structurizr.InfrastructureAsCode.Azure.Sample.Model
 {
-    public class ShopApi : ContainerWithInfrastructure<AppService>
+    public class ShopApi : ContainerWithInfrastructure<WebAppService>
     {
         public ShopApi(Shop shop, ShopDatabase database, ShopServiceBus serviceBus, IInfrastructureEnvironment environment)
         {
@@ -13,7 +13,7 @@ namespace Structurizr.InfrastructureAsCode.Azure.Sample.Model
                 "Provides a service layer to browse and order products",
                 "ASP.NET Core MVC Web Application");
 
-            Infrastructure = new AppService
+            Infrastructure = new WebAppService
             {
                 Name = $"aac-sample-shop-api-{environment.Name}",
                 EnvironmentInvariantName = "aac-sample-shop-api"

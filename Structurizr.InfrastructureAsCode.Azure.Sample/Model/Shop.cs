@@ -19,7 +19,6 @@ namespace Structurizr.InfrastructureAsCode.Azure.Sample.Model
 
             Customer.Uses(Frontend.Container, "buys stuff");
 
-            // TODO: make implicit
             Customer.Uses(System, "buys stuff");
         }
 
@@ -27,6 +26,6 @@ namespace Structurizr.InfrastructureAsCode.Azure.Sample.Model
         public ShopFrontend Frontend { get; }
         public ShopApi Api { get; }
         public ShopDatabase Database { get; }
-        public Person Customer { get;  }
+        public Person Customer { get; }
     }
 }
