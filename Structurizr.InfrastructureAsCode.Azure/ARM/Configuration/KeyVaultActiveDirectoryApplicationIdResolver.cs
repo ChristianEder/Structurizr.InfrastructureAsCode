@@ -26,7 +26,7 @@ namespace Structurizr.InfrastructureAsCode.Azure.ARM.Configuration
 
         public override bool CanResolve(KeyVaultActiveDirectoryApplicationId value)
         {
-            var application = _context.Graph.Applications.List().SingleOrDefault(a => a.DisplayName == value.ClientName);
+            var application = _context.Graph.Applications.ListAsync().Result.SingleOrDefault(a => a.DisplayName == value.ClientName);
             return application == null;
         }
 
