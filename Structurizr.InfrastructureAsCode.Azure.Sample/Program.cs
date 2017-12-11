@@ -140,48 +140,10 @@ namespace Structurizr.InfrastructureAsCode.Azure.Sample
         private static IConfigurationRoot Configuration()
         {
             return new ConfigurationBuilder().AddJsonFile(
-                Path.Combine("appsettings.json.user"),
-                optional: false,
-                reloadOnChange: false)
+                    Path.Combine("appsettings.json.user"),
+                    optional: false,
+                    reloadOnChange: false)
                 .Build();
-        }
-
-    }
-
-    public class EventHub : ContainerInfrastructure
-    {
-
-    }
-
-    public class EventHubRenderer : AzureResourceRenderer<EventHub>
-    {
-        private readonly IAzureConnector _azureConnector;
-
-        public EventHubRenderer(IAzureConnector azureConnector)
-        {
-            _azureConnector = azureConnector;
-        }
-
-        protected override void Render(AzureDeploymentTemplate template, IHaveInfrastructure<EventHub> elementWithInfrastructure,
-            IAzureInfrastructureEnvironment environment, string resourceGroup, string location)
-        {
-            var webApp = _azureConnector.Azure()
-                .WebApps.Define("myapp")
-                .WithRegion(location)
-                .WithExistingResourceGroup(resourceGroup)
-                .WithNewFreeAppServicePlan()
-                .WithAppSetting("a", "b");
-            var w = webApp as IWebApp;
-            var converter = new TransformationJsonConverter();
-            var stringWriter = new StringWriter();
-            if (w != null)
-            {
-                converter.WriteJson(new JsonTextWriter(stringWriter), w.Inner, new JsonSerializer
-                {
-                    NullValueHandling = NullValueHandling.Ignore
-                });
-                var x = stringWriter.ToString();
-            }
         }
     }
 }

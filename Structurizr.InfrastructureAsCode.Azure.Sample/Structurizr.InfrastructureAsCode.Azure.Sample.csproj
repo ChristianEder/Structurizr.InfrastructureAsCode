@@ -11,9 +11,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Include="appsettings.json.user">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
+    <None Include="appsettings.json.user"/>
   </ItemGroup>
 
   <ItemGroup>
@@ -28,7 +26,4 @@
     <Reference Include="Microsoft.CSharp" />
   </ItemGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\Structurizr.InfrastructureAsCode.Azure\Structurizr.InfrastructureAsCode.Azure.csproj" />
-  </ItemGroup>
 </Project>
