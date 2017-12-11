@@ -1,7 +1,13 @@
 ﻿using System;
 using System.IO;
+using System.Reflection;
+using Microsoft.Azure.Management.AppService.Fluent;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Rest.Serialization;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using Structurizr.Client;
+using Structurizr.InfrastructureAsCode.Azure.ARM;
 using Structurizr.InfrastructureAsCode.Azure.InfrastructureRendering;
 using Structurizr.InfrastructureAsCode.Azure.Sample.Model;
 using Structurizr.InfrastructureAsCode.InfrastructureRendering;
@@ -9,6 +15,7 @@ using Structurizr.InfrastructureAsCode.Policies;
 
 namespace Structurizr.InfrastructureAsCode.Azure.Sample
 {
+   
     public class Program
     {
         public static void Main(string[] args)
@@ -87,8 +94,9 @@ namespace Structurizr.InfrastructureAsCode.Azure.Sample
             // New-AzureRmADServicePrincipal -ApplicationId $app.ApplicationId
             // New-AzureRmRoleAssignment -RoleDefinitionName Contributor -ServicePrincipalName $app.ApplicationId
 
-            return new InfrastructureRendererBuilder<InfrastructureToResourcesRenderer>()
+            return new InfrastructureRendererBuilder<InfrastructureToTemplateJsonRenderer>()
                 .In(environment)
+                .Using<IAzureDeploymentTemplateWriter>(new AzureDeploymentTemplateWriter("dev-4"))
                 .UsingResourceGroupPerEnvironment(e => $"shop-{e.Name}")
                 .UsingLocation("westeurope")
                 .Using<IPasswordPolicy, RandomPasswordPolicy>()
@@ -136,6 +144,44 @@ namespace Structurizr.InfrastructureAsCode.Azure.Sample
                 optional: false,
                 reloadOnChange: false)
                 .Build();
+        }
+
+    }
+
+    public class EventHub : ContainerInfrastructure
+    {
+
+    }
+
+    public class EventHubRenderer : AzureResourceRenderer<EventHub>
+    {
+        private readonly IAzureConnector _azureConnector;
+
+        public EventHubRenderer(IAzureConnector azureConnector)
+        {
+            _azureConnector = azureConnector;
+        }
+
+        protected override void Render(AzureDeploymentTemplate template, IHaveInfrastructure<EventHub> elementWithInfrastructure,
+            IAzureInfrastructureEnvironment environment, string resourceGroup, string location)
+        {
+            var webApp = _azureConnector.Azure()
+                .WebApps.Define("myapp")
+                .WithRegion(location)
+                .WithExistingResourceGroup(resourceGroup)
+                .WithNewFreeAppServicePlan()
+                .WithAppSetting("a", "b");
+            var w = webApp as IWebApp;
+            var converter = new TransformationJsonConverter();
+            var stringWriter = new StringWriter();
+            if (w != null)
+            {
+                converter.WriteJson(new JsonTextWriter(stringWriter), w.Inner, new JsonSerializer
+                {
+                    NullValueHandling = NullValueHandling.Ignore
+                });
+                var x = stringWriter.ToString();
+            }
         }
     }
 }
