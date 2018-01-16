@@ -1,4 +1,6 @@
+using System;
 using System.Collections.Generic;
+using Structurizr.InfrastructureAsCode.Model.Connectors;
 
 namespace Structurizr.InfrastructureAsCode.Azure.Model
 {
@@ -8,8 +10,11 @@ namespace Structurizr.InfrastructureAsCode.Azure.Model
         {
             ConsumerGroups = new List<string>();
         }
-        
-        public string ResourceIdReference => $"[resourceId('Microsoft.Devices/Iothubs', '{Name}')]";
+
+        public string EnvironmentInvariantName { get; set; }
+
+        public string ResourceIdReference => $"[{ResourceIdReferenceContent}]";
+        public string ResourceIdReferenceContent => $"resourceId('Microsoft.Devices/iotHubs', '{Name}')";
 
         public List<string> ConsumerGroups { get; }
 
@@ -29,8 +34,10 @@ namespace Structurizr.InfrastructureAsCode.Azure.Model
             _hub = hub;
             Name = name;
         }
-        public string ResourceIdReference =>
-            $"[resourceId('Microsoft.Devices/Iothubs/Iothubkeys', '{_hub.Name}', '{Name}')]";
+        public string ResourceIdReference => $"[{ResourceIdReferenceContent}]";
+
+        public string ResourceIdReferenceContent =>
+            $"resourceId('Microsoft.Devices/iotHubs/Iothubkeys', '{_hub.Name}', '{Name}')";
 
         public override object Value => $"[listkeys('{ResourceIdReference}', {_hub.ApiVersion}).primaryKey]";
         public override bool ShouldBeStoredSecure => true;
@@ -46,7 +53,22 @@ namespace Structurizr.InfrastructureAsCode.Azure.Model
         }
 
         public override object Value =>
-            $"[concat('HostName=', reference('{DependsOn.ResourceIdReference}').hostName, ';SharedAccessKeyName=', '{_key.Name}', ';SharedAccessKey=', listkeys('{_key.ResourceIdReference}', '{DependsOn.ApiVersion}').primaryKey)]";
+            $"[concat('HostName=', reference({DependsOn.ResourceIdReferenceContent}).hostName, ';SharedAccessKeyName=', '{_key.Name}', ';SharedAccessKey=', listkeys({_key.ResourceIdReferenceContent}, '{DependsOn.ApiVersion}').primaryKey)]";
         public override bool ShouldBeStoredSecure => true;
+    }
+
+    public class IoTHubSDK : ContainerConnector<IoTHub>
+    {
+        public override string Technology => "IoT Hub SDK";
+
+        protected override IEnumerable<KeyValuePair<string, IConfigurationValue>> ConnectionInformation(IoTHub source)
+        {
+            if (string.IsNullOrWhiteSpace(source.EnvironmentInvariantName))
+            {
+                throw new InvalidOperationException("You have to set the EnvironmentInvariantName in order to use this as a source of connections");
+            }
+
+            yield return  new KeyValuePair<string, IConfigurationValue>(source.EnvironmentInvariantName + "-connection", source.OwnerConnectionString);
+        }
     }
 }
