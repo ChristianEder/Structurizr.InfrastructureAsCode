@@ -1,13 +1,7 @@
 ﻿using System;
 using System.IO;
-using System.Reflection;
-using Microsoft.Azure.Management.AppService.Fluent;
 using Microsoft.Extensions.Configuration;
-using Microsoft.Rest.Serialization;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
-using Structurizr.Client;
-using Structurizr.InfrastructureAsCode.Azure.ARM;
+using Structurizr.Api;
 using Structurizr.InfrastructureAsCode.Azure.InfrastructureRendering;
 using Structurizr.InfrastructureAsCode.Azure.Sample.Model;
 using Structurizr.InfrastructureAsCode.InfrastructureRendering;
