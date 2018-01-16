@@ -11,14 +11,16 @@
   </PropertyGroup>
 
   <ItemGroup>
-   
+    <None Include="appsettings.json.user">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="1.1.1" />
     <PackageReference Include="Structurizr.Core" Version="0.6.0" />
     <PackageReference Include="Structurizr.InfrastructureAsCode.Azure" Version="1.0.2" />
-    <PackageReference Include="System.Net.Http" Version="4.3.1" />
+    <PackageReference Include="System.Net.Http" Version="4.3.3" />
   </ItemGroup>
 
   <ItemGroup Condition=" '$(TargetFramework)' == 'net461' ">

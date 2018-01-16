@@ -47,12 +47,12 @@ namespace Structurizr.InfrastructureAsCode.Azure.Sample
         {
             var configuration = Configuration();
             var environment = Environment(environmentName, configuration);
-            var shop = InfrastructureModel(environment);
+            var monkeyFactory = InfrastructureModel(environment);
 
             var renderer = Renderer(environment, configuration);
             try
             {
-                renderer.Render(shop).Wait();
+                renderer.Render(monkeyFactory).Wait();
             }
             catch (AggregateException ex)
             {
@@ -88,10 +88,10 @@ namespace Structurizr.InfrastructureAsCode.Azure.Sample
             // New-AzureRmADServicePrincipal -ApplicationId $app.ApplicationId
             // New-AzureRmRoleAssignment -RoleDefinitionName Contributor -ServicePrincipalName $app.ApplicationId
 
-            return new InfrastructureRendererBuilder<InfrastructureToTemplateJsonRenderer>()
+            return new InfrastructureRendererBuilder<InfrastructureToResourcesRenderer>()
                 .In(environment)
-                .Using<IAzureDeploymentTemplateWriter>(new AzureDeploymentTemplateWriter("dev-4"))
-                .UsingResourceGroupPerEnvironment(e => $"shop-{e.Name}")
+                //.Using<IAzureDeploymentTemplateWriter>(new AzureDeploymentTemplateWriter("dev-4"))
+                .UsingResourceGroupPerEnvironment(e => $"monkey-{e.Name}")
                 .UsingLocation("westeurope")
                 .Using<IPasswordPolicy, RandomPasswordPolicy>()
                 .UsingCredentials(
@@ -107,27 +107,27 @@ namespace Structurizr.InfrastructureAsCode.Azure.Sample
         {
             var workspace = CreateWorkspace();
 
-            var shop = new Shop(workspace, environment);
+            var monkeyFactory = new MonkeyFactory(workspace, environment);
 
-            var contextView = workspace.Views.CreateSystemContextView(shop.System, "Shop context view", "Overview over the shop system");
+            var contextView = workspace.Views.CreateSystemContextView(monkeyFactory.System, "Monkey factory context view", "Overview over the monkey factory system");
             contextView.AddAllSoftwareSystems();
             contextView.AddAllPeople();
 
-            var containerView = workspace.Views.CreateContainerView(shop.System, "Shop Container View", "Overview over the shop system architecture");
+            var containerView = workspace.Views.CreateContainerView(monkeyFactory.System, "Monkey factory Container View", "Overview over the monkey factory system architecture");
             containerView.AddAllContainers();
             containerView.AddAllPeople();
 
             return workspace;
         }
 
-        private static Shop InfrastructureModel(IAzureInfrastructureEnvironment environment)
+        private static MonkeyFactory InfrastructureModel(IAzureInfrastructureEnvironment environment)
         {
-            return new Shop(CreateWorkspace(), environment);
+            return new MonkeyFactory(CreateWorkspace(), environment);
         }
 
         private static Workspace CreateWorkspace()
         {
-            var workspace = new Workspace("Shop architecture", "Some generic web implemented with Azure cloud infrastructure");
+            var workspace = new Workspace("Monkey factory architecture", "");
             return workspace;
         }
 
