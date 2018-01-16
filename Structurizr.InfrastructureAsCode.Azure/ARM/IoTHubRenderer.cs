@@ -14,18 +14,13 @@ namespace Structurizr.InfrastructureAsCode.Azure.ARM
             template.Resources.Add(new JObject
             {
                 ["apiVersion"] = hub.ApiVersion,
-                ["type"] = "Microsoft.Devices/Iothubs",
+                ["type"] = "Microsoft.Devices/iotHubs",
                 ["name"] = hub.Name,
                 ["location"] = location,
                 ["sku"] = new JObject
                 {
-                    ["name"] = "Free",
-                    ["tier"] = "F1",
+                    ["name"] = "F1",
                     ["capacity"] = 1
-                },
-                ["properties"] = new JObject
-                {
-                    ["location"] = location
                 }
             });
 
@@ -34,7 +29,7 @@ namespace Structurizr.InfrastructureAsCode.Azure.ARM
                 template.Resources.Add(new JObject
                 {
                     ["apiVersion"] = hub.ApiVersion,
-                    ["type"] = "Microsoft.Devices/Iothubs/eventhubEndpoints/ConsumerGroups",
+                    ["type"] = "Microsoft.Devices/iotHubs/eventhubEndpoints/ConsumerGroups",
                     ["name"] = $"{hub.Name}/events/{consumerGroup}",
                     ["dependsOn"] = new JArray
                     {

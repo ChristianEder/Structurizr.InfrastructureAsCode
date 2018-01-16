@@ -32,12 +32,25 @@ namespace Structurizr.InfrastructureAsCode.Azure.Model
 
         private StorageAccount DefineStorageAccount()
         {
+            var nameParts = Name.Split(new[] {'-', '_'}, StringSplitOptions.RemoveEmptyEntries);
+
+            string name = "";
+            foreach (var namePart in nameParts)
+            {
+                var shortPart = namePart.Substring(0, Math.Min(6, namePart.Length));
+                var charactersLeft = 19 - name.Length;
+                if (shortPart.Length <= charactersLeft || charactersLeft >= 3)
+                {
+                    shortPart = shortPart.Substring(0, Math.Min(shortPart.Length, charactersLeft));
+                    name += shortPart;
+                }
+            }
+            name += "store";
+
             var storage = new StorageAccount
             {
-                Name = Name
-                           .Replace("-", string.Empty)
-                           .Replace("_", string.Empty)
-                       + "storage"
+
+                Name = name
             };
 
             Settings.Add(new AppServiceSetting("AzureWebJobsDashboard", storage.AccessKey));
