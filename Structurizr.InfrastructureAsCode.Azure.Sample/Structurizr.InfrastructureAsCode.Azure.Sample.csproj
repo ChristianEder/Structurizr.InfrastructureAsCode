@@ -33,8 +33,4 @@
     <ProjectReference Include="..\Structurizr.InfrastructureAsCode\Structurizr.InfrastructureAsCode.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="dev-4\" />
-  </ItemGroup>
-
 </Project>

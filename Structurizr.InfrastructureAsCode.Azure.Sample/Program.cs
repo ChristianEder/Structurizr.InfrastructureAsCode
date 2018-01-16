@@ -9,27 +9,13 @@ using Structurizr.InfrastructureAsCode.Policies;
 
 namespace Structurizr.InfrastructureAsCode.Azure.Sample
 {
-   
+
     public class Program
     {
         public static void Main(string[] args)
         {
-            if (args.Length == 2 && args[0] == "infrastructure")
-            {
-                RenderInfrastructure(args[1]);
-                Console.ReadLine();
-            }
-            else if (args.Length == 1 && args[0] == "structurizr")
-            {
-                UploadToStructurizr();
-            }
-            else
-            {
-                Console.WriteLine("You should run this with one of the following parameters:");
-                Console.WriteLine("1) infrastructure <environment>");
-                Console.WriteLine("2) structurizr");
-                Console.ReadLine();
-            }
+            UploadToStructurizr();
+            RenderInfrastructure("dev");
         }
 
         private static void UploadToStructurizr()
@@ -115,8 +101,14 @@ namespace Structurizr.InfrastructureAsCode.Azure.Sample
             contextView.AddAllPeople();
 
             var containerView = workspace.Views.CreateContainerView(monkeyFactory.System, "Monkey factory Container View", "Overview over the monkey factory system architecture");
+
             containerView.AddAllContainers();
             containerView.AddAllPeople();
+
+            foreach (var systemContainer in monkeyFactory.System.Containers)
+            {
+                containerView.AddNearestNeighbours(systemContainer);
+            }
 
             return workspace;
         }
@@ -129,6 +121,7 @@ namespace Structurizr.InfrastructureAsCode.Azure.Sample
         private static Workspace CreateWorkspace()
         {
             var workspace = new Workspace("Monkey factory architecture", "");
+            workspace.Views.Configuration.Styles.Add(new ElementStyle(Tags.Person) { Shape = Shape.Person });
             return workspace;
         }
 

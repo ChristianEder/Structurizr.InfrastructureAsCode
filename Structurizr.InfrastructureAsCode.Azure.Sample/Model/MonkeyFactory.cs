@@ -1,5 +1,4 @@
-﻿using Structurizr.InfrastructureAsCode.Azure.Model;
-using Structurizr.InfrastructureAsCode.InfrastructureRendering;
+﻿using Structurizr.InfrastructureAsCode.InfrastructureRendering;
 
 namespace Structurizr.InfrastructureAsCode.Azure.Sample.Model
 {
@@ -7,6 +6,13 @@ namespace Structurizr.InfrastructureAsCode.Azure.Sample.Model
     {
         public MonkeyHub Hub { get; }
         public MonkeyMessageProcessor MessageProcessor { get; }
+        public MonkeyUI UI { get; }
+        public MonkeyCrmConnector CrmConnector { get; }
+        public MonkeyEventStore EventStore { get; }
+        public Person ProductionShiftLead { get; }
+        public Person TechnicalSupportUser { get; }
+        public SoftwareSystem MonkeyProductionLine { get; }
+        public SoftwareSystem Crm { get; }
 
         public MonkeyFactory(Workspace workspace, IInfrastructureEnvironment environment)
         {
@@ -16,44 +22,23 @@ namespace Structurizr.InfrastructureAsCode.Azure.Sample.Model
                 "Azure cloud based backend for processing data created during production of monkeys");
 
             Hub = new MonkeyHub(this, environment);
-            MessageProcessor = new MonkeyMessageProcessor(this, Hub, environment);
+            CrmConnector = new MonkeyCrmConnector(this, environment);
+            EventStore = new MonkeyEventStore(this, environment);
+            UI = new MonkeyUI(this, EventStore, environment);
+            MessageProcessor = new MonkeyMessageProcessor(this, Hub, CrmConnector, EventStore, environment);
+
+            TechnicalSupportUser = workspace.Model.AddPerson("Technical support user", "Responds to incidents during monkey production");
+            TechnicalSupportUser.Uses(UI, "Gather information about system failures");
+
+            ProductionShiftLead = workspace.Model.AddPerson("Production Shift leader", "Monitors monkey production");
+            ProductionShiftLead.Uses(UI, "Monitor load on production systems");
+
+            MonkeyProductionLine = workspace.Model.AddSoftwareSystem(Location.External, "Production Line", "Produces the actual monkeys");
+            MonkeyProductionLine.Uses(Hub, "Send production telemetry data and failure events", "MQTT");
+
+            Crm = workspace.Model.AddSoftwareSystem(Location.External, "CRM", "");
+            Crm.Uses(CrmConnector, "Process failure events in order to create support tickets", "AMQP");
         }
-    }
 
-    public class MonkeyHub : ContainerWithInfrastructure<IoTHub>
-    {
-        public MonkeyHub(MonkeyFactory monkeyFactory, IInfrastructureEnvironment environment)
-        {
-            Container = monkeyFactory.System.AddContainer(
-                name: "Monkey Hub", 
-                description: "Receives incoming messages from the monkey factory production systems", 
-                technology: "Azure IoT Hub");
-
-            Infrastructure = new IoTHub
-            {
-                Name = "monkey-hub-" + environment.Name,
-                EnvironmentInvariantName = "monkey-hub"
-            };
-        }
-    }
-
-    public class MonkeyMessageProcessor : ContainerWithInfrastructure<FunctionAppService>
-    {
-        public MonkeyMessageProcessor(MonkeyFactory monkeyFactory, MonkeyHub hub, IInfrastructureEnvironment environment)
-        {
-            Container = monkeyFactory.System.AddContainer(
-                name: "Monkey Message Processor",
-                description: "Reads incoming messages, checks for alert conditions, stores messages",
-                technology: "Azure Function");
-
-            Infrastructure = new FunctionAppService
-            {
-                Name = "monkey-message-processor-" + environment.Name
-            };
-
-            Uses(hub)
-                .Over<IoTHubSDK>()
-                .InOrderTo("Read incoming messages");
-        }
     }
 }
