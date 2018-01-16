@@ -31,7 +31,8 @@ namespace Structurizr.InfrastructureAsCode.Azure.Sample.Model
 
             Infrastructure = new IoTHub
             {
-                Name = "monkey-hub-" + environment.Name
+                Name = "monkey-hub-" + environment.Name,
+                EnvironmentInvariantName = "monkey-hub"
             };
         }
     }
@@ -51,7 +52,7 @@ namespace Structurizr.InfrastructureAsCode.Azure.Sample.Model
             };
 
             Uses(hub)
-                .Over("Azure Event Hub SDK")
+                .Over<IoTHubSDK>()
                 .InOrderTo("Read incoming messages");
         }
     }

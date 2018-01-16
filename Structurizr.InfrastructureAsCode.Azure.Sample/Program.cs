@@ -17,6 +17,7 @@ namespace Structurizr.InfrastructureAsCode.Azure.Sample
             if (args.Length == 2 && args[0] == "infrastructure")
             {
                 RenderInfrastructure(args[1]);
+                Console.ReadLine();
             }
             else if (args.Length == 1 && args[0] == "structurizr")
             {
@@ -90,7 +91,7 @@ namespace Structurizr.InfrastructureAsCode.Azure.Sample
 
             return new InfrastructureRendererBuilder<InfrastructureToResourcesRenderer>()
                 .In(environment)
-                //.Using<IAzureDeploymentTemplateWriter>(new AzureDeploymentTemplateWriter("dev-4"))
+                .Using<IAzureDeploymentTemplateWriter>(new AzureDeploymentTemplateWriter("dev-4"))
                 .UsingResourceGroupPerEnvironment(e => $"monkey-{e.Name}")
                 .UsingLocation("westeurope")
                 .Using<IPasswordPolicy, RandomPasswordPolicy>()

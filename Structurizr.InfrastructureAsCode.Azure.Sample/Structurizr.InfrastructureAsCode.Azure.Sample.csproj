@@ -28,4 +28,13 @@
     <Reference Include="Microsoft.CSharp" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\Structurizr.InfrastructureAsCode.Azure\Structurizr.InfrastructureAsCode.Azure.csproj" />
+    <ProjectReference Include="..\Structurizr.InfrastructureAsCode\Structurizr.InfrastructureAsCode.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="dev-4\" />
+  </ItemGroup>
+
 </Project>
