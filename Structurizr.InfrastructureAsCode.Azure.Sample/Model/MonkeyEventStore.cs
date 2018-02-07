@@ -14,7 +14,7 @@ namespace Structurizr.InfrastructureAsCode.Azure.Sample.Model
 
             Infrastructure = new StorageAccount
             {
-                Kind = StorageAccountKind.BlobStorage,
+                Kind = StorageAccountKind.Storage,
                 Name = "monkeyevents" + environment.Name,
                 EnvironmentInvariantName = "monkeyevents"
             };
