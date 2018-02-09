@@ -1,8 +1,7 @@
 {
   "profiles": {
     "Structurizr.InfrastructureAsCode.Azure.Sample": {
-      "commandName": "Project",
-      "commandLineArgs": "infrastructure dev"
+      "commandName": "Project"
     }
   }
 }

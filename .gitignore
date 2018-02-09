@@ -16,7 +16,7 @@ bld/
 
 *.suo
 *.lock.json
-/.vs/restore.dg
+/.vs/
 *.user
 /.vs/config/applicationhost.config
 /packages
