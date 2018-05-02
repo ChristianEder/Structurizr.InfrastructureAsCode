@@ -22,6 +22,9 @@ namespace Structurizr.InfrastructureAsCode.Azure.Model
         public IoTHubConnectionString OwnerConnectionString => new IoTHubConnectionString(this, OwnerKey);
 
         public string ApiVersion = "2016-02-03";
+
+        public string Url => Name + ".azure-devices.net";
+
     }
 
     public class IoTHubKey : DependentConfigurationValue<IoTHub>, IHaveResourceId
