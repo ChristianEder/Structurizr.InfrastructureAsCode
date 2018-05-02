@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "infrastructurizr": {
+      "commandName": "Project",
+      "commandLineArgs": "new serviceprincipal --name my-sp --subscriptionId 9f57d630-49a8-49ff-82c2-c77057a0f3dc --tenantId 5fcefc0d-3894-4f19-b9f3-f972127e7178"
+    }
+  }
+}

@@ -51,21 +51,22 @@ namespace infrastructurizr
 
         private static void ParseParameters(Command command, string[] args)
         {
-            string name = null;
-            string value = null;
-
-            for (var index = 0; index < args.Length; index++)
+            args = args.SkipWhile(a => !a.StartsWith("--")).ToArray();
+            while (args.Any())
             {
-                var arg = args[index];
-                if (arg.StartsWith("--"))
+                var parameterName = args.First().Substring(2);
+                string parameterValue = null;
+                var rest = args.Skip(1).ToArray();
+                if (rest.Any())
                 {
-                    if (name != null)
-                    {
-                        command.SetParameter(name, value);
-                    }
-                    name = arg.Substring("--".Length);
-                    if (true) { }
+                    var values = rest.TakeWhile(a => !a.StartsWith("--")).ToArray();
+                    rest = rest.Skip(values.Length).ToArray();
+                    parameterValue = string.Join(" ", values);
                 }
+
+                command.SetParameter(parameterName, parameterValue);
+
+                args = rest;
             }
         }
 
@@ -125,7 +126,6 @@ namespace infrastructurizr
                 Console.ReadLine();
                 Environment.Exit(1);
             }
-            Console.ReadLine();
         }
 
         private static IEnumerable<T> All<T>()

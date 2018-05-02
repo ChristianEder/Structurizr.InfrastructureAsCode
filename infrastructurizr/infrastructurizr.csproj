@@ -6,4 +6,16 @@
     <RootNamespace>infrastructurizr</RootNamespace>
   </PropertyGroup>
 
+  <ItemGroup>
+    <None Remove="Commands\ServicePrincipal\NewServicePrincipal.ps1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="Commands\ServicePrincipal\NewServicePrincipal.ps1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Newtonsoft.Json" Version="11.0.1" />
+  </ItemGroup>
+
 </Project>
