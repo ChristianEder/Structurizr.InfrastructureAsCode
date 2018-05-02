@@ -15,7 +15,10 @@ namespace Structurizr.InfrastructureAsCode.Azure.Model
         public ApplicationInsightsInstrumentationKey InstrumentationKey { get; }
 
         public List<IHaveHiddenLink> UsedBy { get; }
-        public void Connect<TUsing, TUsed>(ContainerWithInfrastructure<TUsing> usingContainer, ContainerWithInfrastructure<TUsed> usedContainer) where TUsing : ContainerInfrastructure where TUsed : ContainerInfrastructure
+       
+        public string ResourceIdReference => $"[resourceId('microsoft.insights/components/', '{Name}')]";
+
+        void IContainerConnector.Connect<TUsing, TUsed>(ContainerWithInfrastructure<TUsing> usingContainer, ContainerWithInfrastructure<TUsed> usedContainer)
         {
             if (!ReferenceEquals(this, usedContainer.Infrastructure))
             {
@@ -32,7 +35,8 @@ namespace Structurizr.InfrastructureAsCode.Azure.Model
             UsedBy.Add(reference);
         }
 
-        public string ResourceIdReference => $"[resourceId('microsoft.insights/components/', '{Name}')]";
+        string IContainerConnector.Technology => "Application Insights SDK";
+
     }
 
     public class ApplicationInsightsInstrumentationKey : DependentConfigurationValue<ApplicationInsights>

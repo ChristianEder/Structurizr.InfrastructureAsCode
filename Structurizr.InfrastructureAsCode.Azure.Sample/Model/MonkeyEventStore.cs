@@ -1,5 +1,7 @@
+using Microsoft.Azure.Management.Compute.Fluent.Models;
 using Structurizr.InfrastructureAsCode.Azure.Model;
 using Structurizr.InfrastructureAsCode.InfrastructureRendering;
+using Structurizr.InfrastructureAsCode.Model.Connectors;
 
 namespace Structurizr.InfrastructureAsCode.Azure.Sample.Model
 {
@@ -14,7 +16,7 @@ namespace Structurizr.InfrastructureAsCode.Azure.Sample.Model
 
             Infrastructure = new StorageAccount
             {
-                Kind = StorageAccountKind.Storage,
+                Kind = StorageAccountKind.StorageV2,
                 Name = "monkeyevents" + environment.Name,
                 EnvironmentInvariantName = "monkeyevents"
             };

@@ -9,6 +9,8 @@ namespace Structurizr.InfrastructureAsCode.Model.Connectors
             ContainerWithInfrastructure<TUsed> usedContainer)
             where TUsing : ContainerInfrastructure
             where TUsed : ContainerInfrastructure;
+
+        string Technology { get; }
     }
 
     public abstract class ContainerConnector : IContainerConnector

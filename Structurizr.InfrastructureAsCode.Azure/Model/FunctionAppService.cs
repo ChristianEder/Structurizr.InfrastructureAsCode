@@ -53,9 +53,9 @@ namespace Structurizr.InfrastructureAsCode.Azure.Model
                 Name = name
             };
 
-            Settings.Add(new AppServiceSetting("AzureWebJobsDashboard", storage.AccessKey));
-            Settings.Add(new AppServiceSetting("AzureWebJobsStorage", storage.AccessKey));
-            Settings.Add(new AppServiceSetting("WEBSITE_CONTENTAZUREFILECONNECTIONSTRING", storage.AccessKey));
+            Settings.Add(new AppServiceSetting("AzureWebJobsDashboard", storage.ConnectionString));
+            Settings.Add(new AppServiceSetting("AzureWebJobsStorage", storage.ConnectionString));
+            Settings.Add(new AppServiceSetting("WEBSITE_CONTENTAZUREFILECONNECTIONSTRING", storage.ConnectionString));
             Settings.Add(new AppServiceSetting("WEBSITE_CONTENTSHARE", Name.ToLowerInvariant() + "-storage"));
 
             return storage;

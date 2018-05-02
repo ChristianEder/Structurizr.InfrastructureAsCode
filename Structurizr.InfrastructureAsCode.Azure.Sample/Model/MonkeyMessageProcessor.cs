@@ -28,7 +28,7 @@ namespace Structurizr.InfrastructureAsCode.Azure.Sample.Model
                 .InOrderTo("Notify the CRM system of production failures");
 
             Uses(eventStore)
-                .Over<Https>()
+                .Over(eventStore.Infrastructure.TableEndpoint)
                 .InOrderTo("Store incoming messages");
         }
     }
