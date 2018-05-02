@@ -1,4 +1,5 @@
-﻿using Structurizr.InfrastructureAsCode.Model.Connectors;
+﻿using System.ComponentModel;
+using Structurizr.InfrastructureAsCode.Model.Connectors;
 
 namespace Structurizr.InfrastructureAsCode
 {
