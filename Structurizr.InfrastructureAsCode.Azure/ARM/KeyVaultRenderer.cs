@@ -67,11 +67,23 @@ namespace Structurizr.InfrastructureAsCode.Azure.ARM
                     ["properties"] = new JObject
                     {
                         ["contentType"] = "text/plain",
-                        ["value"] = keyVaultSecret.Value.Value.ToString()
+                        ["value"] = keyVaultSecret.Value.Value.ToString(),
+                        ["dependsOn"] = GetDependsOn(keyVaultSecret, keyVault)
                     }
                 });
             }
         }
+
+        protected JArray GetDependsOn(KeyVaultSecret keyVaultSecret, KeyVault keyVault)
+        {
+            if (keyVaultSecret.Value is IDependentConfigurationValue value)
+            {               
+                return new JArray(keyVault.ResourceIdReference, value.DependsOn.ResourceIdReference);
+            }
+
+            else return new JArray(keyVault.ResourceIdReference);
+        }
+
 
         protected override IEnumerable<IConfigurationValue> GetConfigurationValues(
             IHaveInfrastructure<KeyVault> elementWithInfrastructure)
