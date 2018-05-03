@@ -29,13 +29,7 @@ namespace Structurizr.InfrastructureAsCode.Azure.InfrastructureRendering
                 TenantID = _subscriptionCredentials.TenantId
             };
 
-            //AADSTS70002: Error validating credentials.AADSTS50012: Client is public so a 'client_assertion' should not be presented.
-            //Trace ID: bef98c34-7bf4-498d-923c-acd209da0900
-            //Correlation ID: 21054e4a-e17a-4513-a08c-99a3f14f5616
-            //Timestamp: 2018-05-03 13:38:49Z
-
             return graph;
-
         }
 
         private AzureCredentials AzureCredentials => new AzureCredentialsFactory().FromServicePrincipal(
