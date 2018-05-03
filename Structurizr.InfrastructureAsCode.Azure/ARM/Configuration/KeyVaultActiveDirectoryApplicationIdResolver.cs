@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.Azure.Management.Batch.Fluent.Models;
 using Microsoft.Azure.Management.Graph.RBAC.Fluent;
 using Microsoft.Azure.Management.Graph.RBAC.Fluent.Models;
 using Structurizr.InfrastructureAsCode.Azure.Model;
@@ -34,19 +35,17 @@ namespace Structurizr.InfrastructureAsCode.Azure.ARM.Configuration
         {
             var password = _passwordPolicy.GetPassword();
 
-            var applicationCreateParametersInner = new ApplicationCreateParametersInner
+            var application = await _context.Graph.Applications.CreateAsync(new ApplicationCreateParameters
             {
                 DisplayName = value.ClientName,
                 Homepage = $"https://{value.ClientName}",
-                IdentifierUris = new List<string> {$"https://{value.ClientName}"},
+                IdentifierUris = new List<string> { $"https://{value.ClientName}" },
                 PasswordCredentials =
                     new List<PasswordCredential>
                     {
                         new PasswordCredential { EndDate = DateTime.Now.AddYears(1000), Value = password}
                     }
-            };
-
-            var application = await _context.Graph.Applications.CreateAsync(applicationCreateParametersInner);
+            });
 
             _context.Values.Add(new KeyVaultActiveDirectoryApplicationSecret(value.ClientName), password);
 
