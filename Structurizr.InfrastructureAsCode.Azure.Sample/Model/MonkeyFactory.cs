@@ -18,9 +18,6 @@ namespace Structurizr.InfrastructureAsCode.Azure.Sample.Model
 
         public MonkeyDeviceProvisioningService DPS { get; }
 
-        public MonkeyKeyVault KV { get; }
-
-
         public MonkeyFactory(Workspace workspace, IInfrastructureEnvironment environment)
         {
             System = workspace.Model.AddSoftwareSystem(
@@ -35,7 +32,6 @@ namespace Structurizr.InfrastructureAsCode.Azure.Sample.Model
             UI = new MonkeyUI(this, EventStore, environment);
             MessageProcessor = new MonkeyMessageProcessor(this, Hub, CrmConnector, EventStore, environment);
             DPS = new MonkeyDeviceProvisioningService(this, Hub, environment);
-            KV = new MonkeyKeyVault(this, environment);
 
             TechnicalSupportUser = workspace.Model.AddPerson("Technical support user", "Responds to incidents during monkey production");
             TechnicalSupportUser.Uses(UI, "Gather information about system failures");
