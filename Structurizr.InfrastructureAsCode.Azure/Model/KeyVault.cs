@@ -12,6 +12,9 @@ namespace Structurizr.InfrastructureAsCode.Azure.Model
             Secrets = new Configuration<KeyVaultSecret>();
         }
 
+        public string ResourceIdReference => $"[{ResourceIdReferenceContent}]";
+        public string ResourceIdReferenceContent => $"resourceId('Microsoft.KeyVault/vaults', '{Name}')";
+
         public Configuration<KeyVaultSecret> Secrets { get; set; }
 
         public FixedConfigurationValue<string> Url => new FixedConfigurationValue<string>($"https://{Name}.vault.azure.net/");
