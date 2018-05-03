@@ -25,6 +25,11 @@ namespace Structurizr.InfrastructureAsCode
         {
             return GetEnumerator();
         }
+
+        public void Remove(TElement element)
+        {
+            _elements.Remove(element);
+        }
     }
 
     public abstract class ConfigurationElement

@@ -4,6 +4,7 @@ namespace Structurizr.InfrastructureAsCode.Azure.Sample.Model
 {
     public class MonkeyFactory : SoftwareSystemWithInfrastructure
     {
+        public MonkeyKeyVault KeyVault { get; }
         public MonkeyHub Hub { get; }
         public MonkeyMessageProcessor MessageProcessor { get; }
         public MonkeyUI UI { get; }
@@ -21,6 +22,7 @@ namespace Structurizr.InfrastructureAsCode.Azure.Sample.Model
                 "Monkey Factory",
                 "Azure cloud based backend for processing data created during production of monkeys");
 
+            KeyVault = new MonkeyKeyVault(this, environment);
             Hub = new MonkeyHub(this, environment);
             CrmConnector = new MonkeyCrmConnector(this, environment);
             EventStore = new MonkeyEventStore(this, environment);
@@ -38,7 +40,14 @@ namespace Structurizr.InfrastructureAsCode.Azure.Sample.Model
 
             Crm = workspace.Model.AddSoftwareSystem(Location.External, "CRM", "");
             Crm.Uses(CrmConnector, "Process failure events in order to create support tickets", "AMQP");
+
+            StoreSecretsInKeyVault();
         }
 
+        private void StoreSecretsInKeyVault()
+        {
+            UI.Infrastructure.UseStore(KeyVault.Infrastructure);
+            MessageProcessor.Infrastructure.UseStore(KeyVault.Infrastructure);
+        }
     }
 }

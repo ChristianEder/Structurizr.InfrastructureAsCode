@@ -1,6 +1,11 @@
-﻿namespace Structurizr.InfrastructureAsCode.Azure.Model
+﻿using System;
+using System.Linq;
+using Microsoft.Azure.Management.AppService.Fluent;
+using Structurizr.InfrastructureAsCode.Model.Connectors;
+
+namespace Structurizr.InfrastructureAsCode.Azure.Model
 {
-    public class KeyVault : ContainerInfrastructure
+    public class KeyVault : ContainerInfrastructure, IConfigurable
     {
         public KeyVault()
         {
@@ -24,6 +29,39 @@
         protected override bool IsNameValid(string name)
         {
             return base.IsNameValid(name) && name.Length >= 3 && name.Length <= 24;
+        }
+
+        void IConfigurable.Configure(string name, IConfigurationValue value)
+        {
+            var existing = Secrets.FirstOrDefault(s => s.Name == name);
+            if (!ReferenceEquals(existing, null))
+            {
+                if (!Equals(existing.Value, value))
+                {
+                    throw new InvalidOperationException();
+                }
+                return;
+            }
+            Secrets.Add(new KeyVaultSecret { Name = name, Value = value });
+        }
+
+        bool IConfigurable.IsConfigurationDependentOn(IHaveInfrastructure other)
+        {
+            var resource = other.Infrastructure as IHaveResourceId;
+            if (resource == null)
+            {
+                return false;
+            }
+
+            return Secrets
+                .Select(s => s.Value)
+                .OfType<IDependentConfigurationValue>()
+                .Any(v => v.DependsOn == resource);
+        }
+
+        void IConfigurable.UseStore(IConfigurable store)
+        {
+            throw new InvalidOperationException();
         }
     }
 

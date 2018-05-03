@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System.Collections.Generic;
+using System.Linq;
 using Microsoft.Azure.Management.AppService.Fluent.Models;
 using Structurizr.InfrastructureAsCode.Model.Connectors;
 
@@ -6,6 +7,8 @@ namespace Structurizr.InfrastructureAsCode.Azure.Model
 {
     public abstract class AppService : ContainerInfrastructure, IHaveHiddenLink, IConfigurable
     {
+        private IConfigurable _store;
+
         protected AppService()
         {
             Settings = new Configuration<AppServiceSetting>();
@@ -42,6 +45,8 @@ namespace Structurizr.InfrastructureAsCode.Azure.Model
             {
                Settings.Add(new AppServiceSetting(name, value));
             }
+
+            MoveSettingsIntoStore();
         }
 
         bool IConfigurable.IsConfigurationDependentOn(IHaveInfrastructure other)
@@ -56,6 +61,45 @@ namespace Structurizr.InfrastructureAsCode.Azure.Model
                 .Select(s => s.Value)
                 .OfType<IDependentConfigurationValue>()
                 .Any(v => v.DependsOn == resource);
+        }
+
+        public void UseStore(IConfigurable store)
+        {
+            _store = store;
+            MoveSettingsIntoStore();
+        }
+
+        private void MoveSettingsIntoStore()
+        {
+            if (_store is null)
+            {
+                return;
+            }
+
+            MoveSettingsIntoStore(Settings);
+            MoveSettingsIntoStore(ConnectionStrings);
+        }
+
+        private void MoveSettingsIntoStore<T>(Configuration<T> settings) 
+            where T : ConfigurationElement
+        {
+            var secureSettings = settings.Where(s => s.Value.ShouldBeStoredSecure && s.Value.IsResolved).ToArray();
+            if (!secureSettings.Any())
+            {
+                return;
+            }
+
+            ConfigureKeyVaultAccess();
+            foreach (var secureSetting in secureSettings)
+            {
+                settings.Remove(secureSetting);
+                _store.Configure(secureSetting.Name, secureSetting.Value);
+            }
+        }
+
+        private void ConfigureKeyVaultAccess()
+        {
+            // TODO
         }
     }
 

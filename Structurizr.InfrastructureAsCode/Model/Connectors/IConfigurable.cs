@@ -1,8 +1,10 @@
-﻿namespace Structurizr.InfrastructureAsCode.Model.Connectors
+﻿
+namespace Structurizr.InfrastructureAsCode.Model.Connectors
 {
     public interface IConfigurable
     {
         void Configure(string name, IConfigurationValue value);
         bool IsConfigurationDependentOn(IHaveInfrastructure other);
+        void UseStore(IConfigurable store);
     }
 }

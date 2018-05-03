@@ -26,6 +26,9 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Reference Include="Microsoft.Azure.Management.Msi.Fluent">
+      <HintPath>..\..\..\..\Users\ched\.nuget\packages\microsoft.azure.management.msi.fluent\1.7.0\lib\net452\Microsoft.Azure.Management.Msi.Fluent.dll</HintPath>
+    </Reference>
     <Reference Include="System.Net.Http" />
   </ItemGroup>
 
