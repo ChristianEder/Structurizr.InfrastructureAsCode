@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Newtonsoft.Json.Linq;
@@ -10,12 +11,16 @@ namespace Structurizr.InfrastructureAsCode.Azure.ARM
 {
     public class KeyVaultRenderer : AzureResourceRenderer<KeyVault>
     {
-        protected override void Render(AzureDeploymentTemplate template, IHaveInfrastructure<KeyVault> elementWithInfrastructure, IAzureInfrastructureEnvironment environment, string resourceGroup, string location)
+        protected override void Render(AzureDeploymentTemplate template,
+            IHaveInfrastructure<KeyVault> elementWithInfrastructure, IAzureInfrastructureEnvironment environment,
+            string resourceGroup, string location)
         {
+            var keyVault = elementWithInfrastructure.Infrastructure;
+
             template.Resources.Add(new JObject
             {
                 ["type"] = "Microsoft.KeyVault/vaults",
-                ["name"] = elementWithInfrastructure.Infrastructure.Name,
+                ["name"] = keyVault.Name,
                 ["apiVersion"] = "2015-06-01",
                 ["location"] = location,
                 ["properties"] = new JObject
@@ -26,16 +31,17 @@ namespace Structurizr.InfrastructureAsCode.Azure.ARM
                     ["accessPolicies"] = new JArray(
                         environment.AdministratorUserIds.Select(s => new JObject
                         {
-                           ["tenantId"] = environment.Tenant,
-                           ["objectId"] = s,
-                           ["permissions"] = new JObject
-                           {
-                               ["keys"] = new JArray("Get", "List", "Update", "Create", "Import", "Delete", "Backup", "Restore"),
-                               ["secrets"] = new JArray("All")
-                           }
+                            ["tenantId"] = environment.Tenant,
+                            ["objectId"] = s,
+                            ["permissions"] = new JObject
+                            {
+                                ["keys"] = new JArray("Get", "List", "Update", "Create", "Import", "Delete",
+                                        "Backup", "Restore"),
+                                ["secrets"] = new JArray("All")
+                            }
                         })
-                        .Cast<object>().ToArray()
-                        ),
+                            .Cast<object>().ToArray()
+                    ),
                     ["tenantId"] = environment.Tenant,
                     ["sku"] = new JObject
                     {
@@ -44,14 +50,38 @@ namespace Structurizr.InfrastructureAsCode.Azure.ARM
                     }
                 }
             });
+
+
+            foreach (var keyVaultSecret in keyVault.Secrets)
+            {
+                if (!keyVaultSecret.Value.IsResolved)
+                {
+                    throw new Exception($"The keyvault secret {keyVaultSecret.Name} is not resolved ");
+                }
+
+                template.Resources.Add(new JObject
+                {
+                    ["type"] = "Microsoft.KeyVault/vaults/secrets",
+                    ["name"] = keyVault.Name + "/" + keyVaultSecret.Name,
+                    ["apiVersion"] = "2015-06-01",
+                    ["properties"] = new JObject
+                    {
+                        ["contentType"] = "text/plain",
+                        ["value"] = keyVaultSecret.Value.Value.ToString()
+                    }
+                });
+            }
         }
 
-        protected override IEnumerable<IConfigurationValue> GetConfigurationValues(IHaveInfrastructure<KeyVault> elementWithInfrastructure)
+        protected override IEnumerable<IConfigurationValue> GetConfigurationValues(
+            IHaveInfrastructure<KeyVault> elementWithInfrastructure)
         {
-            return base.GetConfigurationValues(elementWithInfrastructure).Concat(elementWithInfrastructure.Infrastructure.Secrets.Values);
+            return base.GetConfigurationValues(elementWithInfrastructure)
+                .Concat(elementWithInfrastructure.Infrastructure.Secrets.Values);
         }
 
-        protected override Task Configure(IHaveInfrastructure<KeyVault> elementWithInfrastructure, AzureConfigurationValueResolverContext context)
+        protected override Task Configure(IHaveInfrastructure<KeyVault> elementWithInfrastructure,
+            AzureConfigurationValueResolverContext context)
         {
             foreach (var secret in elementWithInfrastructure.Infrastructure.Secrets)
             {

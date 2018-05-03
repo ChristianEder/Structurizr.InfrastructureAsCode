@@ -15,7 +15,7 @@ namespace Structurizr.InfrastructureAsCode.Azure.Sample.Model
             IInfrastructureEnvironment environment)
         {
             Container = monkeyFactory.System.AddContainer(
-                name: " Monkey Device Provisioning Service",
+                name: "Monkey Device Provisioning Service",
                 description: "Registeres to Device Provisioning Service", 
                 technology: "Azure Device Provisioning Service");
 
