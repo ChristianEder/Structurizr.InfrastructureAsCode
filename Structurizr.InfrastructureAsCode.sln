@@ -19,6 +19,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Sample", "Sample", "{F4AE60
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "infrastructurizr", "infrastructurizr\infrastructurizr.csproj", "{07CD1DBC-A896-4A2C-B974-B6D2F8534C2C}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IotReferenceArchitectureFunctions", "Sample\IotReferenceArchitectureFunctions\IotReferenceArchitectureFunctions.csproj", "{EF54419D-13BB-4E96-947D-55A39CED0F50}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -49,6 +51,10 @@ Global
 		{07CD1DBC-A896-4A2C-B974-B6D2F8534C2C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{07CD1DBC-A896-4A2C-B974-B6D2F8534C2C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{07CD1DBC-A896-4A2C-B974-B6D2F8534C2C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EF54419D-13BB-4E96-947D-55A39CED0F50}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EF54419D-13BB-4E96-947D-55A39CED0F50}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EF54419D-13BB-4E96-947D-55A39CED0F50}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EF54419D-13BB-4E96-947D-55A39CED0F50}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -57,6 +63,7 @@ Global
 		{A129B28A-7950-468B-BC8D-84770AD5703F} = {F4AE6080-0A5C-4B5F-AFAC-66AE55A5376F}
 		{9E76EE49-EEC8-4A8F-8E08-45F0B9F3823E} = {FCAA6029-470E-49C1-8EF3-5889B5430D3B}
 		{BBD72954-B28A-44B1-8033-564989FC807C} = {FCAA6029-470E-49C1-8EF3-5889B5430D3B}
+		{EF54419D-13BB-4E96-947D-55A39CED0F50} = {F4AE6080-0A5C-4B5F-AFAC-66AE55A5376F}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {270F7792-760C-474E-92F5-5DAE3C8AAA07}

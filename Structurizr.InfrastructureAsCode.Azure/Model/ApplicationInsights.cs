@@ -16,7 +16,7 @@ namespace Structurizr.InfrastructureAsCode.Azure.Model
 
         public List<IHaveHiddenLink> UsedBy { get; }
        
-        public string ResourceIdReference => $"[resourceId('microsoft.insights/components/', '{Name}')]";
+        public string ResourceIdReference => $"[resourceId('Microsoft.Insights/components/', '{Name}')]";
 
         void IContainerConnector.Connect<TUsing, TUsed>(ContainerWithInfrastructure<TUsing> usingContainer, ContainerWithInfrastructure<TUsed> usedContainer)
         {
