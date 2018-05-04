@@ -1,23 +1,27 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
-using Microsoft.Azure.Management.AppService.Fluent;
 using Structurizr.InfrastructureAsCode.Model.Connectors;
 
 namespace Structurizr.InfrastructureAsCode.Azure.Model
 {
-    public class KeyVault : ContainerInfrastructure, IConfigurable
+    public class KeyVault : ContainerInfrastructure, ISecureConfigurationStore
     {
+
         public KeyVault()
         {
             Secrets = new Configuration<KeyVaultSecret>();
         }
 
+        public string EnvironmentInvariantName { get; set; }
+
         public string ResourceIdReference => $"[{ResourceIdReferenceContent}]";
         public string ResourceIdReferenceContent => $"resourceId('Microsoft.KeyVault/vaults', '{Name}')";
+        public List<IHaveServiceIdentity> Readers { get; } = new List<IHaveServiceIdentity>();
 
         public Configuration<KeyVaultSecret> Secrets { get; set; }
 
-        public FixedConfigurationValue<string> Url => new FixedConfigurationValue<string>($"https://{Name}.vault.azure.net/");
+        public IConfigurationValue Url => new FixedConfigurationValue<string>($"https://{Name}.vault.azure.net/");
 
         public KeyVaultActiveDirectoryApplicationId ActiveDirectoryApplicationIdFor(string clientName)
         {
@@ -34,7 +38,7 @@ namespace Structurizr.InfrastructureAsCode.Azure.Model
             return base.IsNameValid(name) && name.Length >= 3 && name.Length <= 24;
         }
 
-        void IConfigurable.Configure(string name, IConfigurationValue value)
+        void ISecureConfigurationStore.Store(string name, IConfigurationValue value)
         {
             var existing = Secrets.FirstOrDefault(s => s.Name == name);
             if (!ReferenceEquals(existing, null))
@@ -48,23 +52,13 @@ namespace Structurizr.InfrastructureAsCode.Azure.Model
             Secrets.Add(new KeyVaultSecret { Name = name, Value = value });
         }
 
-        bool IConfigurable.IsConfigurationDependentOn(IHaveInfrastructure other)
+        void ISecureConfigurationStore.AllowAccessFrom(IHaveServiceIdentity serviceIdentity)
         {
-            var resource = other.Infrastructure as IHaveResourceId;
-            if (resource == null)
+            if (Readers.Any(r => r.Id == serviceIdentity.Id))
             {
-                return false;
+                return;
             }
-
-            return Secrets
-                .Select(s => s.Value)
-                .OfType<IDependentConfigurationValue>()
-                .Any(v => v.DependsOn == resource);
-        }
-
-        void IConfigurable.UseStore(IConfigurable store)
-        {
-            throw new InvalidOperationException();
+            Readers.Add(serviceIdentity);
         }
     }
 

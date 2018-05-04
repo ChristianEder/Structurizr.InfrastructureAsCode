@@ -13,7 +13,6 @@ namespace Structurizr.InfrastructureAsCode.Azure.Sample.Model
         public MonkeyKeyVault(MonkeyFactory monkeyFactory, 
             IInfrastructureEnvironment environment)
         {
-
             Container = monkeyFactory.System.AddContainer(
                 name: "Monkey Key Vault",
                 description: "Keeps the secrets",
@@ -21,7 +20,8 @@ namespace Structurizr.InfrastructureAsCode.Azure.Sample.Model
 
             Infrastructure = new KeyVault()
             {
-                Name = "monkey-keyvault-" + environment.Name
+                Name = "monkey-keyvault-" + environment.Name,
+                EnvironmentInvariantName = "monkey-keyvault"
             };
         }
     }

@@ -21,6 +21,7 @@ namespace Structurizr.InfrastructureAsCode.Azure.ARM
             AddSubResources(elementWithInfrastructure, functionApp);
 
             AddDependsOn(elementWithInfrastructure, functionApp);
+            AddIdentity(elementWithInfrastructure, functionApp);
             functionApp["kind"] = "functionapp";
 
             template.Resources.Add(functionApp);

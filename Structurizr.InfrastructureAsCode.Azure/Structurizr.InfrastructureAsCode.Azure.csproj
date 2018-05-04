@@ -12,6 +12,14 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="ARM\KeyVaultCertificate.ps1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="ARM\KeyVaultCertificate.ps1" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\Structurizr.InfrastructureAsCode\Structurizr.InfrastructureAsCode.csproj" />
   </ItemGroup>
 

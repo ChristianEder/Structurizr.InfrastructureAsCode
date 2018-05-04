@@ -34,13 +34,14 @@ namespace Structurizr.InfrastructureAsCode.Azure.InfrastructureRendering
             BeforeRender();
             try
             {
-                var azureInfrastructureElements = softwareSystem.ElementsWithInfrastructure().Distinct();
+                var azureInfrastructureElements = softwareSystem.ElementsWithInfrastructure().Distinct().ToArray();
 
                 foreach (var elementsInLocation in azureInfrastructureElements.GroupBy(e => _resourceLocationTargetingStrategy.TargetLocation(_environment, e)))
                 {
                     foreach (var elementsInResourceGroup in elementsInLocation.GroupBy(e => _resourceGroupTargetingStrategy.TargetResourceGroup(_environment, e)))
                     {
-                        await DeployInfrastructure(elementsInResourceGroup.Key, elementsInLocation.Key, elementsInResourceGroup.ToList(), softwareSystem.System.Name);
+                        await DeployInfrastructure(elementsInResourceGroup.Key, elementsInLocation.Key,
+                            elementsInResourceGroup.ToList(), softwareSystem.System.Name);
                     }
                 }
             }
@@ -116,7 +117,6 @@ namespace Structurizr.InfrastructureAsCode.Azure.InfrastructureRendering
         }
 
         protected abstract string TemplateDeploymentVersion(string resourceGroupName);
-
 
         protected abstract void BeforeRender();
         protected abstract Task BeforeDeployInfrastructure(string resourceGroupName, string location);

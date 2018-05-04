@@ -37,9 +37,19 @@ namespace Structurizr.InfrastructureAsCode.InfrastructureRendering
 
             foreach (var injectable in allTypes.Where(t => t.GetCustomAttribute(typeof(InjectableAttribute)) != null))
             {
+                var att = injectable.GetCustomAttributes(typeof(InjectableAttribute))
+                    .OfType<InjectableAttribute>()
+                    .Single();
                 foreach (var injectableInterface in injectable.GetInterfaces())
                 {
-                    Ioc.Register(injectableInterface, injectable).AsMultiInstance();
+                    if (att.Singleton)
+                    {
+                        Ioc.Register(injectableInterface, injectable).AsSingleton();
+                    }
+                    else
+                    {
+                        Ioc.Register(injectableInterface, injectable).AsMultiInstance();
+                    }
                 }
             }
         }

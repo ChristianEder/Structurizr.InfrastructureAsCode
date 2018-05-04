@@ -1,5 +1,4 @@
-﻿using Structurizr.InfrastructureAsCode.Azure.Model;
-using Structurizr.InfrastructureAsCode.InfrastructureRendering;
+﻿using Structurizr.InfrastructureAsCode.InfrastructureRendering;
 
 namespace Structurizr.InfrastructureAsCode.Azure.Sample.Model
 {

@@ -41,6 +41,17 @@ namespace Structurizr.InfrastructureAsCode.Azure.ARM
             AppendSettingsResource(elementWithInfrastructure, elementWithInfrastructure.Infrastructure.ConnectionStrings, appService);
         }
 
+        protected virtual void AddIdentity(IHaveInfrastructure<AppService> elementWithInfrastructure, JObject appService)
+        {
+            if (elementWithInfrastructure.Infrastructure.UseSystemAssignedIdentity)
+            {
+                appService["identity"] = new JObject
+                {
+                    ["type"] = "SystemAssigned"
+                };
+            }
+        }
+
         private void AppendSettingsResource(IHaveInfrastructure<AppService> elementWithInfrastructure, IEnumerable<AppServiceSetting> settings, JObject appService)
         {
             var resolvedSettings = settings

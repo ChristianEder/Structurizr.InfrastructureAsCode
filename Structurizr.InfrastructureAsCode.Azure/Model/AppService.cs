@@ -1,13 +1,14 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using Microsoft.Azure.Management.AppService.Fluent.Models;
+using Microsoft.Azure.Management.Fluent;
 using Structurizr.InfrastructureAsCode.Model.Connectors;
 
 namespace Structurizr.InfrastructureAsCode.Azure.Model
 {
-    public abstract class AppService : ContainerInfrastructure, IHaveHiddenLink, IConfigurable
+    public abstract class AppService : ContainerInfrastructure, IHaveHiddenLink, IConfigurable, IHaveServiceIdentity
     {
-        private IConfigurable _store;
+        private ISecureConfigurationStore _store;
 
         protected AppService()
         {
@@ -63,7 +64,7 @@ namespace Structurizr.InfrastructureAsCode.Azure.Model
                 .Any(v => v.DependsOn == resource);
         }
 
-        public void UseStore(IConfigurable store)
+        public void UseStore(ISecureConfigurationStore store)
         {
             _store = store;
             MoveSettingsIntoStore();
@@ -93,14 +94,27 @@ namespace Structurizr.InfrastructureAsCode.Azure.Model
             foreach (var secureSetting in secureSettings)
             {
                 settings.Remove(secureSetting);
-                _store.Configure(secureSetting.Name, secureSetting.Value);
+                _store.Store(secureSetting.Name, secureSetting.Value);
             }
         }
 
         private void ConfigureKeyVaultAccess()
         {
-            // TODO
+            var name = $"{_store.EnvironmentInvariantName}-url";
+            if (Settings.Any(s => s.Name == name))
+            {
+                return;
+            }
+            Settings.Add(new AppServiceSetting(name, _store.Url));
+
+            UseSystemAssignedIdentity = true;
+            _store.AllowAccessFrom(this);
         }
+
+        public bool UseSystemAssignedIdentity { get; private set; }
+
+        string IHaveServiceIdentity.Id =>
+            $"[reference(concat(resourceId('Microsoft.Web/sites', '{Name}'), '/providers/Microsoft.ManagedIdentity/Identities/default'), '2015-08-31-PREVIEW').principalId]";
     }
 
     public class AppServiceSetting : ConfigurationElement

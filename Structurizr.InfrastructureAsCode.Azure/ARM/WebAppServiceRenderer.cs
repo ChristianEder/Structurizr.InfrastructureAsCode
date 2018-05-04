@@ -61,6 +61,7 @@ namespace Structurizr.InfrastructureAsCode.Azure.ARM
 
             AddSubResources(elementWithInfrastructure, appService);
             AddDependsOn(elementWithInfrastructure, appService);
+            AddIdentity(elementWithInfrastructure, appService);
             template.Resources.Add(appService);
         }
 

@@ -84,6 +84,7 @@ namespace Structurizr.InfrastructureAsCode.Azure.Sample
                 .UsingCredentials(
                     new AzureSubscriptionCredentials(
                     configuration["Azure:ClientId"],
+                    configuration["Azure:ApplicationId"],
                     configuration["Azure:Thumbprint"],
                     configuration["Azure:TenantId"],
                     configuration["Azure:SubscriptionId"]))
