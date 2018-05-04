@@ -16,6 +16,8 @@ namespace IotReferenceArchitectureFunctions
     {
         public static void Main(string[] args)
         {
+            UploadToStructurizr();
+            RenderInfrastructure("dev");
         }
 
 
@@ -76,7 +78,7 @@ namespace IotReferenceArchitectureFunctions
             // New-AzureRmADServicePrincipal -ApplicationId $app.ApplicationId
             // New-AzureRmRoleAssignment -RoleDefinitionName Contributor -ServicePrincipalName $app.ApplicationId
 
-            return new InfrastructureRendererBuilder<InfrastructureToResourcesRenderer>()
+            return new InfrastructureRendererBuilder<InfrastructureToTemplateJsonRenderer>()
                 .In(environment)
                 .Using<IAzureDeploymentTemplateWriter>(new AzureDeploymentTemplateWriter("dev-5"))
                 .UsingResourceGroupPerEnvironment(e => $"ref-{e.Name}")

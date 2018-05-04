@@ -13,6 +13,11 @@ namespace IotReferenceArchitectureFunctions.Model
 
         public IotReferenceArchKeyVault KeyVault { get; }
 
+        public IotReferenceArchTelemetryStorage TelemetryStorage { get; }
+
+        public IotReferenceArchIngress Ingress { get; }
+        public IotReferenceArchApplicationInsights AppInsights { get; }
+
         public IotReferenceArchModel(Workspace workspace, IInfrastructureEnvironment environment)
         {
             System = workspace.Model.AddSoftwareSystem(
@@ -23,6 +28,9 @@ namespace IotReferenceArchitectureFunctions.Model
             KeyVault = new IotReferenceArchKeyVault(this, environment);
             Hub = new IotReferenceArchHub(this, environment);
             DPS = new IotReferenceArchDPS(this, Hub, environment);
+            TelemetryStorage = new IotReferenceArchTelemetryStorage(this, environment);
+            AppInsights = new IotReferenceArchApplicationInsights(this, environment);
+            Ingress = new IotReferenceArchIngress(this, Hub, TelemetryStorage, AppInsights, environment);
 
             Device = workspace.Model.AddSoftwareSystem(Location.External,"Device", "Sends data into cloud");
             Device.Uses(Hub, "Send production telemetry data and failure events", "MQTT");
