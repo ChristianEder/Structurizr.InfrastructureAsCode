@@ -16,7 +16,7 @@ namespace IotReferenceArchitectureFunctions.Model
         {
             Container = iotReferenceArchModel.System.AddContainer(
                 name: "Telemetry Table Storage",
-                description: "Persistently stores all telemetry data from device",
+                description: "Stores all telemetry data from device",
                 technology: "Azure Table Storage");
 
             Infrastructure = new StorageAccount

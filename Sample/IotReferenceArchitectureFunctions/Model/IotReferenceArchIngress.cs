@@ -6,8 +6,10 @@ namespace IotReferenceArchitectureFunctions.Model
 {
     public class IotReferenceArchIngress : ContainerWithInfrastructure<FunctionAppService>
     {
-        public IotReferenceArchIngress(IotReferenceArchModel iotReferenceArchModel, IotReferenceArchHub hub, 
-            IotReferenceArchTelemetryStorage telemetryStorage, IotReferenceArchApplicationInsights appInsights, IInfrastructureEnvironment environment)
+        public IotReferenceArchIngress(IotReferenceArchModel iotReferenceArchModel, IotReferenceArchHub hub,
+            IotReferenceArchTelemetryStorage telemetryStorage,
+            IotReferenceArchMasterStorage iotReferencecArchMasterStorage,
+            IotReferenceArchApplicationInsights appInsights, IInfrastructureEnvironment environment)
         {
             Container = iotReferenceArchModel.System.AddContainer(
                 name: "Ingress",
@@ -28,6 +30,8 @@ namespace IotReferenceArchitectureFunctions.Model
                 .InOrderTo("Store telemetry data");
 
             Uses(appInsights).InOrderTo("Log metrics");
+
+            Uses(iotReferencecArchMasterStorage).InOrderTo("Persist master data");
         }
     }
 }

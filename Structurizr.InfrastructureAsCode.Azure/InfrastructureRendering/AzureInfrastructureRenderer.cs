@@ -34,7 +34,8 @@ namespace Structurizr.InfrastructureAsCode.Azure.InfrastructureRendering
             BeforeRender();
             try
             {
-                var azureInfrastructureElements = softwareSystem.ElementsWithInfrastructure().Distinct().ToArray();
+                var azureInfrastructureElements = softwareSystem.ElementsWithInfrastructure()
+                    .GroupBy(e => e.Infrastructure).Select(g => g.First());
 
                 foreach (var elementsInLocation in azureInfrastructureElements.GroupBy(e => _resourceLocationTargetingStrategy.TargetLocation(_environment, e)))
                 {

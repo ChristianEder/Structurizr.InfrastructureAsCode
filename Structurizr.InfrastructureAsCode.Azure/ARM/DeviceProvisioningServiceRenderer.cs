@@ -11,7 +11,7 @@ namespace Structurizr.InfrastructureAsCode.Azure.ARM
             IHaveInfrastructure<DeviceProvisioningService> elementWithInfrastructure,
             IAzureInfrastructureEnvironment environment, string resourceGroup, string location)
         {
-            var dps = elementWithInfrastructure.Infrastructure;
+            var dps = elementWithInfrastructure.Infrastructure;         
 
             template.Resources.Add(new JObject
             {

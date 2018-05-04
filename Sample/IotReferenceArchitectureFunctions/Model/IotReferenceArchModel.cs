@@ -18,6 +18,10 @@ namespace IotReferenceArchitectureFunctions.Model
         public IotReferenceArchIngress Ingress { get; }
         public IotReferenceArchApplicationInsights AppInsights { get; }
 
+        public IotReferenceArchSqlServer IotReferencecArchSqlServer { get; }
+        public IotReferenceArchMasterStorage IotReferencecArchMasterStorage { get; }
+
+
         public IotReferenceArchModel(Workspace workspace, IInfrastructureEnvironment environment)
         {
             System = workspace.Model.AddSoftwareSystem(
@@ -30,7 +34,9 @@ namespace IotReferenceArchitectureFunctions.Model
             DPS = new IotReferenceArchDPS(this, Hub, environment);
             TelemetryStorage = new IotReferenceArchTelemetryStorage(this, environment);
             AppInsights = new IotReferenceArchApplicationInsights(this, environment);
-            Ingress = new IotReferenceArchIngress(this, Hub, TelemetryStorage, AppInsights, environment);
+            IotReferencecArchSqlServer = new IotReferenceArchSqlServer(this, environment);
+            IotReferencecArchMasterStorage = new IotReferenceArchMasterStorage(this, IotReferencecArchSqlServer, environment);
+            Ingress = new IotReferenceArchIngress(this, Hub, TelemetryStorage, IotReferencecArchMasterStorage,AppInsights, environment);
 
             Device = workspace.Model.AddSoftwareSystem(Location.External,"Device", "Sends data into cloud");
             Device.Uses(Hub, "Send production telemetry data and failure events", "MQTT");

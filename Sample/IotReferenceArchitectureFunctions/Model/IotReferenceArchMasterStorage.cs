@@ -9,21 +9,21 @@ using Structurizr.InfrastructureAsCode.InfrastructureRendering;
 
 namespace IotReferenceArchitectureFunctions.Model
 {
-    public class IotReferenceArchMasterStorage : ContainerWithInfrastructure<StorageAccount>
+    public class IotReferenceArchMasterStorage : ContainerWithInfrastructure<SqlDatabase>
     {
-        public IotReferenceArchMasterStorage(IotReferenceArchModel iotReferenceArchModel,
+        public IotReferenceArchMasterStorage(IotReferenceArchModel iotReferenceArchModel, IotReferenceArchSqlServer iotReferencecArchSqlServer, 
             IInfrastructureEnvironment environment)
         {
             Container = iotReferenceArchModel.System.AddContainer(
-                name: "Telemetry Table Storage",
-                description: "Persistently stores all telemetry data from device",
-                technology: "Azure Table Storage");
+                name: "Master SQL Storage",
+                description: "Stores master data",
+                technology: "Azure SQL Database");
 
-            Infrastructure = new StorageAccount
+            var sqlServer = iotReferencecArchSqlServer.Infrastructure;
+
+            Infrastructure = new SqlDatabase (sqlServer)
             {
-                Kind = StorageAccountKind.StorageV2,
-                Name = "reftelemetry" + environment.Name,
-                EnvironmentInvariantName = "reftelemetry"
+                Name = "masterdata" + environment.Name
             };
         }
     }
