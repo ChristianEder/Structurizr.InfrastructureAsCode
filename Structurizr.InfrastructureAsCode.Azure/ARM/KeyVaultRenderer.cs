@@ -1,12 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 using Newtonsoft.Json.Linq;
-using Structurizr.InfrastructureAsCode.Azure.ARM.Configuration;
 using Structurizr.InfrastructureAsCode.Azure.InfrastructureRendering;
 using Structurizr.InfrastructureAsCode.Azure.Model;
-using Structurizr.InfrastructureAsCode.IoC;
 
 namespace Structurizr.InfrastructureAsCode.Azure.ARM
 {
@@ -48,11 +45,6 @@ namespace Structurizr.InfrastructureAsCode.Azure.ARM
 
             foreach (var keyVaultSecret in keyVault.Secrets)
             {
-                if (!keyVaultSecret.Value.IsResolved)
-                {
-                    throw new Exception($"The keyvault secret {keyVaultSecret.Name} is not resolved ");
-                }
-
                 template.Resources.Add(new JObject
                 {
                     ["type"] = "Microsoft.KeyVault/vaults/secrets",
@@ -120,21 +112,6 @@ namespace Structurizr.InfrastructureAsCode.Azure.ARM
         {
             return base.GetConfigurationValues(elementWithInfrastructure)
                 .Concat(elementWithInfrastructure.Infrastructure.Secrets.Values);
-        }
-
-        protected override Task Configure(IHaveInfrastructure<KeyVault> elementWithInfrastructure,
-            AzureConfigurationValueResolverContext context)
-        {
-            foreach (var secret in elementWithInfrastructure.Infrastructure.Secrets)
-            {
-                object value;
-                if (context.Values.TryGetValue(secret.Value, out value))
-                {
-                    // TODO: add secret to key vault using the context.Client
-                }
-            }
-
-            return Task.FromResult(1);
         }
     }
 }

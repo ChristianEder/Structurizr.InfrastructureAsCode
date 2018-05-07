@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Newtonsoft.Json.Linq;
-using Structurizr.InfrastructureAsCode.Azure.ARM.Configuration;
 using Structurizr.InfrastructureAsCode.Azure.InfrastructureRendering;
 using TinyIoC;
 
@@ -13,7 +12,6 @@ namespace Structurizr.InfrastructureAsCode.Azure.ARM
     {
         void Render(AzureDeploymentTemplate template, IHaveInfrastructure elementWithInfrastructure, IAzureInfrastructureEnvironment environment, string resourceGroup, string location);
         IEnumerable<IConfigurationValue> GetConfigurationValues(IHaveInfrastructure elementWithInfrastructure);
-        Task Configure(IHaveInfrastructure elementWithInfrastructure, AzureConfigurationValueResolverContext context);
     }
 
     public abstract class AzureResourceRenderer<TInfrastructure> : IAzureResourceRenderer
@@ -29,19 +27,9 @@ namespace Structurizr.InfrastructureAsCode.Azure.ARM
             return GetConfigurationValues((IHaveInfrastructure<TInfrastructure>)elementWithInfrastructure);
         }
 
-        public Task Configure(IHaveInfrastructure elementWithInfrastructure, AzureConfigurationValueResolverContext context)
-        {
-            return Configure((IHaveInfrastructure<TInfrastructure>)elementWithInfrastructure, context);
-        }
-
         protected virtual IEnumerable<IConfigurationValue> GetConfigurationValues(IHaveInfrastructure<TInfrastructure> elementWithInfrastructure)
         {
             return Enumerable.Empty<IConfigurationValue>();
-        }
-
-        protected virtual Task Configure(IHaveInfrastructure<TInfrastructure> elementWithInfrastructure, AzureConfigurationValueResolverContext context)
-        {
-            return Task.FromResult(0);
         }
 
         protected abstract void Render(AzureDeploymentTemplate template, IHaveInfrastructure<TInfrastructure> elementWithInfrastructure, IAzureInfrastructureEnvironment environment, string resourceGroup, string location);

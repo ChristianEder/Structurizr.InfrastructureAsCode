@@ -84,7 +84,7 @@ namespace Structurizr.InfrastructureAsCode.Azure.Model
         private void MoveSettingsIntoStore<T>(Configuration<T> settings) 
             where T : ConfigurationElement
         {
-            var secureSettings = settings.Where(s => s.Value.ShouldBeStoredSecure && s.Value.IsResolved).ToArray();
+            var secureSettings = settings.Where(s => s.Value.ShouldBeStoredSecure).ToArray();
             if (!secureSettings.Any())
             {
                 return;

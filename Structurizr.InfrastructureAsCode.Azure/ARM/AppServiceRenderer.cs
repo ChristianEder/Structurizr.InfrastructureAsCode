@@ -54,9 +54,7 @@ namespace Structurizr.InfrastructureAsCode.Azure.ARM
 
         private void AppendSettingsResource(IHaveInfrastructure<AppService> elementWithInfrastructure, IEnumerable<AppServiceSetting> settings, JObject appService)
         {
-            var resolvedSettings = settings
-                .Where(s => s.Value.IsResolved)
-                .ToArray();
+            var resolvedSettings = settings.ToArray();
             if (!resolvedSettings.Any())
             {
                 return;
