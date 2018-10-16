@@ -4,15 +4,15 @@ using Structurizr.InfrastructureAsCode.InfrastructureRendering;
 
 namespace IotReferenceArchitectureFunctions.Model
 {
-    public class IotReferenceArchKeyVault : ContainerWithInfrastructure<KeyVault>
+    public class SecretStorage : ContainerWithInfrastructure<KeyVault>
     {
-        public IotReferenceArchKeyVault(IotReferenceArchModel iotReferenceArchModel,
+        public SecretStorage(IotReferenceArchitectureWithFunctions iotReferenceArchitectureWithFunctions,
             IInfrastructureEnvironment environment)
         {
-            Container = iotReferenceArchModel.System.AddContainer(
-                "Iot Reference Architecture Key Vault",
-                "Keeps the secrets",
-                "");
+            Container = iotReferenceArchitectureWithFunctions.System.AddContainer(
+                "Secret storage",
+                "Stores secrets that other services require to access each other",
+                "Azure Key Vault");
 
             Infrastructure = new KeyVault
             {

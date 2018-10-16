@@ -1,20 +1,15 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Structurizr.InfrastructureAsCode;
+﻿using Structurizr.InfrastructureAsCode;
 using Structurizr.InfrastructureAsCode.Azure.Model;
 using Structurizr.InfrastructureAsCode.InfrastructureRendering;
 
 namespace IotReferenceArchitectureFunctions.Model
 {
-    public class IotReferenceArchHub : ContainerWithInfrastructure<IoTHub>
+    public class CloudGateway : ContainerWithInfrastructure<IoTHub>
     {
-        public IotReferenceArchHub(IotReferenceArchModel iotReferenceArchModel, IInfrastructureEnvironment environment)
+        public CloudGateway(IotReferenceArchitectureWithFunctions iotReferenceArchitectureWithFunctions, IInfrastructureEnvironment environment)
         {
-            Container = iotReferenceArchModel.System.AddContainer(
-                name: "Iot Hub",
+            Container = iotReferenceArchitectureWithFunctions.System.AddContainer(
+                name: "Cloud Gateway",
                 description: "Receives incoming messages from the device",
                 technology: "Azure IoT Hub");
 

@@ -1,22 +1,17 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Structurizr.InfrastructureAsCode;
+﻿using Structurizr.InfrastructureAsCode;
 using Structurizr.InfrastructureAsCode.Azure.Model;
 using Structurizr.InfrastructureAsCode.InfrastructureRendering;
 
 namespace IotReferenceArchitectureFunctions.Model
 {
-    public class IotReferenceArchTelemetryStorage : ContainerWithInfrastructure<StorageAccount>
+    public class TelemetryStorage : ContainerWithInfrastructure<StorageAccount>
     {
-        public IotReferenceArchTelemetryStorage(IotReferenceArchModel iotReferenceArchModel,
+        public TelemetryStorage(IotReferenceArchitectureWithFunctions iotReferenceArchitectureWithFunctions,
             IInfrastructureEnvironment environment)
         {
-            Container = iotReferenceArchModel.System.AddContainer(
-                name: "Telemetry Table Storage",
-                description: "Stores all telemetry data from device",
+            Container = iotReferenceArchitectureWithFunctions.System.AddContainer(
+                name: "Telemetry Storage",
+                description: "Stores all telemetry data from the devices",
                 technology: "Azure Table Storage");
 
             Infrastructure = new StorageAccount

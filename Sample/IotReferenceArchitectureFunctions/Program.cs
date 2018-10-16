@@ -90,7 +90,7 @@ namespace IotReferenceArchitectureFunctions
         {
             var workspace = CreateWorkspace();
 
-            var iotReferenceArchModel = new IotReferenceArchModel(workspace, environment);
+            var iotReferenceArchModel = new IotReferenceArchitectureWithFunctions(workspace, environment);
 
             var contextView = workspace.Views.CreateSystemContextView(iotReferenceArchModel.System, "Iot reference architecture with functions Context view", "Overview over the IoT reference architecture");
             contextView.AddAllSoftwareSystems();
@@ -109,9 +109,9 @@ namespace IotReferenceArchitectureFunctions
             return workspace;
         }
 
-        private static IotReferenceArchModel InfrastructureModel(IAzureInfrastructureEnvironment environment)
+        private static IotReferenceArchitectureWithFunctions InfrastructureModel(IAzureInfrastructureEnvironment environment)
         {
-            return new IotReferenceArchModel(CreateWorkspace(), environment);
+            return new IotReferenceArchitectureWithFunctions(CreateWorkspace(), environment);
         }
 
         private static Workspace CreateWorkspace()
