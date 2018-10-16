@@ -42,6 +42,10 @@ namespace Structurizr.InfrastructureAsCode.Azure.ARM
                 {
                     ["endIpAddress"] = "0.0.0.0",
                     ["startIpAddress"] = "0.0.0.0"
+                },
+                ["dependsOn"] = new JArray
+                {
+                    sqlServer.ResourceIdReference
                 }
             });
 
@@ -59,6 +63,10 @@ namespace Structurizr.InfrastructureAsCode.Azure.ARM
                         ["maxSizeBytes"] = "2147483648",
                         ["zoneRedundant"] = false,
                         ["requestedServiceObjectiveId"] = "dd6d99bb-f193-4ec1-86f2-43d3bccbc49c"
+                    },
+                    ["dependsOn"] = new JArray
+                    {
+                        sqlServer.ResourceIdReference
                     }
                 }));
 

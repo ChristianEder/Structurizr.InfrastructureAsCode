@@ -71,24 +71,16 @@ namespace IotReferenceArchitectureFunctions
 
         private static AzureInfrastructureRenderer Renderer(IAzureInfrastructureEnvironment environment, IConfiguration configuration)
         {
-
-            // In order for this to run, you need to create an Azure AD application for this tool first, then configure the AD Apps credentials in the configuration file
-            // How to: https://msdn.microsoft.com/en-us/library/mt603580.aspx
-            // $app = New-AzureRmADApplication -DisplayName "{appname}" -HomePage "http://{appname}.com" -IdentifierUris "http://{appname}.{tenant name}.onmicrosoft.com" -Password "{app secret}" -EndDate $until
-            // New-AzureRmADServicePrincipal -ApplicationId $app.ApplicationId
-            // New-AzureRmRoleAssignment -RoleDefinitionName Contributor -ServicePrincipalName $app.ApplicationId
-
-            return new InfrastructureRendererBuilder<InfrastructureToTemplateJsonRenderer>()
+            return new InfrastructureRendererBuilder<InfrastructureToResourcesRenderer>()
                 .In(environment)
-                .Using<IAzureDeploymentTemplateWriter>(new AzureDeploymentTemplateWriter("dev-5"))
-                .UsingResourceGroupPerEnvironment(e => $"ref-{e.Name}")
+                .UsingResourceGroupPerEnvironment(e => $"iot-rf-{e.Name}")
                 .UsingLocation("westeurope")
                 .Using<IPasswordPolicy, RandomPasswordPolicy>()
                 .UsingCredentials(
                     new AzureSubscriptionCredentials(
                     configuration["Azure:ClientId"],
                     configuration["Azure:ApplicationId"],
-                    configuration["Azure:ClientSecret"],
+                    configuration["Azure:Thumbprint"],
                     configuration["Azure:TenantId"],
                     configuration["Azure:SubscriptionId"]))
                 .Build();
@@ -100,11 +92,11 @@ namespace IotReferenceArchitectureFunctions
 
             var iotReferenceArchModel = new IotReferenceArchModel(workspace, environment);
 
-            var contextView = workspace.Views.CreateSystemContextView(iotReferenceArchModel.System, "Iot reference architecture with functions Context view", "Overview over the iot reference architecture");
+            var contextView = workspace.Views.CreateSystemContextView(iotReferenceArchModel.System, "Iot reference architecture with functions Context view", "Overview over the IoT reference architecture");
             contextView.AddAllSoftwareSystems();
             contextView.AddAllPeople();
 
-            var containerView = workspace.Views.CreateContainerView(iotReferenceArchModel.System, "Iot reference architecture with functions Container View", "Overview over the iot reference architecture");
+            var containerView = workspace.Views.CreateContainerView(iotReferenceArchModel.System, "Iot reference architecture with functions Container View", "Overview over the IoT reference architecture");
 
             containerView.AddAllContainers();
             containerView.AddAllPeople();
