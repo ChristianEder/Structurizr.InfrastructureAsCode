@@ -113,6 +113,8 @@ namespace Structurizr.InfrastructureAsCode.Azure.ARM
                     {
                         ["iotHubNamespace"] = iotHub.IotHub.Name,
                         ["sharedAccessPolicyName"] = "iothubowner",
+                        ["sharedAccessPolicyKey"] = iotHub.IotHub.OwnerKey.Value.ToString(),
+
                         ["endpoint"] = "messages/events",
                         ["consumerGroupName"] = "$Default"
                     }
@@ -128,7 +130,8 @@ namespace Structurizr.InfrastructureAsCode.Azure.ARM
                     {
                         ["storageAccounts"] = new JArray(new JObject
                         {
-                            ["accountName"] = blobStorage.StorageAccount.Name
+                            ["accountName"] = blobStorage.StorageAccount.Name,
+                            ["accountKey"] = blobStorage.StorageAccount.AccountKey
                         }),
                         ["container"] = blobStorage.Container,
                         ["pathPattern"] = blobStorage.PathPattern,
@@ -151,6 +154,7 @@ namespace Structurizr.InfrastructureAsCode.Azure.ARM
                     ["properties"] = new JObject
                     {
                         ["accountName"] = tableStorage.StorageAccount.Name,
+                        ["accountKey"] = tableStorage.StorageAccount.AccountKey,
                         ["table"] = tableStorage.Table,
                         ["partitionKey"] = tableStorage.PartitionKey,
                         ["rowKey"] = tableStorage.RowKey,

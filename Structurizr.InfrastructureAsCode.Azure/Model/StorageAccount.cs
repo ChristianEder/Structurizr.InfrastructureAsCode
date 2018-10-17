@@ -14,6 +14,9 @@ namespace Structurizr.InfrastructureAsCode.Azure.Model
         public StorageAccountTableEndpoint TableEndpoint => new StorageAccountTableEndpoint(this);
         public string ResourceIdReference => $"[{ResourceIdReferenceContent}]";
         public string ResourceIdReferenceContent => $"resourceId('Microsoft.Storage/storageAccounts', '{Name}')";
+
+        public string AccountKey => $"[{AccountKeyValue}]";
+        public string AccountKeyValue => $"listKeys(resourceId('Microsoft.Storage/storageAccounts', '{Name}'), '2015-05-01-preview').key1";
     }
 
     public enum StorageAccountKind
@@ -76,6 +79,6 @@ namespace Structurizr.InfrastructureAsCode.Azure.Model
         public override bool ShouldBeStoredSecure => true;
 
         public override object Value =>
-            $"[concat('DefaultEndpointsProtocol=https;AccountName=','{ DependsOn.Name}',';AccountKey=',listKeys(resourceId('Microsoft.Storage/storageAccounts', '{DependsOn.Name}'), '2015-05-01-preview').key1)]";
+            $"[concat('DefaultEndpointsProtocol=https;AccountName=','{ DependsOn.Name}',';AccountKey=',{DependsOn.AccountKeyValue})]";
     }
 }

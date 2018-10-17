@@ -42,7 +42,7 @@ namespace Structurizr.InfrastructureAsCode.Azure.Model
         public string ResourceIdReferenceContent =>
             $"resourceId('Microsoft.Devices/iotHubs/Iothubkeys', '{_hub.Name}', '{Name}')";
 
-        public override object Value => $"[listkeys('{ResourceIdReference}', {_hub.ApiVersion}).primaryKey]";
+        public override object Value => $"[listkeys({ResourceIdReferenceContent}, '{_hub.ApiVersion}').primaryKey]";
         public override bool ShouldBeStoredSecure => true;
     }
 
