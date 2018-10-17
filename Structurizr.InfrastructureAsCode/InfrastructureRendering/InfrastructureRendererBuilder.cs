@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Linq;
 using System.Reflection;
-using Structurizr.InfrastructureAsCode.InfrastructureRendering.Configuration;
 using Structurizr.InfrastructureAsCode.IoC;
 using TinyIoC;
 
@@ -20,26 +19,21 @@ namespace Structurizr.InfrastructureAsCode.InfrastructureRendering
                 .SelectMany(a => a.GetTypes())
                 .ToArray();
 
-            var resolverTypes = allTypes
-                .Where(t => typeof(IConfigurationValueResolver).IsAssignableFrom(t))
-                .Where(t => !t.IsAbstract && !t.IsGenericTypeDefinition);
-
-            foreach (var resolverType in resolverTypes)
-            {
-                foreach (var resolverInterface in resolverType.GetInterfaces().Where(i => i.IsGenericType && i.GetGenericTypeDefinition() == typeof(IConfigurationValueResolver<>)))
-                {
-                    Ioc.Register(resolverInterface, resolverType).AsMultiInstance();
-                }
-            }
-
-            Ioc.Register<IConfigurationValueResolver<FixedConfigurationValue<string>>, FixedConfigurationValueResolver<string>>().AsMultiInstance();
-            Ioc.Register<IConfigurationValueResolver<FixedConfigurationValue<int>>, FixedConfigurationValueResolver<int>>().AsMultiInstance();
-
             foreach (var injectable in allTypes.Where(t => t.GetCustomAttribute(typeof(InjectableAttribute)) != null))
             {
+                var att = injectable.GetCustomAttributes(typeof(InjectableAttribute))
+                    .OfType<InjectableAttribute>()
+                    .Single();
                 foreach (var injectableInterface in injectable.GetInterfaces())
                 {
-                    Ioc.Register(injectableInterface, injectable).AsMultiInstance();
+                    if (att.Singleton)
+                    {
+                        Ioc.Register(injectableInterface, injectable).AsSingleton();
+                    }
+                    else
+                    {
+                        Ioc.Register(injectableInterface, injectable).AsMultiInstance();
+                    }
                 }
             }
         }
@@ -47,14 +41,6 @@ namespace Structurizr.InfrastructureAsCode.InfrastructureRendering
         public TBuilder In(TEnvironment environment)
         {
             Ioc.Register(environment);
-            return (TBuilder)this;
-        }
-
-        public TBuilder UsingConfigurationValueResolver<TValue, TResolver>()
-            where TValue : IConfigurationValue
-            where TResolver : class, IConfigurationValueResolver<TValue>
-        {
-            Ioc.Register<IConfigurationValueResolver<TValue>, TResolver>().AsMultiInstance();
             return (TBuilder)this;
         }
 

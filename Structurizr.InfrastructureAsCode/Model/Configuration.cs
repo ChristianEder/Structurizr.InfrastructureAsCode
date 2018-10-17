@@ -25,6 +25,11 @@ namespace Structurizr.InfrastructureAsCode
         {
             return GetEnumerator();
         }
+
+        public void Remove(TElement element)
+        {
+            _elements.Remove(element);
+        }
     }
 
     public abstract class ConfigurationElement
@@ -36,15 +41,12 @@ namespace Structurizr.InfrastructureAsCode
     public interface IConfigurationValue
     {
         object Value { get;  }
-        bool IsResolved { get; }
         bool ShouldBeStoredSecure { get; }
     }
 
     public abstract class ConfigurationValue : IConfigurationValue
     {
         public virtual object Value { get;  }
-
-        public virtual bool IsResolved => !ReferenceEquals(null, Value);
         public abstract bool ShouldBeStoredSecure { get; }
     }
 
@@ -58,7 +60,6 @@ namespace Structurizr.InfrastructureAsCode
         }
 
         object IConfigurationValue.Value => Value;
-        bool IConfigurationValue.IsResolved => !Equals(default(T), Value);
         public bool ShouldBeStoredSecure { get; set; }
     }
 }

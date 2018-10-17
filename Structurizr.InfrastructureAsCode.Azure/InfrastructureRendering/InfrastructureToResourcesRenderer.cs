@@ -4,10 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Azure.Management.Fluent;
 using Microsoft.Azure.Management.Graph.RBAC.Fluent;
-using Newtonsoft.Json.Linq;
 using Structurizr.InfrastructureAsCode.Azure.ARM;
-using Structurizr.InfrastructureAsCode.Azure.ARM.Configuration;
-using Structurizr.InfrastructureAsCode.InfrastructureRendering.Configuration;
 using TinyIoC;
 
 namespace Structurizr.InfrastructureAsCode.Azure.InfrastructureRendering
@@ -43,7 +40,6 @@ namespace Structurizr.InfrastructureAsCode.Azure.InfrastructureRendering
 
         protected override async Task BeforeDeployInfrastructure(string resourceGroupName, string location)
         {
-            SetContextToConfigurationResolvers(_azure, _graph, resourceGroupName);
             await _azure.EnsureResourceGroupExists(resourceGroupName, location);
         }
 
@@ -59,7 +55,7 @@ namespace Structurizr.InfrastructureAsCode.Azure.InfrastructureRendering
 
         protected override Task AfterDeployInfrastructure(string resourceGroupName, string location, List<IHaveInfrastructure> elementsWithInfrastructure)
         {
-            return Configure(elementsWithInfrastructure);
+            return Task.CompletedTask;
         }
 
         private int DeploymentCount(string resourceGroupName)
@@ -68,77 +64,6 @@ namespace Structurizr.InfrastructureAsCode.Azure.InfrastructureRendering
                 .Where(d => d.ResourceGroupName == resourceGroupName)
                 .Distinct()
                 .Count();
-        }
-
-        private async Task Configure(List<IHaveInfrastructure> elementsWithInfrastructure)
-        {
-            var configContext = Ioc.Resolve<AzureConfigurationValueResolverContext>();
-
-            await ResolveConfigurationValuesToContext(elementsWithInfrastructure, configContext);
-            foreach (var container in elementsWithInfrastructure)
-            {
-                var renderer = Ioc.GetRendererFor(container);
-                if (renderer != null)
-                {
-                    Console.Write($"Configuring {container.Infrastructure.Name} ...");
-
-                    await renderer.Configure(container, configContext);
-
-                    Console.WriteLine(" done");
-                }
-            }
-        }
-
-        private async Task ResolveConfigurationValuesToContext(IEnumerable<IHaveInfrastructure> elementsWithInfrastructure,
-            AzureConfigurationValueResolverContext configContext)
-        {
-            var valuesAndResolvers = elementsWithInfrastructure.SelectMany(c =>
-                {
-                    var renderer = Ioc.GetRendererFor(c);
-                    return renderer != null
-                        ? renderer.GetConfigurationValues(c)
-                        : Enumerable.Empty<IConfigurationValue>();
-                })
-                .Where(v => !v.IsResolved)
-                .Distinct()
-                .ToDictionary(v => v, v => Ioc.GetResolverFor(v));
-
-            var value = FindFirstValueToBeResolved(valuesAndResolvers);
-            while (value != null)
-            {
-                var resolver = valuesAndResolvers[value];
-                valuesAndResolvers.Remove(value);
-
-                var resolvedValue = await resolver.Resolve(value);
-                configContext.Values.Add(value, resolvedValue);
-
-                value = FindFirstValueToBeResolved(valuesAndResolvers);
-            }
-        }
-
-        private IConfigurationValue FindFirstValueToBeResolved(Dictionary<IConfigurationValue, IConfigurationValueResolver> valuesAndResolvers)
-        {
-            if (!valuesAndResolvers.Any())
-            {
-                return null;
-            }
-
-            foreach (var valueAndResolver in valuesAndResolvers)
-            {
-                if (valueAndResolver.Value != null && 
-                    valueAndResolver.Value.CanResolve(valueAndResolver.Key))
-                {
-                    return valueAndResolver.Key;
-                }
-            }
-            return null;
-        }
-
-        
-        private void SetContextToConfigurationResolvers(IAzure azure, IGraphRbacManagementClient graph, string resourceGroupName)
-        {
-            var configContext = new AzureConfigurationValueResolverContext(azure, graph, resourceGroupName);
-            Ioc.Register(configContext);
         }
     }
 }

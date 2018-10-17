@@ -1,15 +1,27 @@
-﻿namespace Structurizr.InfrastructureAsCode.Azure.Model
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using Structurizr.InfrastructureAsCode.Model.Connectors;
+
+namespace Structurizr.InfrastructureAsCode.Azure.Model
 {
-    public class KeyVault : ContainerInfrastructure
+    public class KeyVault : ContainerInfrastructure, ISecureConfigurationStore
     {
+
         public KeyVault()
         {
             Secrets = new Configuration<KeyVaultSecret>();
         }
 
+        public string EnvironmentInvariantName { get; set; }
+
+        public string ResourceIdReference => $"[{ResourceIdReferenceContent}]";
+        public string ResourceIdReferenceContent => $"resourceId('Microsoft.KeyVault/vaults', '{Name}')";
+        public List<IHaveServiceIdentity> Readers { get; } = new List<IHaveServiceIdentity>();
+
         public Configuration<KeyVaultSecret> Secrets { get; set; }
 
-        public FixedConfigurationValue<string> Url => new FixedConfigurationValue<string>($"https://{Name}.vault.azure.net/");
+        public IConfigurationValue Url => new FixedConfigurationValue<string>($"https://{Name}.vault.azure.net/");
 
         public KeyVaultActiveDirectoryApplicationId ActiveDirectoryApplicationIdFor(string clientName)
         {
@@ -24,6 +36,29 @@
         protected override bool IsNameValid(string name)
         {
             return base.IsNameValid(name) && name.Length >= 3 && name.Length <= 24;
+        }
+
+        void ISecureConfigurationStore.Store(string name, IConfigurationValue value)
+        {
+            var existing = Secrets.FirstOrDefault(s => s.Name == name);
+            if (!ReferenceEquals(existing, null))
+            {
+                if (!Equals(existing.Value, value))
+                {
+                    throw new InvalidOperationException();
+                }
+                return;
+            }
+            Secrets.Add(new KeyVaultSecret { Name = name, Value = value });
+        }
+
+        void ISecureConfigurationStore.AllowAccessFrom(IHaveServiceIdentity serviceIdentity)
+        {
+            if (Readers.Any(r => r.Id == serviceIdentity.Id))
+            {
+                return;
+            }
+            Readers.Add(serviceIdentity);
         }
     }
 

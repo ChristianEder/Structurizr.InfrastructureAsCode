@@ -1,6 +1,6 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.InteropServices.WindowsRuntime;
 using Newtonsoft.Json.Linq;
 using Structurizr.InfrastructureAsCode.Azure.Model;
 
@@ -41,64 +41,80 @@ namespace Structurizr.InfrastructureAsCode.Azure.ARM
             AppendSettingsResource(elementWithInfrastructure, elementWithInfrastructure.Infrastructure.ConnectionStrings, appService);
         }
 
+        protected virtual void AddIdentity(IHaveInfrastructure<AppService> elementWithInfrastructure, JObject appService)
+        {
+            if (elementWithInfrastructure.Infrastructure.UseSystemAssignedIdentity)
+            {
+                appService["identity"] = new JObject
+                {
+                    ["type"] = "SystemAssigned"
+                };
+            }
+        }
+
         private void AppendSettingsResource(IHaveInfrastructure<AppService> elementWithInfrastructure, IEnumerable<AppServiceSetting> settings, JObject appService)
         {
-            var resolvedSettings = settings
-                .Where(s => s.Value.IsResolved)
-                .ToArray();
-            if (!resolvedSettings.Any())
+            try
             {
-                return;
-            }
-
-            var isConnectionStrings = resolvedSettings.First() is AppServiceConnectionString;
-
-            var resources = appService["resources"] as JArray;
-            if (resources == null)
-            {
-                appService["resources"] = resources = new JArray();
-            }
-
-            var dependsOn = new JArray
-            {
-                elementWithInfrastructure.Infrastructure.Name
-            };
-
-            var properties = new JObject();
-
-            var config = new JObject
-            {
-                ["apiVersion"] = ApiVersion,
-                ["name"] = isConnectionStrings ? "connectionstrings" : "appsettings",
-                ["type"] = "config",
-                ["dependsOn"] = dependsOn,
-                ["properties"] = properties
-            };
-
-            foreach (var setting in resolvedSettings)
-            {
-                var value = setting.Value;
-                var dependentValue = value as IDependentConfigurationValue;
-                if (dependentValue != null)
+                var resolvedSettings = settings.ToArray();
+                if (!resolvedSettings.Any())
                 {
-                    dependsOn.Add(dependentValue.DependsOn.ResourceIdReference);
+                    return;
                 }
 
-                if (isConnectionStrings)
+                var isConnectionStrings = resolvedSettings.First() is AppServiceConnectionString;
+
+                var resources = appService["resources"] as JArray;
+                if (resources == null)
                 {
-                    properties[setting.Name] = new JObject
+                    appService["resources"] = resources = new JArray();
+                }
+
+                var dependsOn = new JArray
+                {
+                    elementWithInfrastructure.Infrastructure.Name
+                };
+
+                var properties = new JObject();
+
+                var config = new JObject
+                {
+                    ["apiVersion"] = ApiVersion,
+                    ["name"] = isConnectionStrings ? "connectionstrings" : "appsettings",
+                    ["type"] = "config",
+                    ["dependsOn"] = dependsOn,
+                    ["properties"] = properties
+                };
+
+                foreach (var setting in resolvedSettings)
+                {
+                    var value = setting.Value;
+                    var dependentValue = value as IDependentConfigurationValue;
+                    if (dependentValue != null)
                     {
-                        ["value"]  = JToken.FromObject(setting.Value.Value),
-                        ["type"] = ((AppServiceConnectionString) setting).Type
-                    };
-                }
-                else
-                {
-                    properties[setting.Name] = JToken.FromObject(setting.Value.Value);
-                }
-            }
+                        dependsOn.Add(dependentValue.DependsOn.ResourceIdReference);
+                    }
 
-            resources.Add(config);
+                    if (isConnectionStrings)
+                    {
+                        properties[setting.Name] = new JObject
+                        {
+                            ["value"]  = JToken.FromObject(setting.Value.Value),
+                            ["type"] = ((AppServiceConnectionString) setting).Type
+                        };
+                    }
+                    else
+                    {
+                        properties[setting.Name] = JToken.FromObject(setting.Value.Value);
+                    }
+                }
+
+                resources.Add(config);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+            }
         }
 
         protected const string ApiVersion = "2016-03-01";

@@ -11,12 +11,10 @@ using Microsoft.Azure.Management.ResourceManager.Fluent;
 using Microsoft.Azure.Management.ResourceManager.Fluent.Models;
 using Moq;
 using Structurizr.InfrastructureAsCode.Azure.ARM;
-using Structurizr.InfrastructureAsCode.Azure.ARM.Configuration;
 using Structurizr.InfrastructureAsCode.Azure.InfrastructureRendering;
 using Structurizr.InfrastructureAsCode.Azure.Model;
 using Structurizr.InfrastructureAsCode.Azure.Tests.Data;
 using Structurizr.InfrastructureAsCode.InfrastructureRendering;
-using Structurizr.InfrastructureAsCode.InfrastructureRendering.Configuration;
 using TinyIoC;
 using Xunit;
 
@@ -96,8 +94,7 @@ namespace Structurizr.InfrastructureAsCode.Azure.Tests
                 SetupWebAppUpdate(mock);
             });
 
-            var renderer = GivenARenderer(azure.Object,
-                ioc: WithConfigurationResolvers(WithRenderers(new TinyIoCContainer())));
+            var renderer = GivenARenderer(azure.Object, ioc: WithRenderers(new TinyIoCContainer()));
 
             await WhenRendering(renderer);
 
@@ -172,12 +169,6 @@ namespace Structurizr.InfrastructureAsCode.Azure.Tests
         private TinyIoCContainer WithRenderers(TinyIoCContainer ioc)
         {
             ioc.Register<AzureResourceRenderer<WebAppService>, WebAppServiceRenderer>();
-            return ioc;
-        }
-
-        private TinyIoCContainer WithConfigurationResolvers(TinyIoCContainer ioc)
-        {
-            ioc.Register<IConfigurationValueResolver<WebAppServiceUrl>, WebAppServiceUrlResolver>();
             return ioc;
         }
 

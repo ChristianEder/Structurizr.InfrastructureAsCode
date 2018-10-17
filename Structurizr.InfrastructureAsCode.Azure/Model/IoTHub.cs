@@ -22,6 +22,9 @@ namespace Structurizr.InfrastructureAsCode.Azure.Model
         public IoTHubConnectionString OwnerConnectionString => new IoTHubConnectionString(this, OwnerKey);
 
         public string ApiVersion = "2016-02-03";
+
+        public string Url => Name + ".azure-devices.net";
+
     }
 
     public class IoTHubKey : DependentConfigurationValue<IoTHub>, IHaveResourceId
@@ -39,7 +42,7 @@ namespace Structurizr.InfrastructureAsCode.Azure.Model
         public string ResourceIdReferenceContent =>
             $"resourceId('Microsoft.Devices/iotHubs/Iothubkeys', '{_hub.Name}', '{Name}')";
 
-        public override object Value => $"[listkeys('{ResourceIdReference}', {_hub.ApiVersion}).primaryKey]";
+        public override object Value => $"[listkeys({ResourceIdReferenceContent}, '{_hub.ApiVersion}').primaryKey]";
         public override bool ShouldBeStoredSecure => true;
     }
 
@@ -68,7 +71,7 @@ namespace Structurizr.InfrastructureAsCode.Azure.Model
                 throw new InvalidOperationException("You have to set the EnvironmentInvariantName in order to use this as a source of connections");
             }
 
-            yield return  new KeyValuePair<string, IConfigurationValue>(source.EnvironmentInvariantName + "-connection", source.OwnerConnectionString);
+            yield return new KeyValuePair<string, IConfigurationValue>(source.EnvironmentInvariantName + "-connection", source.OwnerConnectionString);
         }
     }
 }

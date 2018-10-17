@@ -1,4 +1,4 @@
-﻿namespace Structurizr.InfrastructureAsCode.Azure.Sample.Model
+﻿namespace Structurizr.InfrastructureAsCode.Model
 {
     public static class UsageExtensions
     {

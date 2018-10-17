@@ -16,7 +16,6 @@ namespace Structurizr.InfrastructureAsCode.Azure.Model
         }
 
         public abstract object Value { get; }
-        public bool IsResolved => true;
         public abstract bool ShouldBeStoredSecure { get; }
         public TDependentOn DependsOn { get; }
 

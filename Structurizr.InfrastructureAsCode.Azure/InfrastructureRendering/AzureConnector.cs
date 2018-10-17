@@ -1,3 +1,4 @@
+using System.Security.Cryptography.X509Certificates;
 using Microsoft.Azure.Management.Fluent;
 using Microsoft.Azure.Management.Graph.RBAC.Fluent;
 using Microsoft.Azure.Management.ResourceManager.Fluent;
@@ -27,14 +28,34 @@ namespace Structurizr.InfrastructureAsCode.Azure.InfrastructureRendering
             {
                 TenantID = _subscriptionCredentials.TenantId
             };
+
             return graph;
         }
 
         private AzureCredentials AzureCredentials => new AzureCredentialsFactory().FromServicePrincipal(
                 _subscriptionCredentials.ClientId,
-                _subscriptionCredentials.ClientSecret,
+                Certificate,
                 _subscriptionCredentials.TenantId,
                 AzureEnvironment.AzureGlobalCloud)
             .WithDefaultSubscription(_subscriptionCredentials.SubscriptionId);
+
+        private X509Certificate2 Certificate
+        {
+            get
+            {
+                X509Store store = new X509Store(StoreName.My, StoreLocation.CurrentUser);
+                try
+                {
+                    store.Open(OpenFlags.ReadOnly);
+                    X509Certificate2Collection col = store.Certificates.Find(X509FindType.FindByThumbprint,
+                        _subscriptionCredentials.Thumbprint, false); // Don't validate certs, since the test root isn't installed.
+                    return col.Count == 0 ? null : col[0];
+                }
+                finally
+                {
+                    store.Close();
+                }
+            }
+        }
     }
 }

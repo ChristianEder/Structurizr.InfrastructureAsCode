@@ -4,7 +4,7 @@ using Structurizr.InfrastructureAsCode.Azure.Model;
 
 namespace Structurizr.InfrastructureAsCode.Azure.ARM
 {
-    public class IoTHubRenderer: AzureResourceRenderer<IoTHub>
+    public class IoTHubRenderer : AzureResourceRenderer<IoTHub>
     {
         protected override void Render(AzureDeploymentTemplate template, IHaveInfrastructure<IoTHub> elementWithInfrastructure,
             IAzureInfrastructureEnvironment environment, string resourceGroup, string location)

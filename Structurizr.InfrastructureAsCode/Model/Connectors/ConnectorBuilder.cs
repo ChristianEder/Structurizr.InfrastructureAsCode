@@ -17,8 +17,8 @@ namespace Structurizr.InfrastructureAsCode.Model.Connectors
     public interface ICanConfigureTechnologies<TUsing, TUsed> : ICanConfigureConnectorDescription
     {
         ICanConfigureTechnologies<TUsing, TUsed> Over(string technology);
-        ICanConfigureConnectorDescription Over<TConnector>() where TConnector : ContainerConnector, new();
-        ICanConfigureConnectorDescription Over<TConnector>(TConnector connector) where TConnector : ContainerConnector;
+        ICanConfigureConnectorDescription Over<TConnector>() where TConnector : IContainerConnector, new();
+        ICanConfigureConnectorDescription Over<TConnector>(TConnector connector) where TConnector : IContainerConnector;
     }
 
     public class ConnectorBuilder<TUsing, TUsed> : ICanConfigureTechnologies<TUsing, TUsed>
@@ -39,13 +39,13 @@ namespace Structurizr.InfrastructureAsCode.Model.Connectors
         }
 
         public ICanConfigureConnectorDescription Over<TConnector>()
-            where TConnector : ContainerConnector, new()
+            where TConnector : IContainerConnector, new()
         {
             return Over(new TConnector());
         }
 
         public ICanConfigureConnectorDescription Over<TConnector>(TConnector connector)
-            where TConnector : ContainerConnector
+            where TConnector : IContainerConnector
         {
             _containerConnector = connector;
             _connectorTechnologies.Add(connector.Technology);

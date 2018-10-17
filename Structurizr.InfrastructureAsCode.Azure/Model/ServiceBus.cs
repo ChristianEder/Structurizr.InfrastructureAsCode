@@ -30,8 +30,8 @@ namespace Structurizr.InfrastructureAsCode.Azure.Model
         {
             yield return new KeyValuePair<string, IConfigurationValue>(EnvironmentInvariantName + "-connectionstring", ConnectionString);
         }
-
-        public string ResourceIdReference => $"[resourceId('Microsoft.ServiceBus/namespaces', '{Name}')]";
+        public string ResourceIdReference => $"[{ResourceIdReferenceContent}]";
+        public string ResourceIdReferenceContent => $"resourceId('Microsoft.ServiceBus/namespaces', '{Name}')";
     }
 
     public class ServiceBusConnectionString : DependentConfigurationValue<ServiceBus>

@@ -3,7 +3,8 @@
     public interface IAzureSubscriptionCredentials
     {
         string ClientId { get; }
-        string ClientSecret { get; }
+        string ApplicationId { get; }
+        string Thumbprint { get; }
         string TenantId { get; }
         string SubscriptionId { get; }
     }

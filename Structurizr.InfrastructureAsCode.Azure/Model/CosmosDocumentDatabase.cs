@@ -16,7 +16,8 @@ namespace Structurizr.InfrastructureAsCode.Azure.Model
 
         public string EnvironmentInvariantName { get; set; }
 
-        public string ResourceIdReference => $"[resourceId('Microsoft.DocumentDb/databaseAccounts', '{Name}')]";
+        public string ResourceIdReference => $"[{ResourceIdReferenceContent}]";
+        public string ResourceIdReferenceContent => $"resourceId('Microsoft.DocumentDb/databaseAccounts', '{Name}')";
 
         IEnumerable<KeyValuePair<string, IConfigurationValue>> IHttpsConnectionSource.ConnectionInformation()
         {

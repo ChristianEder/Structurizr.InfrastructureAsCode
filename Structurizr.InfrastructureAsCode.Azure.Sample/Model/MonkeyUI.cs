@@ -19,7 +19,7 @@ namespace Structurizr.InfrastructureAsCode.Azure.Sample.Model
             };
 
             Uses(eventStore)
-                .Over<Https>()
+                .Over(eventStore.Infrastructure.TableEndpoint)
                 .InOrderTo("Load information about the monkey factory");
         }
     }

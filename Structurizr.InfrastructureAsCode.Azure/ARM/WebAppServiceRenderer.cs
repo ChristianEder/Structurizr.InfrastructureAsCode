@@ -6,7 +6,6 @@ using Microsoft.Azure.Management.AppService.Fluent;
 using Microsoft.Azure.Management.AppService.Fluent.Models;
 using Microsoft.Azure.Management.AppService.Fluent.WebAppBase.Update;
 using Newtonsoft.Json.Linq;
-using Structurizr.InfrastructureAsCode.Azure.ARM.Configuration;
 using Structurizr.InfrastructureAsCode.Azure.InfrastructureRendering;
 using Structurizr.InfrastructureAsCode.Azure.Model;
 
@@ -61,6 +60,7 @@ namespace Structurizr.InfrastructureAsCode.Azure.ARM
 
             AddSubResources(elementWithInfrastructure, appService);
             AddDependsOn(elementWithInfrastructure, appService);
+            AddIdentity(elementWithInfrastructure, appService);
             template.Resources.Add(appService);
         }
 
@@ -78,46 +78,6 @@ namespace Structurizr.InfrastructureAsCode.Azure.ARM
                 $"[concat(resourceGroup().id, \'/providers/Microsoft.Web/serverfarms/\', \'{elementWithInfrastructure.Infrastructure.Name}\')]";
             properties["hostingEnvironment"] = "";
             return properties;
-        }
-
-        protected override async Task Configure(IHaveInfrastructure<WebAppService> elementWithInfrastructure, AzureConfigurationValueResolverContext context)
-        {
-            var webapp = await context.Azure.WebApps.GetByResourceGroupAsync(context.ResourceGroupName, elementWithInfrastructure.Infrastructure.Name);
-
-            var appSettings = new Dictionary<string, string>();
-
-            foreach (var setting in elementWithInfrastructure.Infrastructure.Settings)
-            {
-                object value;
-                if (context.Values.TryGetValue(setting.Value, out value))
-                {
-                    appSettings.Add(setting.Name, value.ToString());
-                }
-            }
-
-            IUpdate<IWebApp> update = null;
-            if (appSettings.Any())
-            {
-                update = webapp.Update().WithAppSettings(appSettings);
-
-            }
-
-            foreach (var connectionString in elementWithInfrastructure.Infrastructure.ConnectionStrings)
-            {
-                object value;
-                if (context.Values.TryGetValue(connectionString.Value, out value))
-                {
-                    update = (update ?? webapp.Update()).WithConnectionString(
-                        connectionString.Name,
-                        value.ToString(),
-                        (ConnectionStringType)Enum.Parse(typeof(ConnectionStringType), connectionString.Type));
-                }
-            }
-
-            if (update != null)
-            {
-                await update.ApplyAsync();
-            }
         }
     }
 }
