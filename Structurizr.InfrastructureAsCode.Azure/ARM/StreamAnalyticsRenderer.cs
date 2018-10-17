@@ -42,8 +42,8 @@ namespace Structurizr.InfrastructureAsCode.Azure.ARM
                             ["streamingUnits"] = 1
                         }
                     }
-                }
-                ["dependsOn"] = new JArray(streamAnalytics.Inputs.Select(i => i.Source).OfType<IHaveResourceId>().Select(i => i.ResourceIdReferenceContent).Cast<object>().ToArray())
+                },
+                ["dependsOn"] = new JArray(streamAnalytics.Inputs.Select(i => i.Source).OfType<IHaveResourceId>().Select(i => i.ResourceIdReference).Cast<object>().ToArray())
             });
         }
 
