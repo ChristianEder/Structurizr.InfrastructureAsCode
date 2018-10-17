@@ -61,63 +61,6 @@ namespace Structurizr.InfrastructureAsCode.Azure.Tests
 
         }
 
-
-        [Fact]
-        public async Task ShouldNotConfigureAnythingWhenHavingNoAppropriateConfigurationResolver()
-        {
-            var webApps = new List<Mock<IWebApp>>();
-            var azure = GetAzure();
-
-            SetupWebApp(azure, mock => webApps.Add(mock));
-
-            var renderer = GivenARenderer(azure.Object);
-
-            await WhenRendering(renderer);
-
-            Assert.Equal(2, webApps.Count);
-            foreach (var webApp in webApps)
-            {
-                webApp.Verify(a => a.Update(), Times.Never);
-            }
-        }
-
-
-        [Fact]
-        public async Task ShouldConfigureEverythingWhenHavingAppropriateConfigurationResolvers()
-        {
-            var webApps = new List<Mock<IWebApp>>();
-            var azure = GetAzure();
-
-            SetupWebApp(azure, mock =>
-            {
-                webApps.Add(mock);
-                SetupWebAppUpdate(mock);
-            });
-
-            var renderer = GivenARenderer(azure.Object, ioc: WithRenderers(new TinyIoCContainer()));
-
-            await WhenRendering(renderer);
-
-            Assert.Equal(2, webApps.Count);
-            foreach (var webApp in webApps)
-            {
-                if (webApp.Object.Name == "sampleapi")
-                {
-                    webApp.Verify(a => a.Update(), Times.Never);
-                }
-                else if (webApp.Object.Name == "sample")
-                {
-                    webApp.Verify(a => a.Update(), Times.Once);
-                    var expectedSettings = new Dictionary<string, string> {{"apiUrl", "sampleapi.azure.com"}};
-                    webApp.Verify(a => a.Update().WithAppSettings(expectedSettings), Times.Once);
-                }
-                else
-                {
-                    throw new InvalidOperationException("Unkown web app");
-                }
-            }
-        }
-
         private InfrastructureToResourcesRenderer GivenARenderer(
             IAzure azure,
             IResourceGroupTargetingStrategy resourceGroupTargetingStrategy = null,
