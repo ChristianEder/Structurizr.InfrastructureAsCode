@@ -56,7 +56,7 @@ namespace Structurizr.InfrastructureAsCode.Azure.ARM
                 inputs.Add(new JObject
                 {
                     ["type"] = "Microsoft.StreamAnalytics/streamingjobs/inputs",
-                    ["name"] = streamAnalytics.Name + "/" + input.Name,
+                    ["name"] = input.Name,
                     ["apiVersion"] = "2016-03-01",
                     ["properties"] = new JObject
                     {
@@ -70,7 +70,7 @@ namespace Structurizr.InfrastructureAsCode.Azure.ARM
                                 ["encoding"] = "UTF8"
                             }
                         }
-                    }
+                    },
                     ["dependsOn"] = new JArray(streamAnalytics.ResourceIdReference)
                 });
 
@@ -89,13 +89,13 @@ namespace Structurizr.InfrastructureAsCode.Azure.ARM
                 outputs.Add(new JObject
                 {
                     ["type"] = "Microsoft.StreamAnalytics/streamingjobs/outputs",
-                    ["name"] = streamAnalytics.Name + "/" + output.Name,
+                    ["name"] = output.Name,
                     ["apiVersion"] = "2016-03-01",
                     ["properties"] = new JObject
                     {
                         ["datasource"] = OutputDataSource(output)
-                    }
-                        ["dependsOn"] = new JArray(streamAnalytics.ResourceIdReference)
+                    },
+                    ["dependsOn"] = new JArray(streamAnalytics.ResourceIdReference)
                 });
             }
 
