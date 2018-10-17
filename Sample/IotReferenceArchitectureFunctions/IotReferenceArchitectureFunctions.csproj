@@ -1,15 +1,15 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
-
-  <PropertyGroup>
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project Sdk="Microsoft.NET.Sdk">
+ <PropertyGroup>
     <TargetFramework>net461</TargetFramework>
-    <AssemblyName>Structurizr.InfrastructureAsCode.Azure.Sample</AssemblyName>
+    <AssemblyName>IotReferenceArchitectureFunctions</AssemblyName>
     <OutputType>Exe</OutputType>
-    <PackageId>Structurizr.InfrastructureAsCode.Azure.Sample</PackageId>
+    <PackageId>IotReferenceArchitectureFunctions</PackageId>
     <GenerateAssemblyConfigurationAttribute>false</GenerateAssemblyConfigurationAttribute>
     <GenerateAssemblyCompanyAttribute>false</GenerateAssemblyCompanyAttribute>
     <GenerateAssemblyProductAttribute>false</GenerateAssemblyProductAttribute>
   </PropertyGroup>
-
+  
   <ItemGroup>
     <Content Include="appsettings.json.user">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
@@ -26,8 +26,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Structurizr.InfrastructureAsCode.Azure\Structurizr.InfrastructureAsCode.Azure.csproj" />
-    <ProjectReference Include="..\Structurizr.InfrastructureAsCode\Structurizr.InfrastructureAsCode.csproj" />
+    <ProjectReference Include="..\..\Structurizr.InfrastructureAsCode.Azure\Structurizr.InfrastructureAsCode.Azure.csproj" />
+    <ProjectReference Include="..\..\Structurizr.InfrastructureAsCode\Structurizr.InfrastructureAsCode.csproj" />
   </ItemGroup>
-
-</Project>
+ </Project>
