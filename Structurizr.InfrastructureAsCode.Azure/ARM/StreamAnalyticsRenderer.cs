@@ -32,13 +32,13 @@ namespace Structurizr.InfrastructureAsCode.Azure.ARM
                         ["name"] = "standard"
                     },
                     ["inputs"] = Inputs(streamAnalytics),
-                    ["outputs"] = new JArray(),
+                    ["outputs"] = Outputs(streamAnalytics),
                     ["transformation"] = new JObject
                     {
                         ["name"] = "Transformation",
                         ["properties"] = new JObject
                         {
-                            ["query"] = "SELECT\r\n    *\r\nINTO\r\n    [YourOutputAlias]\r\nFROM\r\n    [YourInputAlias]",
+                            ["query"] = streamAnalytics.TransformationQuery,
                             ["streamingUnits"] = 1
                         }
                     }
@@ -61,17 +61,17 @@ namespace Structurizr.InfrastructureAsCode.Azure.ARM
                     ["properties"] = new JObject
                     {
                         ["type"] = input.Type,
-                        ["datasource"] = DataSource(input),
+                        ["datasource"] = InputDataSource(input),
                         ["serialization"] = new JObject
                         {
-                            ["type"] ="Json",
-                            ["properties"]= new JObject
+                            ["type"] = "Json",
+                            ["properties"] = new JObject
                             {
                                 ["encoding"] = "UTF8"
                             }
                         }
                     }
-                    ["dependsOn"]= new JArray(streamAnalytics.ResourceIdReference)
+                    ["dependsOn"] = new JArray(streamAnalytics.ResourceIdReference)
                 });
 
 
@@ -80,7 +80,29 @@ namespace Structurizr.InfrastructureAsCode.Azure.ARM
             return inputs;
         }
 
-        private static JObject DataSource(StreamAnalyticsInput input)
+        private static JArray Outputs(StreamAnalytics streamAnalytics)
+        {
+            var outputs = new JArray();
+
+            foreach (var output in streamAnalytics.Outputs)
+            {
+                outputs.Add(new JObject
+                {
+                    ["type"] = "Microsoft.StreamAnalytics/streamingjobs/outputs",
+                    ["name"] = streamAnalytics.Name + "/" + output.Name,
+                    ["apiVersion"] = "2016-03-01",
+                    ["properties"] = new JObject
+                    {
+                        ["datasource"] = OutputDataSource(output)
+                    }
+                        ["dependsOn"] = new JArray(streamAnalytics.ResourceIdReference)
+                });
+            }
+
+            return outputs;
+        }
+
+        private static JObject InputDataSource(StreamAnalyticsInput input)
         {
             if (input is IotHubInput iotHub)
             {
@@ -117,6 +139,27 @@ namespace Structurizr.InfrastructureAsCode.Azure.ARM
             }
 
             throw new InvalidOperationException("Unknown input to StreamAnalytics: " + input.GetType());
+        }
+
+        private static JObject OutputDataSource(StreamAnalyticsOutput output)
+        {
+            if (output is TableOutput tableStorage)
+            {
+                return new JObject
+                {
+                    ["type"] = "Microsoft.Storage/Table",
+                    ["properties"] = new JObject
+                    {
+                        ["accountName"] = tableStorage.StorageAccount.Name,
+                        ["table"] = tableStorage.Table,
+                        ["partitionKey"] = tableStorage.PartitionKey,
+                        ["rowKey"] = tableStorage.RowKey,
+                        ["batchSize"] = 100
+                    }
+                };
+            }
+
+            throw new InvalidOperationException("Unknown output to StreamAnalytics: " + output.GetType());
         }
     }
 }

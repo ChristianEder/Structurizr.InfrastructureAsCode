@@ -10,20 +10,32 @@ namespace Structurizr.InfrastructureAsCode.Azure.Model
         private readonly List<StreamAnalyticsInput> _inputs = new List<StreamAnalyticsInput>();
         public IEnumerable<StreamAnalyticsInput> Inputs => _inputs;
 
-        public IotHubInput Input(string name, IoTHub iotHub)
+        private readonly List<StreamAnalyticsOutput> _outputs = new List<StreamAnalyticsOutput>();
+        public IEnumerable<StreamAnalyticsOutput> Outputs => _outputs;
+        public string ResourceIdReference => $"[{ResourceIdReferenceContent}]";
+        public string ResourceIdReferenceContent => $"resourceId('Microsoft.StreamAnalytics/streamingjobs', '{Name}')";
+
+        public string TransformationQuery { get; set; } = "SELECT\r\n    *\r\nINTO\r\n    [YourOutputAlias]\r\nFROM\r\n    [YourInputAlias]";
+
+        public IotHubInput IotHubInput(string name, IoTHub iotHub)
         {
             return GetOrAddInput(iotHub, () => new IotHubInput(name, iotHub));
         }
 
-        public BlobStorageInput Input(string name, StorageAccount blobStorageAccount, string container)
+        public BlobStorageInput BlobStorageInput(string name, StorageAccount storageAccount, string container)
         {
-            return GetOrAddInput(blobStorageAccount, () => new BlobStorageInput(name, blobStorageAccount, container));
+            return GetOrAddInput(storageAccount, () => new BlobStorageInput(name, storageAccount, container));
         }
 
-        private TInput GetOrAddInput<TInput>(ContainerInfrastructure iotHub, Func<TInput> create)
+        public TableOutput TableStorageOutput(string name, StorageAccount storageAccount, string table, string partitionKey, string rowKey)
+        {
+            return GetOrAddOutput(storageAccount, () => new TableOutput(name, storageAccount, table, partitionKey, rowKey));
+        }
+
+        private TInput GetOrAddInput<TInput>(ContainerInfrastructure source, Func<TInput> create)
             where TInput : StreamAnalyticsInput
         {
-            var input = _inputs.OfType<TInput>().FirstOrDefault(i => i.Source == iotHub);
+            var input = _inputs.OfType<TInput>().FirstOrDefault(i => i.Source == source);
             if (input == null)
             {
                 input = create();
@@ -32,9 +44,19 @@ namespace Structurizr.InfrastructureAsCode.Azure.Model
 
             return input;
         }
+        private TOutput GetOrAddOutput<TOutput>(ContainerInfrastructure target, Func<TOutput> create)
+            where TOutput : StreamAnalyticsOutput
+        {
+            var output = _outputs.OfType<TOutput>().FirstOrDefault(i => i.Target == target);
+            if (output == null)
+            {
+                output = create();
+                _outputs.Add(output);
+            }
 
-        public string ResourceIdReference => $"[{ResourceIdReferenceContent}]";
-        public string ResourceIdReferenceContent => $"resourceId('Microsoft.StreamAnalytics/streamingjobs', '{Name}')";
+            return output;
+        }
+
     }
 
     public abstract class StreamAnalyticsInput : IContainerConnector
@@ -106,5 +128,42 @@ namespace Structurizr.InfrastructureAsCode.Azure.Model
             TimeFormat = format;
             return this;
         }
+    }
+
+    public abstract class StreamAnalyticsOutput : IContainerConnector
+    {
+        protected StreamAnalyticsOutput(string name, ContainerInfrastructure target)
+        {
+            Name = name;
+            Target = target;
+        }
+
+        public void Connect<TUsing, TUsed>(ContainerWithInfrastructure<TUsing> usingContainer, ContainerWithInfrastructure<TUsed> usedContainer) where TUsing : ContainerInfrastructure where TUsed : ContainerInfrastructure
+        {
+        }
+
+        public ContainerInfrastructure Target { get; }
+
+        public string Name { get; }
+
+        public abstract string Technology { get; }
+    }
+
+    public class TableOutput : StreamAnalyticsOutput
+    {
+        public StorageAccount StorageAccount { get; }
+        public string Table { get; }
+        public string PartitionKey { get; }
+        public string RowKey { get; }
+
+        public TableOutput(string name, StorageAccount storageAccount, string table, string partitionKey, string rowKey) : base(name, storageAccount)
+        {
+            StorageAccount = storageAccount;
+            Table = table;
+            PartitionKey = partitionKey;
+            RowKey = rowKey;
+        }
+
+        public override string Technology => "Stream Analytics Table Storage output";
     }
 }
