@@ -9,5 +9,8 @@ namespace Structurizr.InfrastructureAsCode.Azure.Model
         public string ResourceIdReferenceContent => $"resourceId('Microsoft.Sql/servers', '{Name}')";
 
         public string ResourceIdReference => $"[{ResourceIdReferenceContent}]";
+
+        public string AdministratorLogin { get; set; }
+        public string AdministratorPassword { get; set; }
     }
 }

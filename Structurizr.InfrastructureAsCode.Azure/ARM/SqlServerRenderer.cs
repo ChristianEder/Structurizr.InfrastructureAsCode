@@ -22,7 +22,9 @@ namespace Structurizr.InfrastructureAsCode.Azure.ARM
                 ["location"] = location,
                 ["properties"] = new JObject
                 {
-                    ["version"] = "12.0"
+                    ["version"] = "12.0",
+                    ["administratorLogin"] = sqlServer.AdministratorLogin,
+                    ["administratorLoginPassword"] = sqlServer.AdministratorPassword
                 },
                 ["resources"] = GetResources(sqlServer, location)
             });
