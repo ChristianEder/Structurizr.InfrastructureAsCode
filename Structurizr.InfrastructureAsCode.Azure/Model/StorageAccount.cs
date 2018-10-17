@@ -12,7 +12,8 @@ namespace Structurizr.InfrastructureAsCode.Azure.Model
         public StorageAccountConnectionString ConnectionString => new StorageAccountConnectionString(this);
         public StorageAccountBlobEndpoint BlobEndpoint => new StorageAccountBlobEndpoint(this);
         public StorageAccountTableEndpoint TableEndpoint => new StorageAccountTableEndpoint(this);
-        public string ResourceIdReference => $"[resourceId('Microsoft.Storage/storageAccounts', '{Name}')]";
+        public string ResourceIdReference => $"[{ResourceIdReferenceContent}]";
+        public string ResourceIdReferenceContent => $"resourceId('Microsoft.Storage/storageAccounts', '{Name}')";
     }
 
     public enum StorageAccountKind

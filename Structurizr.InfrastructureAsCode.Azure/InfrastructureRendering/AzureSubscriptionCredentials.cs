@@ -5,10 +5,10 @@
         public AzureSubscriptionCredentials(string clientId, string applicationId, string thumbprint, string tenantId, string subscriptionId)
         {
             ClientId = clientId;
+            ApplicationId = applicationId;
             Thumbprint = thumbprint;
             TenantId = tenantId;
             SubscriptionId = subscriptionId;
-            ApplicationId = applicationId;
         }
 
         public string ClientId { get; }

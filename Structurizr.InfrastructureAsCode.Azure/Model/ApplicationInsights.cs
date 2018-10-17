@@ -15,8 +15,9 @@ namespace Structurizr.InfrastructureAsCode.Azure.Model
         public ApplicationInsightsInstrumentationKey InstrumentationKey { get; }
 
         public List<IHaveHiddenLink> UsedBy { get; }
-       
-        public string ResourceIdReference => $"[resourceId('Microsoft.Insights/components/', '{Name}')]";
+
+        public string ResourceIdReference => $"[{ResourceIdReferenceContent}]";
+        public string ResourceIdReferenceContent => $"resourceId('Microsoft.Insights/components/', '{Name}')";
 
         void IContainerConnector.Connect<TUsing, TUsed>(ContainerWithInfrastructure<TUsing> usingContainer, ContainerWithInfrastructure<TUsed> usedContainer)
         {
