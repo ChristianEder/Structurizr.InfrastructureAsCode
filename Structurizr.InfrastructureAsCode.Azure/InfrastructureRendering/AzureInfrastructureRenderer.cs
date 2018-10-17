@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.Azure.Management.Fluent;
 using Structurizr.InfrastructureAsCode.Azure.ARM;
 using Structurizr.InfrastructureAsCode.Azure.Model;
 using Structurizr.InfrastructureAsCode.InfrastructureRendering;

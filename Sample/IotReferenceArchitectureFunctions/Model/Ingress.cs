@@ -8,9 +8,10 @@ namespace IotReferenceArchitectureFunctions.Model
     {
         public Ingress(IotReferenceArchitectureWithFunctions iotReferenceArchitectureWithFunctions, CloudGateway hub,
             TelemetryStorage telemetryStorage,
-            MasterDataStorage iotReferencecArchMasterDataStorage,
+            MasterDataStorage masterDataStorage,
             SanitizedMessages sanitizedMessages,
-            ApplicationInsights appInsights, IInfrastructureEnvironment environment)
+            ApplicationInsights applicationInsights, 
+            IInfrastructureEnvironment environment)
         {
             Container = iotReferenceArchitectureWithFunctions.System.AddContainer(
                 name: "Ingress",
@@ -34,10 +35,9 @@ namespace IotReferenceArchitectureFunctions.Model
                 .Over(telemetryStorage.Infrastructure.TableEndpoint)
                 .InOrderTo("Persist telemetry data");
 
-            Uses(iotReferencecArchMasterDataStorage).InOrderTo("Persist master data");
+            Uses(masterDataStorage).InOrderTo("Persist master data");
 
-            Uses(appInsights).InOrderTo("Log metrics");
-
+            Uses(applicationInsights).InOrderTo("Log metrics");
         }
     }
 }

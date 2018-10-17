@@ -47,7 +47,10 @@ namespace Structurizr.InfrastructureAsCode.Azure.ARM
                 ["type"] = "eventhubs",
                 ["name"] = hub.Name,
                 ["location"] = location,
-                ["properties"] = new JObject(),
+                ["properties"] = new JObject
+                {
+                    ["messageRetentionInDays"] = 1
+                },
                 ["dependsOn"] = new JArray(eventHubNamespace.ResourceIdReference)
             };
         }
