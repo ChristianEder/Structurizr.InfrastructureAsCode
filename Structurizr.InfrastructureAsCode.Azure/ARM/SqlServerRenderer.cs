@@ -56,7 +56,7 @@ namespace Structurizr.InfrastructureAsCode.Azure.ARM
                 {
                     ["type"] = "databases",
                     ["name"] = database.Name,
-                    ["apiVersion"] = sqlServer.Name,
+                    ["apiVersion"] = sqlServer.ApiVersion,
                     ["location"] = location,
                     ["properties"] = new JObject
                     {
