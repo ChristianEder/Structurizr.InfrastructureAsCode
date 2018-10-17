@@ -19,6 +19,7 @@ namespace IotReferenceArchitectureFunctions.Model
         public ApplicationInsights ApplicationInsights { get; }
 
         public MasterDataStorage MasterDataStorage { get; }
+        public StreamAnalytics StreamAnalytics{ get; }
 
 
         public IotReferenceArchitectureWithFunctions(Workspace workspace, IInfrastructureEnvironment environment)
@@ -33,8 +34,9 @@ namespace IotReferenceArchitectureFunctions.Model
             DeviceProvisioning = new DeviceProvisioning(this, CloudGateway, environment);
             TelemetryStorage = new TelemetryStorage(this, environment);
             ApplicationInsights = new ApplicationInsights(this, environment);
-            MasterDataStorage = new MasterDataStorage(this, new IotReferenceArchSqlServer(environment), environment);
+            MasterDataStorage = new MasterDataStorage(this, new SqlServer(environment), environment);
             Ingress = new Ingress(this, CloudGateway, TelemetryStorage, MasterDataStorage,ApplicationInsights, environment);
+            StreamAnalytics = new StreamAnalytics(this, CloudGateway, TelemetryStorage, environment);
 
             Device = workspace.Model.AddSoftwareSystem(Location.External,"Device", "Sends data into the cloud");
             Device.Uses(CloudGateway, "Send production telemetry data and failure events", "MQTT");

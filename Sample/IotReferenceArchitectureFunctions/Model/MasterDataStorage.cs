@@ -6,7 +6,7 @@ namespace IotReferenceArchitectureFunctions.Model
 {
     public class MasterDataStorage : ContainerWithInfrastructure<SqlDatabase>
     {
-        public MasterDataStorage(IotReferenceArchitectureWithFunctions iotReferenceArchitectureWithFunctions, IotReferenceArchSqlServer iotReferencecArchSqlServer, 
+        public MasterDataStorage(IotReferenceArchitectureWithFunctions iotReferenceArchitectureWithFunctions, SqlServer iotReferencecArchSqlServer, 
             IInfrastructureEnvironment environment)
         {
             Container = iotReferenceArchitectureWithFunctions.System.AddContainer(
