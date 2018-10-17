@@ -5,7 +5,7 @@ namespace IotReferenceArchitectureFunctions.Model
 {
     public class StreamAnalytics : ContainerWithInfrastructure<Structurizr.InfrastructureAsCode.Azure.Model.StreamAnalytics>
     {
-        public StreamAnalytics(IotReferenceArchitectureWithFunctions iotReferenceArchitectureWithFunctions, CloudGateway cloudGateway, TelemetryStorage telemetryStorage, IInfrastructureEnvironment environment)
+        public StreamAnalytics(IotReferenceArchitectureWithFunctions iotReferenceArchitectureWithFunctions, SanitizedMessages sanitizedMessages, TelemetryStorage telemetryStorage, IInfrastructureEnvironment environment)
         {
             Container = iotReferenceArchitectureWithFunctions.System.AddContainer(
                 name: "Stream Analytics",
@@ -17,8 +17,7 @@ namespace IotReferenceArchitectureFunctions.Model
                 Name = "ref-sa-" + environment.Name
             };
 
-            Uses(cloudGateway).Over(Infrastructure.IotHubInput("iothub", cloudGateway.Infrastructure)).InOrderTo("Process incoming events");
-            Uses(telemetryStorage).Over(Infrastructure.BlobStorageInput("blob", telemetryStorage.Infrastructure, "streamingInput")).InOrderTo("Join reference data");
+            Uses(sanitizedMessages).Over(Infrastructure.EventHubInput("messages", sanitizedMessages.Infrastructure)).InOrderTo("Process incoming events");
             Uses(telemetryStorage).Over(Infrastructure.TableStorageOutput("out", telemetryStorage.Infrastructure, "aggregated", "partitionKey", "rowKey")).InOrderTo("Store aggregated data");
 
             Infrastructure.TransformationQuery = "SELECT\r\n    *\r\nINTO\r\n    out\r\nFROM\r\n    iothub";

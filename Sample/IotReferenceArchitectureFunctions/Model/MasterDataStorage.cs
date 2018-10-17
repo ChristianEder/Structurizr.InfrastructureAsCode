@@ -6,7 +6,7 @@ namespace IotReferenceArchitectureFunctions.Model
 {
     public class MasterDataStorage : ContainerWithInfrastructure<SqlDatabase>
     {
-        public MasterDataStorage(IotReferenceArchitectureWithFunctions iotReferenceArchitectureWithFunctions, SqlServer iotReferencecArchSqlServer, 
+        public MasterDataStorage(IotReferenceArchitectureWithFunctions iotReferenceArchitectureWithFunctions, SqlServer sqlServer, 
             IInfrastructureEnvironment environment)
         {
             Container = iotReferenceArchitectureWithFunctions.System.AddContainer(
@@ -14,9 +14,7 @@ namespace IotReferenceArchitectureFunctions.Model
                 description: "Stores master data",
                 technology: "Azure SQL Database");
 
-            var sqlServer = iotReferencecArchSqlServer.Infrastructure;
-
-            Infrastructure = new SqlDatabase (sqlServer)
+            Infrastructure = new SqlDatabase (sqlServer.Infrastructure)
             {
                 Name = "masterdata" + environment.Name
             };

@@ -71,7 +71,7 @@ namespace Structurizr.InfrastructureAsCode.Azure.Model
                 throw new InvalidOperationException("You have to set the EnvironmentInvariantName in order to use this as a source of connections");
             }
 
-            yield return  new KeyValuePair<string, IConfigurationValue>(source.EnvironmentInvariantName + "-connection", source.OwnerConnectionString);
+            yield return new KeyValuePair<string, IConfigurationValue>(source.EnvironmentInvariantName + "-connection", source.OwnerConnectionString);
         }
     }
 }

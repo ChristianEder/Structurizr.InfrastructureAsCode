@@ -114,8 +114,23 @@ namespace Structurizr.InfrastructureAsCode.Azure.ARM
                         ["iotHubNamespace"] = iotHub.IotHub.Name,
                         ["sharedAccessPolicyName"] = "iothubowner",
                         ["sharedAccessPolicyKey"] = iotHub.IotHub.OwnerKey.Value.ToString(),
-
                         ["endpoint"] = "messages/events",
+                        ["consumerGroupName"] = "$Default"
+                    }
+                };
+            }
+
+            if (input is EventHubInput eventHub)
+            {
+                return new JObject
+                {
+                    ["type"] = "Microsoft.ServiceBus/EventHub",
+                    ["properties"] = new JObject
+                    {
+                        ["serviceBusNamespace"] = eventHub.EventHub.Namespace.Name,
+                        ["sharedAccessPolicyName"] = eventHub.EventHub.Namespace.RootManageSharedAccessPolicy.Name,
+                        ["sharedAccessPolicyKey"] = eventHub.EventHub.Namespace.RootManageSharedAccessPolicy.Value.ToString(),
+                        ["eventHubName"] = eventHub.EventHub.Name,
                         ["consumerGroupName"] = "$Default"
                     }
                 };

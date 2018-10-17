@@ -1,5 +1,4 @@
 ﻿using Structurizr.InfrastructureAsCode;
-using Structurizr.InfrastructureAsCode.Azure.Model;
 using Structurizr.InfrastructureAsCode.InfrastructureRendering;
 
 namespace IotReferenceArchitectureFunctions.Model

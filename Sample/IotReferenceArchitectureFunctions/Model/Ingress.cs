@@ -9,6 +9,7 @@ namespace IotReferenceArchitectureFunctions.Model
         public Ingress(IotReferenceArchitectureWithFunctions iotReferenceArchitectureWithFunctions, CloudGateway hub,
             TelemetryStorage telemetryStorage,
             MasterDataStorage iotReferencecArchMasterDataStorage,
+            SanitizedMessages sanitizedMessages,
             ApplicationInsights appInsights, IInfrastructureEnvironment environment)
         {
             Container = iotReferenceArchitectureWithFunctions.System.AddContainer(
@@ -24,6 +25,10 @@ namespace IotReferenceArchitectureFunctions.Model
             Uses(hub)
                 .Over<IoTHubSDK>()
                 .InOrderTo("Subscribes to incoming messages");
+
+            Uses(sanitizedMessages)
+                .Over<EventHubSDK>()
+                .InOrderTo("Publish sanitized messages");
 
             Uses(telemetryStorage)
                 .Over(telemetryStorage.Infrastructure.TableEndpoint)

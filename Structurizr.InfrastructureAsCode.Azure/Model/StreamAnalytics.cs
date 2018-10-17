@@ -21,6 +21,10 @@ namespace Structurizr.InfrastructureAsCode.Azure.Model
         {
             return GetOrAddInput(iotHub, () => new IotHubInput(name, iotHub));
         }
+        public EventHubInput EventHubInput(string name, EventHub eventHub)
+        {
+            return GetOrAddInput(eventHub, () => new EventHubInput(name, eventHub));
+        }
 
         public BlobStorageInput BlobStorageInput(string name, StorageAccount storageAccount, string container)
         {
@@ -128,6 +132,20 @@ namespace Structurizr.InfrastructureAsCode.Azure.Model
             TimeFormat = format;
             return this;
         }
+    }
+
+    public class EventHubInput : StreamAnalyticsInput
+    {
+        public EventHub EventHub { get; }
+
+        public EventHubInput(string name, EventHub eventHub) : base(name, eventHub)
+        {
+            EventHub = eventHub;
+        }
+
+        public override string Technology => "Stream Analytics Event Hub input";
+
+        public override string Type => "Stream";
     }
 
     public abstract class StreamAnalyticsOutput : IContainerConnector
