@@ -22,3 +22,4 @@ bld/
 /packages
 /Structurizr.InfrastructureAsCode.Azure.Sample/structurizr-18991-*.json
 /infrastructurizr/Properties/launchSettings.json
+/infrastructurizr/Properties/PublishProfiles/FolderProfile.pubxml

@@ -97,15 +97,15 @@ namespace infrastructurizr
             {
                 Console.WriteLine($"- {command.Name}");
                 Console.WriteLine($"  {command.Description}");
-                Console.WriteLine($"  Example usage: z-azure {command.Name} [parameters]");
-                Console.WriteLine($"  For more info: z-azure {command.Name} --help");
+                Console.WriteLine($"  Example usage: infrastructurizr {command.Name} [parameters]");
+                Console.WriteLine($"  For more info: infrastructurizr {command.Name} --help");
             }
         }
 
         private static void PrintHelp(Command command)
         {
             Console.WriteLine($"Help for \"{command.Name}\"");
-            Console.WriteLine($"  Example usage: z-azure {command.Name} [parameters]");
+            Console.WriteLine($"  Example usage: infrastructurizr {command.Name} [parameters]");
             Console.WriteLine("Required parameters");
             PrintParametersHelp(command, p=> p.IsMandatory);
             Console.WriteLine("Optional parameters");
