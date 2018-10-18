@@ -10,10 +10,12 @@ namespace infrastructurizr.Dependencies
 
         public bool Assert()
         {
+            var isInstalled = IsInstalled(out var version);
+            var currentColor = Console.ForegroundColor;
+            Console.ForegroundColor = isInstalled ? ConsoleColor.Green : ConsoleColor.Red;
             Console.Write("##### " + Name);
-            string version;
-            var isInstalled = IsInstalled(out version);
             Console.WriteLine(isInstalled ? (" v (" + version.Trim() + ")") : " x");
+            Console.ForegroundColor = currentColor;
             return isInstalled;
         }
 

@@ -1,7 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.IO;
 using System.Linq;
+using System.Security.Cryptography.X509Certificates;
 using infrastructurizr.Util;
+using Newtonsoft.Json.Linq;
 
 namespace infrastructurizr.Commands.ServicePrincipal
 {
@@ -32,13 +36,60 @@ namespace infrastructurizr.Commands.ServicePrincipal
         {
             EnsurePassword();
 
+            Console.WriteLine($"### Checking if the service principal \"{ServicePrincipalName.Value}\" already exists, and creating it if required");
+
             var message = Powershell.RunScriptOf(this,
                 KeyValuePair.Create("$TenantId", TenantId.Value.ToString()),
                 KeyValuePair.Create("$ServicePrincipalName", ServicePrincipalName.Value),
                 KeyValuePair.Create("$CertPassword", ServicePrincipalCertificatePassword.Value),
                 KeyValuePair.Create("$SubscriptionId", SubscriptionId.Value.ToString()));
 
-            Console.WriteLine(message);
+
+            var success = ((message["Success"] as JValue)?.Value as bool?).GetValueOrDefault(false);
+            var created = success && ((message["Created"] as JValue)?.Value as bool?).GetValueOrDefault(false);
+            var path = success && created ? message["CertificateLocation"].ToString() : null;
+
+            if (!success)
+            {
+                using (new TemporaryConsoleColor(ConsoleColor.Red))
+                {
+                    Console.WriteLine("#### Getting or creating the service principal failed: " + message["Log"]);
+                    return;
+                }
+            }
+
+            using (new TemporaryConsoleColor(ConsoleColor.Green))
+            {
+                Console.WriteLine("#### " + message["Log"]);
+            }
+
+            if (!created)
+            {
+                return;
+            }
+
+            Console.Write("#### Do you want to install the certificate into your personal certificate store on this machine? [y/N] ");
+            if (Console.ReadLine()?.ToLowerInvariant() == "y")
+            {
+                try
+                {
+                    var cert = new X509Certificate2(path, ServicePrincipalCertificatePassword.Value, X509KeyStorageFlags.PersistKeySet);
+                    var store = new X509Store(StoreName.My);
+                    store.Open(OpenFlags.ReadWrite);
+                    store.Add(cert);
+                    using (new TemporaryConsoleColor(ConsoleColor.Green))
+                    {
+                        Console.WriteLine("#### Certificate installed successfully");
+                    }
+                }
+                catch (Exception e)
+                {
+                    using (new TemporaryConsoleColor(ConsoleColor.Red))
+                    {
+                        Console.WriteLine("#### Certificate could not be installed: " + e.Message);
+                    }
+                }
+            }
         }
 
         private void EnsurePassword()

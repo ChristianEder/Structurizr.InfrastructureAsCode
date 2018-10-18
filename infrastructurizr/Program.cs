@@ -32,6 +32,10 @@ namespace infrastructurizr
 
             CheckDependencies();
             command.Execute();
+
+#if DEBUG
+            Console.ReadLine();
+#endif
         }
 
         private static bool IsHelp(string a)

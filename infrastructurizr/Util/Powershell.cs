@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using infrastructurizr.Commands;
-using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
 namespace infrastructurizr.Util
