@@ -105,20 +105,33 @@ namespace infrastructurizr
         private static void PrintHelp(Command command)
         {
             Console.WriteLine($"Help for \"{command.Name}\"");
-            Console.WriteLine($"  Example usage: infrastructurizr {command.Name} [parameters]");
-            Console.WriteLine("Required parameters");
-            PrintParametersHelp(command, p=> p.IsMandatory);
-            Console.WriteLine("Optional parameters");
-            PrintParametersHelp(command, p => !p.IsMandatory);
+            
+            Console.WriteLine($"  Example usage: infrastructurizr {command.Name}{(command.Parameters.Any() ? " [parameters]": "")}");
+
+            var firstParameter = command.Parameters.FirstOrDefault(p => p.IsMandatory) ??
+                                 command.Parameters.FirstOrDefault();
+
+            if (firstParameter != null)
+            {
+                Console.WriteLine($"  Example usage: infrastructurizr {command.Name} --{firstParameter.Name} <value for {firstParameter.Name}>");
+            }
+            PrintParametersHelp("Required parameters", command, p => p.IsMandatory);
+            PrintParametersHelp("Optional parameters", command, p => !p.IsMandatory);
         }
 
-        private static void PrintParametersHelp(Command command, Func<CommandParameter, bool> predicate)
+        private static void PrintParametersHelp(string message, Command command, Func<CommandParameter, bool> predicate)
         {
-            foreach (var parameter in command.Parameters.Where(predicate))
+            var paramaters = command.Parameters.Where(predicate).ToArray();
+
+            if (paramaters.Any())
             {
-                Console.WriteLine($"  {parameter.Name}");
-                Console.WriteLine($"    {parameter.Description}");
-                Console.WriteLine($"    Type: {parameter.Type}");
+                Console.WriteLine(message);
+                foreach (var parameter in paramaters)
+                {
+                    Console.WriteLine($"  {parameter.Name}");
+                    Console.WriteLine($"    {parameter.Description}");
+                    Console.WriteLine($"    Type: {parameter.Type}");
+                }
             }
         }
 
