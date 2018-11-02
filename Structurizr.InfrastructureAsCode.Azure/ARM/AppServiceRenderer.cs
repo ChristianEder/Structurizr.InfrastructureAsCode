@@ -9,22 +9,66 @@ namespace Structurizr.InfrastructureAsCode.Azure.ARM
     public abstract class AppServiceRenderer<TAppService> : AzureResourceRenderer<TAppService>
         where TAppService : AppService
     {
+        protected virtual JObject AppServicePlan(IHaveInfrastructure<TAppService> elementWithInfrastructure,
+            string location)
+        {
+            return new JObject
+            {
+                ["type"] = "Microsoft.Web/serverfarms",
+                ["name"] = elementWithInfrastructure.Infrastructure.Name,
+                ["apiVersion"] = ApiVersion,
+                ["location"] = ToLocationName(location),
+                ["sku"] = new JObject
+                {
+                    ["Tier"] = "Free",
+                    ["Name"] = "F1"
+                },
+                ["properties"] = new JObject
+                {
+                    ["name"] = elementWithInfrastructure.Infrastructure.Name,
+                    ["workerSizeId"] = "0",
+                    ["numberOfWorkers"] = "1",
+                    ["reserved"] = false,
+                    ["hostingEnvironment"] = ""
+                }
+            };
+        }
+
+
         protected override IEnumerable<IConfigurationValue> GetConfigurationValues(IHaveInfrastructure<TAppService> elementWithInfrastructure)
         {
             return elementWithInfrastructure.Infrastructure.Settings.Values.Concat(elementWithInfrastructure.Infrastructure.ConnectionStrings.Values);
         }
 
-        protected void AddDependsOn(IHaveInfrastructure<AppService> elementWithInfrastructure, JObject template)
+        protected void AddDependsOn(IHaveInfrastructure<TAppService> elementWithInfrastructure, string location, JObject template)
         {
-            var dependsOn = DependsOn(elementWithInfrastructure);
+            var dependsOn = DependsOn(elementWithInfrastructure, location);
             if (dependsOn.Any())
             {
                 template["dependsOn"] = new JArray(dependsOn);
             }
         }
 
-        protected virtual IEnumerable<string> DependsOn(IHaveInfrastructure<AppService> elementWithInfrastructure)
+        protected void AddHiddenRelatedToAppServicePlan(IHaveInfrastructure<AppService> elementWithInfrastructure, JObject template)
         {
+            template["tags"] = new JObject
+            {
+                [
+                    $"[concat(\'hidden-related:\', resourceGroup().id, \'/providers/Microsoft.Web/serverfarms/\', \'{elementWithInfrastructure.Infrastructure.Name}\')]"
+                ] = "empty"
+            };
+        }
+
+        protected virtual IEnumerable<string> DependsOn(IHaveInfrastructure<TAppService> elementWithInfrastructure, string location)
+        {
+            var appServicePlan = AppServicePlan(elementWithInfrastructure, location);
+            if (appServicePlan != null)
+            {
+                return Enumerable.Repeat(
+                    $"[concat(\'Microsoft.Web/serverfarms/\', \'{elementWithInfrastructure.Infrastructure.Name}\')]",
+                    1);
+            }
+
             return Enumerable.Empty<string>();
         }
 
