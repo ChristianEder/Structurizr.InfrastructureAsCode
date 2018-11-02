@@ -13,7 +13,7 @@ namespace Structurizr.InfrastructureAsCode.Azure.ARM
         {
             var streamAnalytics = elementWithInfrastructure.Infrastructure;
 
-            template.Resources.Add(new JObject
+            template.Resources.Add(PostProcess(new JObject
             {
                 ["type"] = "Microsoft.StreamAnalytics/streamingjobs",
                 ["name"] = streamAnalytics.Name,
@@ -44,7 +44,7 @@ namespace Structurizr.InfrastructureAsCode.Azure.ARM
                     }
                 },
                 ["dependsOn"] = new JArray(streamAnalytics.Inputs.Select(i => i.Source).OfType<IHaveResourceId>().Select(i => i.ResourceIdReference).Cast<object>().ToArray())
-            });
+            }));
         }
 
         private static JArray Inputs(StreamAnalytics streamAnalytics)

@@ -9,7 +9,7 @@ namespace Structurizr.InfrastructureAsCode.Azure.ARM
         protected override void Render(AzureDeploymentTemplate template, IHaveInfrastructure<CosmosDocumentDatabase> elementWithInfrastructure, IAzureInfrastructureEnvironment environment, string resourceGroup,
             string location)
         {
-            template.Resources.Add(new JObject
+            template.Resources.Add(PostProcess(new JObject
             {
                 ["type"] = "Microsoft.DocumentDb/databaseAccounts",
                 ["kind"] = "GlobalDocumentDB",
@@ -28,7 +28,7 @@ namespace Structurizr.InfrastructureAsCode.Azure.ARM
                         }
                     }
                 }
-            });
+            }));
         }
     }
 }

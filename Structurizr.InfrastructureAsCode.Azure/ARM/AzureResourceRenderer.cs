@@ -59,6 +59,11 @@ namespace Structurizr.InfrastructureAsCode.Azure.ARM
             
             return template;
         }
+
+        protected virtual JObject PostProcess(JObject template)
+        {
+            return template;
+        }
     }
 
     public static class AzureResourceRendererExtensions

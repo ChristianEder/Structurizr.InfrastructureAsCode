@@ -17,7 +17,7 @@ namespace Structurizr.InfrastructureAsCode.Azure.ARM
 
             foreach (var queue in serviceBus.Queues)
             {
-                template.Resources.Add(new JObject
+                template.Resources.Add(PostProcess(new JObject
                 {
                     ["name"] = $"{serviceBus.Name}/{queue}",
                     ["type"] = "Microsoft.ServiceBus/namespaces/queues",
@@ -36,12 +36,12 @@ namespace Structurizr.InfrastructureAsCode.Azure.ARM
                     {
                         serviceBus.ResourceIdReference
                     }
-                });
+                }));
             }
 
             foreach (var topic in serviceBus.Topics)
             {
-                template.Resources.Add(new JObject
+                template.Resources.Add(PostProcess(new JObject
                 {
                     ["name"] = $"{serviceBus.Name}/{topic}",
                     ["type"] = "Microsoft.ServiceBus/namespaces/topics",
@@ -58,11 +58,11 @@ namespace Structurizr.InfrastructureAsCode.Azure.ARM
                     {
                         $"[resourceId('Microsoft.ServiceBus/namespaces', '{serviceBus.Name}')]"
                     }
-                });
+                }));
             }
         }
 
-        private static void AddNamespace(AzureDeploymentTemplate template,
+        private void AddNamespace(AzureDeploymentTemplate template,
             ServiceBus serviceBus, string location)
         {
             var sku = "1";
@@ -72,7 +72,7 @@ namespace Structurizr.InfrastructureAsCode.Azure.ARM
                 sku = "2";
             }
 
-            template.Resources.Add(new JObject
+            template.Resources.Add(PostProcess(new JObject
             {
                 ["type"] = "Microsoft.ServiceBus/namespaces",
                 ["name"] = serviceBus.Name,
@@ -87,7 +87,7 @@ namespace Structurizr.InfrastructureAsCode.Azure.ARM
                         ["SKU"] = sku
                     }
                 }
-            });
+            }));
         }
     }
 }

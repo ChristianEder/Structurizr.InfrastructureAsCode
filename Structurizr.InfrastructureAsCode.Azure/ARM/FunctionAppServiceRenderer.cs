@@ -24,7 +24,7 @@ namespace Structurizr.InfrastructureAsCode.Azure.ARM
             AddIdentity(elementWithInfrastructure, functionApp);
             functionApp["kind"] = "functionapp";
 
-            template.Resources.Add(functionApp);
+            template.Resources.Add(PostProcess(functionApp));
         }
         
         protected override JObject Properties(IHaveInfrastructure<AppService> elementWithInfrastructure)

@@ -13,7 +13,7 @@ namespace Structurizr.InfrastructureAsCode.Azure.ARM
         {
             var dps = elementWithInfrastructure.Infrastructure;         
 
-            template.Resources.Add(new JObject
+            template.Resources.Add(PostProcess(new JObject
             {
                 ["type"] = "Microsoft.Devices/provisioningServices",
                 ["name"] = dps.Name,
@@ -30,7 +30,7 @@ namespace Structurizr.InfrastructureAsCode.Azure.ARM
                         }))
                 },
                 ["dependsOn"] = new JArray(dps.IotHubs.Select(iothub => iothub.ResourceIdReference).ToArray())
-            });
+            }));
         }
     }
 }

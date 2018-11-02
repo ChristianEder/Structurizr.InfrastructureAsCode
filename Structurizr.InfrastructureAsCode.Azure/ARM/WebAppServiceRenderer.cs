@@ -22,7 +22,7 @@ namespace Structurizr.InfrastructureAsCode.Azure.ARM
         {
             var name = elementWithInfrastructure.Infrastructure.Name;
 
-            template.Resources.Add(new JObject
+            template.Resources.Add(PostProcess(new JObject
             {
                 ["type"] = "Microsoft.Web/serverfarms",
                 ["name"] = name,
@@ -41,7 +41,7 @@ namespace Structurizr.InfrastructureAsCode.Azure.ARM
                     ["reserved"] = false,
                     ["hostingEnvironment"] = ""
                 }
-            });
+            }));
 
             var appService = new JObject
             {
@@ -61,7 +61,7 @@ namespace Structurizr.InfrastructureAsCode.Azure.ARM
             AddSubResources(elementWithInfrastructure, appService);
             AddDependsOn(elementWithInfrastructure, appService);
             AddIdentity(elementWithInfrastructure, appService);
-            template.Resources.Add(appService);
+            template.Resources.Add(PostProcess(appService));
         }
 
         protected override IEnumerable<string> DependsOn(IHaveInfrastructure<AppService> elementWithInfrastructure)

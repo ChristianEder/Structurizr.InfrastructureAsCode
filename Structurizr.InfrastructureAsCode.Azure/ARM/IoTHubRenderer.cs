@@ -11,7 +11,7 @@ namespace Structurizr.InfrastructureAsCode.Azure.ARM
         {
             var hub = elementWithInfrastructure.Infrastructure;
 
-            template.Resources.Add(new JObject
+            template.Resources.Add(PostProcess(new JObject
             {
                 ["apiVersion"] = hub.ApiVersion,
                 ["type"] = "Microsoft.Devices/iotHubs",
@@ -22,11 +22,11 @@ namespace Structurizr.InfrastructureAsCode.Azure.ARM
                     ["name"] = "F1",
                     ["capacity"] = 1
                 }
-            });
+            }));
 
             foreach (var consumerGroup in hub.ConsumerGroups)
             {
-                template.Resources.Add(new JObject
+                template.Resources.Add(PostProcess(new JObject
                 {
                     ["apiVersion"] = hub.ApiVersion,
                     ["type"] = "Microsoft.Devices/iotHubs/eventhubEndpoints/ConsumerGroups",
@@ -35,7 +35,7 @@ namespace Structurizr.InfrastructureAsCode.Azure.ARM
                     {
                         hub.ResourceIdReference
                     }
-                });
+                }));
             }
         }
     }

@@ -22,7 +22,7 @@ namespace Structurizr.InfrastructureAsCode.Azure.ARM
         {
             var keyVault = elementWithInfrastructure.Infrastructure;
 
-            template.Resources.Add(new JObject
+            template.Resources.Add(PostProcess(new JObject
             {
                 ["type"] = "Microsoft.KeyVault/vaults",
                 ["name"] = keyVault.Name,
@@ -41,11 +41,11 @@ namespace Structurizr.InfrastructureAsCode.Azure.ARM
                         ["family"] = "A"
                     }
                 }
-            });
+            }));
 
             foreach (var keyVaultSecret in keyVault.Secrets)
             {
-                template.Resources.Add(new JObject
+                template.Resources.Add(PostProcess(new JObject
                 {
                     ["type"] = "Microsoft.KeyVault/vaults/secrets",
                     ["name"] = keyVault.Name + "/" + keyVaultSecret.Name,
@@ -56,7 +56,7 @@ namespace Structurizr.InfrastructureAsCode.Azure.ARM
                         ["value"] = keyVaultSecret.Value.Value.ToString(),
                         ["dependsOn"] = GetDependsOn(keyVaultSecret, keyVault)
                     }
-                });
+                }));
             }
         }
 

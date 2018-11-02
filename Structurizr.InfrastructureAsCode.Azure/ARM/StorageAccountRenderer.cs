@@ -40,7 +40,7 @@ namespace Structurizr.InfrastructureAsCode.Azure.ARM
           
             storageAccount["properties"] = properties;
 
-            template.Resources.Add(storageAccount);
+            template.Resources.Add(PostProcess(storageAccount));
         }
     }
 }

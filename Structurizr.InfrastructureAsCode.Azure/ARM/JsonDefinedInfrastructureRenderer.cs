@@ -32,7 +32,7 @@ namespace Structurizr.InfrastructureAsCode.Azure.ARM
             {
                 foreach (var resource in resources)
                 {
-                    template.Resources.Add((JObject) resource);
+                    template.Resources.Add(PostProcess((JObject)resource));
                 }
             }
         }

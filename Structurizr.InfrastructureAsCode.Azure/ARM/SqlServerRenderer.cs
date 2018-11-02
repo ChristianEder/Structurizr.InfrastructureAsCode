@@ -14,7 +14,7 @@ namespace Structurizr.InfrastructureAsCode.Azure.ARM
         {
             var sqlServer = elementWithInfrastructure.Infrastructure;
 
-            template.Resources.Add(new JObject
+            template.Resources.Add(PostProcess(new JObject
             {
                 ["type"] = "Microsoft.Sql/servers",
                 ["name"] = sqlServer.Name,
@@ -27,14 +27,14 @@ namespace Structurizr.InfrastructureAsCode.Azure.ARM
                     ["administratorLoginPassword"] = sqlServer.AdministratorPassword
                 },
                 ["resources"] = GetResources(sqlServer, location)
-            });
+            }));
         }
 
         private JArray GetResources(SqlServer sqlServer, string location)
         {
             var resources = new List<JObject>();
 
-            resources.Add(new JObject
+            resources.Add(PostProcess(new JObject
             {
                 ["type"] = "firewallrules",
                 ["name"] = "AllowAllWindowsAzureIps",
@@ -49,10 +49,10 @@ namespace Structurizr.InfrastructureAsCode.Azure.ARM
                 {
                     sqlServer.ResourceIdReference
                 }
-            });
+            }));
 
             resources.AddRange(
-                sqlServer.Databases.Select(database => new JObject
+                sqlServer.Databases.Select(database => PostProcess(new JObject
                 {
                     ["type"] = "databases",
                     ["name"] = database.Name,
@@ -70,7 +70,7 @@ namespace Structurizr.InfrastructureAsCode.Azure.ARM
                     {
                         sqlServer.ResourceIdReference
                     }
-                }));
+                })));
 
             return new JArray(resources);
         }

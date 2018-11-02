@@ -26,7 +26,7 @@ namespace Structurizr.InfrastructureAsCode.Azure.ARM
                 ["ApplicationId"] = elementWithInfrastructure.Infrastructure.Name
             };
 
-            template.Resources.Add(insights);
+            template.Resources.Add(PostProcess(insights));
         }
     }
 }

@@ -11,7 +11,7 @@ namespace Structurizr.InfrastructureAsCode.Azure.ARM
         {
             var eventHubNamespace = elementWithInfrastructure.Infrastructure;
 
-            template.Resources.Add(new JObject
+            template.Resources.Add(PostProcess(new JObject
             {
                 ["apiVersion"] = eventHubNamespace.ApiVersion,
                 ["type"] = "Microsoft.EventHub/namespaces",
@@ -25,7 +25,7 @@ namespace Structurizr.InfrastructureAsCode.Azure.ARM
                 },
                 ["properties"] = new JObject(),
                 ["resources"] = Resources(eventHubNamespace, location)
-            });
+            }));
         }
 
         private JArray Resources(EventHubNamespace eventHubNamespace, string location)
