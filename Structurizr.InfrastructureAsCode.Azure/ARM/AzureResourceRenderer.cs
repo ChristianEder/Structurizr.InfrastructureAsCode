@@ -72,7 +72,14 @@ namespace Structurizr.InfrastructureAsCode.Azure.ARM
             }
             catch (TinyIoCResolutionException e)
             {
-                Console.WriteLine(e);
+                var rrex = e.InnerException as RendererResolutionException ??
+                           e.InnerException?.InnerException as RendererResolutionException;
+                if(rrex != null)
+                {
+                    Console.WriteLine(rrex);
+                    throw rrex;
+                }
+
                 return null;
             }
         }

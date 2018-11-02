@@ -15,26 +15,44 @@ namespace Structurizr.InfrastructureAsCode.InfrastructureRendering
 
         protected InfrastructureRendererBuilder()
         {
-            var allTypes = AppDomain.CurrentDomain.GetAssemblies()
-                .SelectMany(a => a.GetTypes())
-                .ToArray();
-
-            foreach (var injectable in allTypes.Where(t => t.GetCustomAttribute(typeof(InjectableAttribute)) != null))
+            try
             {
-                var att = injectable.GetCustomAttributes(typeof(InjectableAttribute))
-                    .OfType<InjectableAttribute>()
-                    .Single();
-                foreach (var injectableInterface in injectable.GetInterfaces())
+                var allTypes = AppDomain.CurrentDomain.GetAssemblies()
+                    .SelectMany(a =>
+                    {
+                        try
+                        {
+                            return a.GetTypes();
+                        }
+                        catch
+                        {
+                            return Enumerable.Empty<Type>();
+                        }
+                    })
+                    .ToArray();
+
+                foreach (var injectable in allTypes.Where(t => t.GetCustomAttribute(typeof(InjectableAttribute)) != null))
                 {
-                    if (att.Singleton)
+                    var att = injectable.GetCustomAttributes(typeof(InjectableAttribute))
+                        .OfType<InjectableAttribute>()
+                        .Single();
+                    foreach (var injectableInterface in injectable.GetInterfaces())
                     {
-                        Ioc.Register(injectableInterface, injectable).AsSingleton();
-                    }
-                    else
-                    {
-                        Ioc.Register(injectableInterface, injectable).AsMultiInstance();
+                        if (att.Singleton)
+                        {
+                            Ioc.Register(injectableInterface, injectable).AsSingleton();
+                        }
+                        else
+                        {
+                            Ioc.Register(injectableInterface, injectable).AsMultiInstance();
+                        }
                     }
                 }
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                throw;
             }
         }
 
