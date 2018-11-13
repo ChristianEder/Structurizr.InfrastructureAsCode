@@ -4,7 +4,7 @@ using Structurizr.InfrastructureAsCode.Model.Connectors;
 
 namespace Structurizr.InfrastructureAsCode.Azure.Model
 {
-    public abstract class AppService : ContainerInfrastructure, IHaveHiddenLink, IConfigurable, IHaveServiceIdentity
+    public abstract class AppService : ContainerInfrastructure, IHaveHiddenLink, IConfigurable, IHaveServiceIdentity, IHaveResourceId
     {
         private ISecureConfigurationStore _store;
 
@@ -13,6 +13,11 @@ namespace Structurizr.InfrastructureAsCode.Azure.Model
             Settings = new Configuration<AppServiceSetting>();
             ConnectionStrings = new Configuration<AppServiceConnectionString>();
         }
+
+        public AppServiceUrl Url => new AppServiceUrl(this);
+
+        public string ResourceIdReference => $"[{ResourceIdReferenceContent}]";
+        public string ResourceIdReferenceContent => $"resourceId('Microsoft.Web/sites', '{Name}')";
 
         public string HiddenLink =>
             $"[concat('hidden-link:', resourceGroup().id, '/providers/Microsoft.Web/sites/', '{Name}')]";
@@ -146,5 +151,19 @@ namespace Structurizr.InfrastructureAsCode.Azure.Model
         }
 
         public string Type { get; set; }
+    }
+
+    public class AppServiceUrl : DependentConfigurationValue<AppService>
+    {
+        public AppService AppService { get; }
+        public override bool ShouldBeStoredSecure => false;
+        public override object Value => $"[concat('https://', reference({DependsOn.ResourceIdReferenceContent}, '2016-03-01').defaultHostName)]";
+
+        public string DefaultHostName => $"[ reference({DependsOn.ResourceIdReferenceContent}, '2016-03-01').defaultHostName]";
+
+        public AppServiceUrl(AppService appService) : base(appService)
+        {
+            AppService = appService;
+        }
     }
 }
