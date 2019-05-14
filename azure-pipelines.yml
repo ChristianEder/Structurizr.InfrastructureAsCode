@@ -9,9 +9,15 @@ queue:
   - vstest
 
 steps:
+
 - task: NuGetCommand@2
   displayName: 'NuGet restore'
 
+- task: CmdLine@1
+  displayName: 'dotnet restore'
+  inputs:
+      filename: dotnet
+      arguments: 'restore .\infrastructurizr'
 
 - task: VSBuild@1
   displayName: 'Build solution **\*.sln'
