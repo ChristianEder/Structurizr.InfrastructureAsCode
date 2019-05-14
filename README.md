@@ -1,5 +1,10 @@
 # Structurizr.InfrastructureAsCode
 
+[![Build Status](https://christianederzuehlke.visualstudio.com/aprg%20Structurizr%20Infrastructure%20as%20Code/_apis/build/status/ChristianEder.Structurizr.InfrastructureAsCode)](https://christianederzuehlke.visualstudio.com/aprg%20Structurizr%20Infrastructure%20as%20Code/_build/latest?definitionId=5)
+
+[![Structurizr.InfrastructureAsCode](https://img.shields.io/nuget/v/Structurizr.InfrastructureAsCode.png "Latest nuget package for Structurizr.InfrastructureAsCode")](https://www.nuget.org/packages/Structurizr.InfrastructureAsCode/)
+[![Structurizr.InfrastructureAsCode.Azure](https://img.shields.io/nuget/v/Structurizr.InfrastructureAsCode.Azure.png "Latest nuget package for Structurizr.InfrastructureAsCode.Azure")](https://www.nuget.org/packages/Structurizr.InfrastructureAsCode.Azure/)
+
 Structurizr.InfrastructureAsCode is a library that uses both [Structurizr for .NET](https://github.com/structurizr/dotnet) and the [Azure SDK for .NET](https://github.com/Azure/azure-sdk-for-net/tree/Fluent) to provide an easy to use architecture- and infrastructure-as-code solution. Currently, there is only an implementation for Azure resources available.
 
 ## How to desribe your architecture and infrastructure

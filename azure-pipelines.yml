@@ -1,0 +1,59 @@
+resources:
+- repo: self
+  clean: true
+queue:
+  name: Hosted VS2017
+  demands: 
+  - msbuild
+  - visualstudio
+  - vstest
+
+steps:
+- task: NuGetCommand@2
+  displayName: 'NuGet restore'
+
+
+- task: VSBuild@1
+  displayName: 'Build solution **\*.sln'
+
+
+- task: VSTest@2
+  displayName: Test
+  inputs:
+    testAssemblyVer2: |
+     **\*Tests*.dll
+     !**\obj\**
+
+    codeCoverageEnabled: true
+
+
+- task: CmdLine@1
+  displayName: 'Pack Structurizr.InfrastructureAsCode'
+  inputs:
+    filename: dotnet
+
+    arguments: 'pack Structurizr.InfrastructureAsCode\Structurizr.InfrastructureAsCode.csproj -c Release'
+
+
+- task: CmdLine@1
+  displayName: 'Pack Structurizr.InfrastructureAsCode.Azure'
+  inputs:
+    filename: dotnet
+
+    arguments: 'pack Structurizr.InfrastructureAsCode.Azure\Structurizr.InfrastructureAsCode.Azure.csproj -c Release'
+
+
+- task: PublishBuildArtifacts@1
+  displayName: 'Publish Artifact: Structurizr.InfrastructureAsCode'
+  inputs:
+    PathtoPublish: Structurizr.InfrastructureAsCode/bin/Release
+
+    ArtifactName: Structurizr.InfrastructureAsCode
+
+
+- task: PublishBuildArtifacts@1
+  displayName: 'Publish Artifact: Structurizr.InfrastructureAsCode.Azure'
+  inputs:
+    PathtoPublish: Structurizr.InfrastructureAsCode.Azure/bin/Release
+
+    ArtifactName: Structurizr.InfrastructureAsCode.Azure
