@@ -97,19 +97,16 @@ namespace Structurizr.InfrastructureAsCode.Azure.Model
             foreach (var secureSetting in secureSettings)
             {
                 settings.Remove(secureSetting);
-                _store.Store(secureSetting.Name, secureSetting.Value);
+                var reference = _store.Store(secureSetting.Name, secureSetting.Value);
+                if (!string.IsNullOrEmpty(reference))
+                {
+                    Settings.Add(new AppServiceSetting(secureSetting.Name, reference));
+                }
             }
         }
 
         private void ConfigureKeyVaultAccess()
         {
-            var name = $"{_store.EnvironmentInvariantName}-url";
-            if (Settings.Any(s => s.Name == name))
-            {
-                return;
-            }
-            Settings.Add(new AppServiceSetting(name, _store.Url));
-
             UseSystemAssignedIdentity = true;
             _store.AllowAccessFrom(this);
         }

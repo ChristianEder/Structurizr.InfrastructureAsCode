@@ -12,7 +12,7 @@ namespace Structurizr.InfrastructureAsCode.Model.Connectors
     {
         string EnvironmentInvariantName { get; }
         IConfigurationValue Url { get; }
-        void Store(string name, IConfigurationValue value);
+        string Store(string name, IConfigurationValue value);
         void AllowAccessFrom(IHaveServiceIdentity serviceIdentity);
     }
 

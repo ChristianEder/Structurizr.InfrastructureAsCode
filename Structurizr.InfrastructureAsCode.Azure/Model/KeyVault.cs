@@ -38,18 +38,24 @@ namespace Structurizr.InfrastructureAsCode.Azure.Model
             return base.IsNameValid(name) && name.Length >= 3 && name.Length <= 24;
         }
 
-        void ISecureConfigurationStore.Store(string name, IConfigurationValue value)
+        string ISecureConfigurationStore.Store(string name, IConfigurationValue value)
         {
-            var existing = Secrets.FirstOrDefault(s => s.Name == name);
-            if (!ReferenceEquals(existing, null))
+            var secret = Secrets.FirstOrDefault(s => s.Name == name);
+            if (!ReferenceEquals(secret, null))
             {
-                if (!Equals(existing.Value, value))
+                if (!Equals(secret.Value, value))
                 {
                     throw new InvalidOperationException();
                 }
-                return;
             }
-            Secrets.Add(new KeyVaultSecret { Name = name, Value = value });
+            else
+            {
+                secret = new KeyVaultSecret { Name = name, Value = value };
+                Secrets.Add(new KeyVaultSecret { Name = name, Value = value });
+            }
+
+            var secretResourceId = $"resourceId('Microsoft.KeyVault/vaults/secrets', '{Name}', '{secret.Name}')";
+            return $"[concat('@Microsoft.KeyVault(SecretUri=', reference({secretResourceId}).secretUriWithVersion, ')')]";
         }
 
         void ISecureConfigurationStore.AllowAccessFrom(IHaveServiceIdentity serviceIdentity)
